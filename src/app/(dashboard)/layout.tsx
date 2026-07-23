@@ -8,10 +8,10 @@ interface layoutProps {
 export default function layout({ children }: layoutProps) {
   return (
     <section className=" grid grid-cols-12">
-      <div className=" col-span-2">
+      <div className="hidden md:block md:col-span-2">
         <Sidebar />
       </div>
-      <div className=" col-span-10 ">
+      <div className="col-span-12 md:col-span-10 ">
         <Header />
         <main>{children}</main>
       </div>
