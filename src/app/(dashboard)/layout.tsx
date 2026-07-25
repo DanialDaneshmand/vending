@@ -1,3 +1,4 @@
+import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 
@@ -14,6 +15,7 @@ export default function layout({ children }: layoutProps) {
       <div className="col-span-12 md:col-span-10 ">
         <Header />
         <main>{children}</main>
+        <Footer />
       </div>
     </section>
   );

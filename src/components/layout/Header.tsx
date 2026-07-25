@@ -144,7 +144,7 @@ const Header = () => {
           </div>
           {/* Mobile Links */}
           {isShow && (
-            <aside className="fixed top-0 bottom-0 right-0 left-0 bg-linear-to-b from-[#04275F] to-[#033074] ">
+            <aside className="fixed z-50 top-0 bottom-0 right-0 left-0 bg-linear-to-b from-[#04275F] to-[#033074] ">
               <div className="p-5 flex items-center justify-between">
                 <img
                   src="/icon.png"
