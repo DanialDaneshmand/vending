@@ -20,7 +20,7 @@ const links = [
   {
     id: 4,
     title: "کنترل و زمان بندی",
-    href: "/scheduling",
+    href: "/control-scheduling",
     icon: <FaRegClock />,
   },
   { id: 5, title: "هشدار ها ", href: "/alerts", icon: <FaRegBell /> },
