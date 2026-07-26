@@ -1,6 +1,7 @@
 import PageTitle from "@/components/shared/PageTitle";
 import DeviceManagementSection from "@/features/control-scheduling/components/DeviceManagementSection";
 import DeviceHeaderCard from "@/features/control-scheduling/components/DeviceHeaderCard";
+import SchedulingHistorySection from "@/features/control-scheduling/components/SchedulingHistorySection";
 
 export default function page() {
   return (
@@ -11,6 +12,8 @@ export default function page() {
       <DeviceHeaderCard/>
       {/* Device Management Section */}
       <DeviceManagementSection/>
+      {/* Scheduling History Section */}
+      <SchedulingHistorySection/>
     </section>
   );
 }
