@@ -1,14 +1,7 @@
-import React from "react";
-import {
-  Plus,
-  Edit2,
-  Trash2,
-  
-} from "lucide-react";
+
 import CommandHistory from "./CommandHistory";
 import SettingsHistory from "./SettingHistory";
-import { FaRegTrashAlt } from "react-icons/fa";
-import { FiEdit } from "react-icons/fi";
+
 import WeeklySchedule from "./WeeklySchedule";
 
 

@@ -1,4 +1,4 @@
-const farsiDigits: string[] = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+const farsiDigits: string[] = ["۰","۱","۲","۳","۴","۵","۶","۷","۸","۹"];
 
 export function toPersianNumbersWithComma(n: number | string): string {
   const numWithCommas = numberWithCommas(n); 

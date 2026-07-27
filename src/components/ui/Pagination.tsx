@@ -13,8 +13,8 @@ interface StyledPaginationProps {
   totalPages: number;
   setCurrentPage: (page: number | ((prev: number) => number)) => void;
   rowsPerPage?: number;
-  pageSize:number;
-  setPageSize:Dispatch<SetStateAction<number>>
+  pageSize: number;
+  setPageSize: Dispatch<SetStateAction<number>>;
 }
 
 const StyledPagination: React.FC<StyledPaginationProps> = ({
@@ -23,8 +23,7 @@ const StyledPagination: React.FC<StyledPaginationProps> = ({
   setCurrentPage,
   rowsPerPage = 10,
   pageSize,
-  setPageSize
-
+  setPageSize,
 }) => {
   const getPageNumbers = (): (number | string)[] => {
     const pages: (number | string)[] = [];
@@ -41,7 +40,7 @@ const StyledPagination: React.FC<StyledPaginationProps> = ({
   return (
     <div className=" flex items-center justify-between px-4">
       {/* Right */}
-      <div className="py-4 bg-white border-t border-gray-100 flex flex-row-reverse items-center justify-center sm:justify-between dir-ltr font-[vazirmatn]">
+      <div className="py-4 w-full border-t border-gray-100 bg-white flex flex-row-reverse items-center justify-center sm:justify-between dir-ltr font-[vazirmatn]">
         {/* بخش سمت چپ: انتخاب تعداد ردیف */}
         <div className="hidden sm:block">
           {/* <div className="flex  items-center gap-2 border border-gray-300 rounded-lg px-3 py-1.5 text-gray-500 text-[13px] cursor-pointer hover:bg-gray-50 transition-colors select-none group">
@@ -77,7 +76,7 @@ const StyledPagination: React.FC<StyledPaginationProps> = ({
                 <button
                   key={`page-${page}`}
                   onClick={() => setCurrentPage(page as number)}
-                  className={`w-9 h-9 flex items-center justify-center  cursor-pointer rounded-lg text-[14px] font-medium transition-all duration-300 ${
+                  className={`w-9 h-9 flex items-center justify-center  cursor-pointer rounded-sm text-[14px] font-medium transition-all duration-300 ${
                     isPageActive
                       ? "bg-blue-600 text-white shadow-md"
                       : "text-gray-800 hover:bg-gray-50 hover:text-gray-600"
@@ -103,21 +102,25 @@ const StyledPagination: React.FC<StyledPaginationProps> = ({
       </div>
 
       {/* left */}
-      <div className=" flex items-center  gap-x-4">
-        <span className=" text-sm font-bold">تعداد در هر صفحه :</span>
-        <select
-          value={pageSize}
-          onChange={(e) => {
-            setPageSize(Number(e.target.value));
-            setCurrentPage(1);
-          }}
-          className="border rounded-md px-1 text-sm outline-0"
-        >
-          <option value={5}>5</option>
-          <option value={10}>10</option>
-          <option value={15}>15</option>
-          <option value={20}>20</option>
-        </select>
+      <div className="hidden sm:block ">
+        <div className=" flex items-center w-full  ">
+          <div className=" w-32 text-sm text-gray-500 font-nedium">
+            تعداد در هر صفحه :
+          </div>
+          <select
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+            className="border rounded-md px-1 text-sm outline-0"
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={15}>15</option>
+            <option value={20}>20</option>
+          </select>
+        </div>
       </div>
     </div>
   );
