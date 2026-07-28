@@ -34,7 +34,7 @@ export default function RootLayout({
       lang="fa"
       className={cn("h-full", "antialiased", "font-sans", geist.variable)}
     >
-      <body className={Vazir.variable} dir="rtl">{children}</body>
+      <body className={`bg-[#FAFBFD] ${Vazir.variable}`} dir="rtl">{children}</body>
     </html>
   );
 }

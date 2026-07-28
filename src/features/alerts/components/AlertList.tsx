@@ -128,7 +128,7 @@ export default function AlertList() {
       {/* Header */}
       <div className=" flex px-4 justify-between items-center">
         <h1 className="text-xl font-bold text-gray-800">لیست هشدارها</h1>
-        <button className="flex items-center font-bold cursor-pointer gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 hover:bg-gray-50 transition-all">
+        <button className="flex items-center font-medium cursor-pointer gap-2 px-4 py-2 border border-gray-100 shadow-sm rounded-md text-sm text-gray-800 hover:bg-gray-50 transition-all">
           <Download className="w-4 h-4" />
           خروجی اکسل
         </button>

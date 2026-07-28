@@ -44,7 +44,7 @@ export default function SelectInput<T>({
   return (
     <div dir="rtl" className="relative flex flex-col w-full" ref={ref}>
       {/* Button */}
-      <label htmlFor="" className="text-sm font-medium mb-2 text-gray-800">
+      <label htmlFor="" className="text-sm font-bold mb-2 mr-1 text-gray-800">
           {title}
         </label>
       <button

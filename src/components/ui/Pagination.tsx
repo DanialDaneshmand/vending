@@ -76,7 +76,7 @@ const StyledPagination: React.FC<StyledPaginationProps> = ({
                 <button
                   key={`page-${page}`}
                   onClick={() => setCurrentPage(page as number)}
-                  className={`w-9 h-9 flex items-center justify-center  cursor-pointer rounded-sm text-[14px] font-medium transition-all duration-300 ${
+                  className={`w-9 h-9 border border-gray-200 flex items-center justify-center  cursor-pointer rounded-sm text-[14px] font-medium transition-all duration-300 ${
                     isPageActive
                       ? "bg-blue-600 text-white shadow-md"
                       : "text-gray-800 hover:bg-gray-50 hover:text-gray-600"
