@@ -90,6 +90,7 @@ export default function page() {
         handleInputChange={handleInputChange}
         className="grid xl:grid-cols-5 gap-4 py-4 grid-cols-2 "
         optionsMap={optionsMap}
+        isClearFilter
       />
       {/* Alert Status Cards */}
       <AlertStats />

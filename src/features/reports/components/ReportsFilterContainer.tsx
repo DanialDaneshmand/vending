@@ -1,5 +1,6 @@
-import { LuFilter } from "react-icons/lu";
-import SelectInput from "../form/SelectInput";
+import DateRangePicker from "@/components/form/DateRangePicker";
+import SelectInput from "@/components/form/SelectInput";
+import { Dispatch, SetStateAction } from "react";
 
 interface OptionsMap {
   [key: string]: {
@@ -8,6 +9,10 @@ interface OptionsMap {
   };
 }
 
+interface DateFilterBase {
+  fromDate?: string;
+  toDate?: string;
+} 
 interface ChangeHandlerEvent {
   target: {
     name: string;
@@ -15,27 +20,29 @@ interface ChangeHandlerEvent {
   };
 }
 
-interface FilterContainerProps<T> {
+interface ReportsFilterContainerProps<T> {
   filterValues: T;
   className: string;
   optionsMap: OptionsMap;
   handleInputChange: (e: ChangeHandlerEvent) => void;
-  isClearFilter?: boolean;
+  setFilterValues: Dispatch<SetStateAction<T>>;
 }
 
-export default function FilterContainer<T>({
-  className,
-  optionsMap,
+export default function ReportsFilterContainer<T extends DateFilterBase>({
   filterValues,
+  className,
   handleInputChange,
-  isClearFilter,
-}: FilterContainerProps<T>) {
+  optionsMap,
+  setFilterValues,
+}: ReportsFilterContainerProps<T>) {
   return (
     <div className={`${className}`}>
-     
+      <div className="col-span-12 sm:col-span-6 xl:col-span-3">
+        <DateRangePicker setFilterValues={setFilterValues} />
+      </div>
       {Object.entries(optionsMap).map(([key, value]) => {
         return (
-          <div key={key}>
+          <div key={key} className="col-span-12 sm:col-span-6 xl:col-span-2" >
             <SelectInput
               name={key}
               title={value.title}
@@ -46,16 +53,12 @@ export default function FilterContainer<T>({
           </div>
         );
       })}
-      {isClearFilter && (
-        <div className=" flex items-end ">
-          <button className=" flex shadow-xs items-center justify-center gap-x-3 border border-gray-100 rounded-lg px-3 w-full py-3  cursor-pointer text-sm">
-            <span>
-              <LuFilter size={18} />
-            </span>
-            <span>پاکسازی فیلتر ها</span>
-          </button>
-        </div>
-      )}
     </div>
   );
 }
+
+
+
+
+      
+ 

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaGamepad, FaRegBell, FaRegClock } from "react-icons/fa6";
 import { FiUsers } from "react-icons/fi";
-import { IoStatsChart } from "react-icons/io5";
+import { IoGameControllerOutline, IoStatsChart } from "react-icons/io5";
 import {
   IoHome,
   IoLocationOutline,
@@ -15,7 +15,7 @@ import {
 
 const links = [
   { id: 1, title: "داشبورد", href: "/dashboard", icon: <IoHome /> },
-  { id: 2, title: "دستگاه ها", href: "/devices", icon: <FaGamepad /> },
+  { id: 2, title: "دستگاه ها", href: "/devices", icon: <IoGameControllerOutline /> },
   { id: 3, title: "مکان ها", href: "/places", icon: <IoLocationOutline /> },
   {
     id: 4,

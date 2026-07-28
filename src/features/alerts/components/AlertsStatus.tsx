@@ -65,7 +65,7 @@ export default function AlertStats() {
                 <span className="text-sm font-bold text-slate-600">
                   {item.title}
                 </span>
-                <span className="text-4xl font-bold text-slate-800 mb-1">
+                <span className="text-2xl font-bold text-slate-800 mb-1">
                   {item.value}
                 </span>
                 <span className="text-xs text-slate-400 font-normal">

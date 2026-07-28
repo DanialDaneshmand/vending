@@ -42,8 +42,11 @@ export default function SelectInput<T>({
   const label = (filterValues as any)[name] || "انتخاب کنید...";
 
   return (
-    <div dir="rtl" className="relative inline-flex w-full" ref={ref}>
+    <div dir="rtl" className="relative flex flex-col w-full" ref={ref}>
       {/* Button */}
+      <label htmlFor="" className="text-sm font-medium mb-2 text-gray-800">
+          {title}
+        </label>
       <button
         onClick={() => setOpen((prev) => !prev)}
         className="
@@ -58,8 +61,8 @@ export default function SelectInput<T>({
            font-medium
         "
       >
+        
         <span className=" flex flex-col items-start">
-          <p className="text-xs text-gray-500">{title}</p>
           <span className="mt-2">{label}</span>
         </span>
 
@@ -79,7 +82,7 @@ export default function SelectInput<T>({
             bg-white
             border border-gray-200
             rounded-xl
-            shadow-lg
+            shadow-sm
             overflow-hidden
             z-50
           "
