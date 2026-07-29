@@ -3,7 +3,7 @@ import { LuCalendarDays } from "react-icons/lu";
 
 interface PageTitlePropos {
   title: string;
-  description: string;
+  description?: string;
 }
 
 export default function PageTitle({ title, description }: PageTitlePropos) {

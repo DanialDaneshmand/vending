@@ -45,7 +45,7 @@ function page() {
       {/* Header */}
       <div className=" w-full bg-white shadow-sm py-6 flex items-center gap-x-2 pr-4">
         <img src="/header-icon.png" alt="" className="w-14 h-12" />
-        <p className=" text-xl font-semibold">سامانه کنترل و مدیریت وندینگ</p>
+        <p className=" sm:text-xl font-semibold">سامانه کنترل و مدیریت وندینگ</p>
       </div>
       {/* Body */}
       <div className="grid grid-cols-12 py-4 xl:px-16">
@@ -54,7 +54,7 @@ function page() {
             <div className="max-w-xs sm:max-w-md ">
               <div className="w-full px-6 bg-white shadow-sm border border-gray-100  rounded-2xl py-8">
                 <div className=" text-center mb-8">
-                  <p className=" text-xl font-bold">
+                  <p className=" sm:text-xl font-bold">
                     سامانه مدیریت و کنترل وندینگ
                   </p>
                   <p className=" mt-2 text-gray-500 ">ورود به پنل مدیریت</p>

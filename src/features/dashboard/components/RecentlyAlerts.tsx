@@ -71,7 +71,7 @@ const getAlertStyle = (type: string) => {
 export default function RecentAlerts() {
   return (
     <div
-      className="w-full  h-[350] rounded-lg border border-gray-100 bg-white py-5 px-3 shadow-sm"
+      className="w-full h-full sm:h-[350] rounded-lg border border-gray-100 bg-white py-5 px-3 shadow-sm"
       dir="rtl"
     >
       {/* هدر کارت */}

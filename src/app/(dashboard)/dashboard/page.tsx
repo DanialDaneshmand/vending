@@ -13,24 +13,28 @@ export default function page() {
       <PageTitle title="داشبورد" description="خوش امدید علی محمدی" />
       {/* Dashboard Cards */}
       <DashboardCards />
-      {/* Chats Section */}
-      <div className=" grid grid-cols-12 xl:grid-cols-7 gap-4">
-        <div className=" col-span-12 sm:col-span-6 xl:col-span-2">
+      {/* Charts Section */}
+      <div className=" grid grid-cols-12 gap-4">
+        <div className=" col-span-12 md:col-span-5">
           <DeviceStatusChart />
         </div>
-        <div className=" col-span-12 sm:col-span-6 xl:col-span-2">
-          <RecentAlerts />
-        </div>
-        <div className="col-span-12 xl:col-span-3">
+
+        <div className="col-span-12 md:col-span-7">
           <WeeklySalesChart />
         </div>
       </div>
-      {/* Map And Devices */}
-      <div className="mt-4 grid grid-cols-12 gap-4">
-        <div className="col-span-12 lg:col-span-4">
+      {/* Map And Recent Alerts Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4">
+        <div>
+          <RecentAlerts />
+        </div>
+        <div className="">
           <MapComponent />
         </div>
-        <div className=" col-span-12 lg:col-span-8">
+      </div>
+      {/* Devices */}
+      <div>
+        <div >
           <DeviceSummary />
         </div>
       </div>

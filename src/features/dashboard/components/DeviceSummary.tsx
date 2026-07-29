@@ -67,7 +67,7 @@ export default function DeviceSummary() {
 
       {/* Table */}
       <div className="overflow-x-auto rounded-lg border border-gray-100 shadow-xs">
-        <table className="w-full text-right border-collapse">
+        <table className="w-full min-w-4xl text-right border-collapse">
           <thead className=" rounded-t-lg overflow-hidden bg-[#F6F7F8]">
             <tr className=" border-b border-gray-100">
               <th className="p-4 font-bold text-xs ">نام دستگاه</th>

@@ -31,11 +31,11 @@ export default function StoreMap() {
   console.log(pathname);
   
   return (
-    <div className={`w-full ${pathname==="/places"?" h-[300] sm:h-[400]":"h-[300]"}  overflow-hidden `}>
+    <div className={`w-full ${pathname==="/places"?" h-[300] sm:h-[400]":"h-[255]"}  overflow-hidden `}>
       <MapContainer
         center={center}
         zoom={5}
-        className={`${pathname==="/places"&&"rounded-lg border border-gray-100 shadow-sm"}`}
+        className={`rounded-lg border border-gray-100 shadow-sm`}
         style={{ width: "100%", height: "100%" }}
       >
         {/* لایه بصری نقشه (OpenStreetMap) */}

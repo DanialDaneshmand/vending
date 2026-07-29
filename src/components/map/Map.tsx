@@ -9,13 +9,13 @@ const StoreMap = dynamic(() => import("@/components/map/MapStore"), {
   ssr: false,
 
   loading: () => (
-    <div className="h-[500] w-full bg-gray-100 animate-pulse rounded-lg" />
+    <div className="h-[500] w-full bg-white animate-pulse rounded-lg" />
   ),
 });
 
 export default function MapComponent() {
   return (
-    <div className=" rounded-lg border  border-gray-100 shadow-xs">
+    <div className=" rounded-lg border bg-white h-full  border-gray-100 shadow-xs">
       <div className=" flex items-center justify-between p-4">
         <span className="font-bold">مکان ها و محدودیت ها</span>
         <Link
@@ -26,8 +26,10 @@ export default function MapComponent() {
           <ChevronLeft size={14} />
         </Link>
       </div>
-      <StoreMap />
-      <div className="grid grid-cols-3 py-4">
+      <div className="p-4">
+        <StoreMap />
+      </div>
+      {/* <div className="grid grid-cols-3 py-4">
         <div className="border-l border-gray-200">
           <div className=" flex flex-col items-center justify-center gap-y-2">
             <span className="text-xs font-bold">مکان ها</span>
@@ -46,7 +48,7 @@ export default function MapComponent() {
             <span className="font-bold text-[#F3060B]">{toPersianNumbers(9)}</span>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

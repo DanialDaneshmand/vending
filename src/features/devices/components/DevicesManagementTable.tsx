@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Eye, Pencil, MoreHorizontal } from "lucide-react";
 import StyledPagination from "@/components/ui/Pagination";
+import Link from "next/link";
 
 // آیکون کوچک دستگاه برای بخش نام دستگاه
 const DeviceMiniIcon = () => (
@@ -238,9 +239,11 @@ export default function DeviceManagementTable() {
                 {/* عملیات */}
                 <td className="px-4 py-3 rounded-l-lg border-y border-l border-gray-100">
                   <div className="flex items-center justify-center gap-2">
-                    <button className="flex items-center gap-1 px-2 py-1 text-blue-600  border border-gray-200 cursor-pointer rounded-md text-[12px] font-medium transition-colors">
-                      <Eye className="w-3.5 h-3.5" /> مشاهده
-                    </button>
+                    <Link href="/device-detail">
+                      <button className="flex items-center gap-1 px-2 py-1 text-blue-600  border border-gray-200 cursor-pointer rounded-md text-[12px] font-medium transition-colors">
+                        <Eye className="w-3.5 h-3.5" /> مشاهده
+                      </button>
+                    </Link>
                     <button className="flex items-center gap-1 px-2 py-1 text-slate-600 border border-gray-200 cursor-pointer rounded-md text-[12px] font-medium transition-colors">
                       <Pencil className="w-3.5 h-3.5 text-blue-600" /> ویرایش
                     </button>
