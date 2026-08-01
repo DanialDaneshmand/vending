@@ -36,11 +36,11 @@ export default function ReportsFilterSection() {
     });
   };
   return (
-    <section className=" p-4 border border-gray-100 shadow-sm rounded-lg mt-4">
+    <section className=" p-4 border bg-white border-gray-100 shadow-sm rounded-lg mt-4">
       {/* Tabs */}
-      <div>
+      {/* <div>
         <SegmentedTabs />
-      </div>
+      </div> */}
       <div className="grid grid-cols-12">
         <div className="col-span-12 xl:col-span-9 ">
           <ReportsFilterContainer

@@ -24,11 +24,11 @@ const links = [
   {
     id: 4,
     title: "کنترل و زمان بندی",
-    href: "/scheduling",
+    href: "/control-scheduling",
     icon: <FaRegClock />,
   },
   { id: 5, title: "هشدار ها ", href: "/alerts", icon: <FaRegBell /> },
-  { id: 6, title: "گزارش ها", href: "/reports", icon: <IoStatsChart /> },
+  { id: 6, title: "گزارش مالی", href: "/financial-report", icon: <IoStatsChart /> },
   { id: 7, title: "کاربران و نقش ها", href: "/roles-users", icon: <FiUsers /> },
   { id: 8, title: "تنظیمات", href: "/settings", icon: <IoSettingsOutline /> },
 ];
@@ -144,7 +144,7 @@ const Header = () => {
           </div>
           {/* Mobile Links */}
           {isShow && (
-            <aside className="fixed z-50 top-0 bottom-0 right-0 left-0 bg-linear-to-b from-[#04275F] to-[#033074] ">
+            <aside className="fixed  z-50 top-0 min-h-screen  right-0 left-0 bg-linear-to-b from-[#04275F] to-[#033074] ">
               <div className="p-5 flex items-center justify-between">
                 <img
                   src="/icon.png"
@@ -158,19 +158,19 @@ const Header = () => {
                   <IoClose className="text-xl text-[#EEEEF2]" />
                 </button>
               </div>
-              <nav className="px-2">
+              <nav className="px-2 ">
                 <ul>
                   {links.map((item) => (
                     <Link
                       key={item.id}
                       href={item.href}
-                      className="my-4"
+                      className="my-2"
                       onClick={() => setIsShow(false)}
                     >
                       <li
                         className={`text-[#EEEEF2] py-4 flex justify-between  px-3 ${pathName === item.href ? "bg-linear-to-r from-[#023BA0] to-[#033BA1] rounded-lg" : ""}`}
                       >
-                        <span className="flex items-center gap-x-4">
+                        <span className="flex text-xs items-center gap-x-4">
                           <span className="text-xl">{item.icon}</span>
                           <span>{item.title}</span>
                         </span>

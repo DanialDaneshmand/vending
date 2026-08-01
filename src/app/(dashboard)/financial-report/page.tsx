@@ -8,7 +8,7 @@ export default function page() {
   return (
     <section className="p-4">
       {/* Page Title */}
-      <PageTitle title="گزارش ها" description="داشبورد /  گزارش ها" />
+      <PageTitle title="گزارش مالی" description="داشبورد /  گزارش مالی" />
       {/* Reports Filter Section */}
       <ReportsFilterSection />
       {/*Reports Cards Section  */}

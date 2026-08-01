@@ -38,7 +38,7 @@ const formatYAxis = (value: number) => {
 
 export default function IncomeTrendChart() {
   return (
-    <div className="w-full border border-gray-100 shadow-sm rounded-lg p-4">
+    <div className="w-full border bg-white border-gray-100 shadow-sm rounded-lg p-4">
       {/* هدر */}
       <div className="flex justify-between items-center mb-8">
         <h3 className="text-sm font-bold text-gray-800">روند درآمد</h3>

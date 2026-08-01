@@ -25,10 +25,10 @@ export default function page() {
       </div>
       {/* Map And Recent Alerts Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4">
-        <div>
+        <div >
           <RecentAlerts />
         </div>
-        <div className="">
+        <div >
           <MapComponent />
         </div>
       </div>

@@ -85,7 +85,7 @@ export default function ReportsCardsSection() {
   ];
 
   return (
-    <div className="border border-gray-100 shadow-sm rounded-lg p-4 mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className=" mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map((stat, index) => (
         <div key={index}>
           <StatCard {...stat} />

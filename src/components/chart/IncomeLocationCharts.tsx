@@ -17,8 +17,7 @@ const data = [
   { name: "میدان ونک", value: 3100000 },
   { name: "پارک ملت", value: 2200000 },
   { name: "بازار بزرگ", value: 2200000 },
-  { name: "مجتمع ایران‌مال", value: 1800000 },
-  { name: "ایستگاه مترو صادقیه", value: 1300000 },
+  
 ];
 
 // تابع برای تبدیل اعداد به فرمت M (میلیون) مشابه عکس
@@ -42,7 +41,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 export default function IncomeLocationChart() {
   return (
     <div
-      className="w-full h-full border border-gray-100 shadow-sm rounded-lg p-4"
+      className="w-full h-full border border-gray-100 bg-white shadow-sm rounded-lg p-4"
     >
       {/* هدر نمودار */}
       <div className="flex justify-between items-center mb-8">

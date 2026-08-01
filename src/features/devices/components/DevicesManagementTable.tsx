@@ -239,7 +239,7 @@ export default function DeviceManagementTable() {
                 {/* عملیات */}
                 <td className="px-4 py-3 rounded-l-lg border-y border-l border-gray-100">
                   <div className="flex items-center justify-center gap-2">
-                    <Link href="/device-detail">
+                    <Link href={`/devices/${device.id}`}>
                       <button className="flex items-center gap-1 px-2 py-1 text-blue-600  border border-gray-200 cursor-pointer rounded-md text-[12px] font-medium transition-colors">
                         <Eye className="w-3.5 h-3.5" /> مشاهده
                       </button>

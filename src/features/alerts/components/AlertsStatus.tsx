@@ -48,7 +48,7 @@ export default function AlertStats() {
         {statsData.map((item, index) => (
           <div
             key={index}
-            className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex  justify-between relative overflow-hidden h-40"
+            className="bg-white p-4 rounded-lg gap-x-1 shadow-sm border border-gray-100 flex  justify-between relative overflow-hidden h-40"
           >
             {/* Header: Title and Icon */}
             <div className="flex justify-between items-start">

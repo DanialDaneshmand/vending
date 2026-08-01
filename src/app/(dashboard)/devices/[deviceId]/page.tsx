@@ -6,10 +6,13 @@ import NavigationTabs from "@/features/device-detail/components/NavigationTabs";
 import OverviewSection from "@/features/device-detail/components/OverviewSection";
 import VendingMachineCard from "@/features/device-detail/components/VendingMachinCard";
 import { TabsType } from "@/features/device-detail/Types";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 
 export default function page() {
+  const params=useParams();
   const [activeTab, setActiveTab] = useState<TabsType>('overview');
+  
 
   return (
     <section className="p-4">

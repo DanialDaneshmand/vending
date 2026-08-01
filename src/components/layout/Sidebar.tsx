@@ -24,7 +24,7 @@ const links = [
     icon: <FaRegClock />,
   },
   { id: 5, title: "هشدار ها ", href: "/alerts", icon: <FaRegBell /> },
-  { id: 6, title: "گزارش ها", href: "/reports", icon: <IoStatsChart /> },
+  { id: 6, title: "گزارش مالی", href: "/financial-report", icon: <IoStatsChart /> },
   { id: 7, title: "کاربران و نقش ها", href: "/roles-users", icon: <FiUsers /> },
   { id: 8, title: "تنظیمات", href: "/settings", icon: <IoSettingsOutline /> },
 ];
