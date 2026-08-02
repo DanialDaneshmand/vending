@@ -21,14 +21,14 @@ const links = [
   { id: 1, title: "داشبورد", href: "/dashboard", icon: <IoHome /> },
   { id: 2, title: "دستگاه ها", href: "/devices", icon: <FaGamepad /> },
   { id: 3, title: "مکان ها", href: "/places", icon: <IoLocationOutline /> },
-  {
-    id: 4,
-    title: "کنترل و زمان بندی",
-    href: "/control-scheduling",
-    icon: <FaRegClock />,
-  },
+
   { id: 5, title: "هشدار ها ", href: "/alerts", icon: <FaRegBell /> },
-  { id: 6, title: "گزارش مالی", href: "/financial-report", icon: <IoStatsChart /> },
+  {
+    id: 6,
+    title: "گزارش مالی",
+    href: "/financial-report",
+    icon: <IoStatsChart />,
+  },
   { id: 7, title: "کاربران و نقش ها", href: "/roles-users", icon: <FiUsers /> },
   { id: 8, title: "تنظیمات", href: "/settings", icon: <IoSettingsOutline /> },
 ];

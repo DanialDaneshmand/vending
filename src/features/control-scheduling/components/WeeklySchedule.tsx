@@ -45,11 +45,11 @@ const WeeklySchedule = () => {
 
   return (
     <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 flex flex-col h-full">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
         <h2 className="text-[15px] font-bold text-gray-800">
           برنامه زمان‌بندی هفتگی
         </h2>
-        <button className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-600 rounded-md text-blue-600 text-xs font-bold cursor-pointer transition-all">
+        <button className="flex mt-4 sm:mt-0 items-center gap-1.5 px-3 py-1.5 border border-blue-600 rounded-md text-blue-600 text-xs font-bold cursor-pointer transition-all">
           افزودن بازه زمانی
           <Plus className="w-4 h-4" />
         </button>
