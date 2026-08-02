@@ -8,6 +8,7 @@ import RecentActivitiesTable from "./RecentActivitiesTable";
 import GameTab from "./GameTab";
 import InventoryTab from "./InventoryTab";
 import RepairsTab from "./RepairsTab";
+import ControlSchedulingTab from "./ControlSchedulingTab";
 
 interface OverviewSectionProps {
   activeTab: TabsType;
@@ -34,6 +35,7 @@ export default function OverviewSection({
           <EventsCard activeTab={activeTab} setActiveTab={setActiveTab}/>
         </div>;
       case "repairs": return <RepairsTab/>
+      case "control-scheduling": return <ControlSchedulingTab/>
       default:
         return null;
     }

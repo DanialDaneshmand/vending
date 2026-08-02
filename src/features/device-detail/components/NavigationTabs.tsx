@@ -10,6 +10,7 @@ const tabs = [
   { id: "inventory", label: "موجودی" },
   { id: "events", label: "رویدادها" },
   { id: "repairs", label: "تعمیرات" },
+  { id: "control-scheduling", label: "کنترل و زمان بندی" },
 ] as const;
 
 interface NavigationTabsProps {

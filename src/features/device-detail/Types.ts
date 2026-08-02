@@ -6,4 +6,5 @@ export type TabsType =
   | "games"
   | "inventory"
   | "events"
-  | "repairs";
+  | "repairs"
+  |"control-scheduling"
