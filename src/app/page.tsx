@@ -3,16 +3,13 @@
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { GoLock } from "react-icons/go";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import TextField from "@/components/form/TextFeild";
-import SeperatorLine from "@/components/ui/SeperatorLine";
 import FormBtn from "@/components/ui/FormBtn";
 import { LuLock, LuUser } from "react-icons/lu";
 import { IoIosArrowBack } from "react-icons/io";
 import { BsShieldCheck } from "react-icons/bs";
-import { FaRegCopyright } from "react-icons/fa6";
 import Footer from "@/components/layout/Footer";
 
 export const schema = yup
@@ -38,6 +35,7 @@ function page() {
 
   const onSubmit: SubmitHandler<FormDataSignin> = async (data) => {
     console.log(data);
+    router.push("/dashboard")
   };
 
   return (
@@ -97,6 +95,7 @@ function page() {
                     isLoading={isLoading}
                     btnTitle="ورود"
                     Icon={IoIosArrowBack}
+
                   />
                 </form>
                 <div className=" flex items-center gap-x-3 sm:px-8 mt-8">

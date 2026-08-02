@@ -7,6 +7,7 @@ import PaymentDetail from "./PaymentsDetail";
 import RecentActivitiesTable from "./RecentActivitiesTable";
 import GameTab from "./GameTab";
 import InventoryTab from "./InventoryTab";
+import RepairsTab from "./RepairsTab";
 
 interface OverviewSectionProps {
   activeTab: TabsType;
@@ -32,7 +33,7 @@ export default function OverviewSection({
         return <div className="pt-4 grid grid-cols-1 md:grid-cols-2">
           <EventsCard activeTab={activeTab} setActiveTab={setActiveTab}/>
         </div>;
-
+      case "repairs": return <RepairsTab/>
       default:
         return null;
     }

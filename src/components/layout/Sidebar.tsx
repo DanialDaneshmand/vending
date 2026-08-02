@@ -41,7 +41,7 @@ export default function Sidebar() {
           {links.map((item) => (
             <Link key={item.id} href={item.href} className="my-4">
               <li
-                className={`text-[#EEEEF2] py-4 flex justify-between  px-3 ${pathName === item.href ? "bg-linear-to-r from-[#023BA0] to-[#033BA1] rounded-lg" : ""}`}
+                className={`text-[#EEEEF2] py-4 flex justify-between  px-3 ${pathName.startsWith(item.href)  ? "bg-linear-to-r from-[#023BA0] to-[#033BA1] rounded-lg" : ""}`}
               >
                 <span className="flex items-center gap-x-4">
                   <span className="text-xl">{item.icon}</span>
