@@ -38,7 +38,7 @@ const SettingsHistory = () => {
   ];
 
   return (
-      <div className="bg-white rounded-lg py-4 h-full border border-gray-100 shadow-sm px-2">
+      <div className="bg-white rounded-lg py-4 h-full! border border-gray-100 shadow-sm px-2">
 
         {/* هدر بخش */}
         <div className='px-2'>

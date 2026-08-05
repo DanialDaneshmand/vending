@@ -3,22 +3,17 @@
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { SubmitHandler, useForm } from "react-hook-form";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import TextField from "@/components/form/TextFeild";
 import FormBtn from "@/components/ui/FormBtn";
-import { LuLock, LuUser } from "react-icons/lu";
+import { LuUser } from "react-icons/lu";
 import { IoIosArrowBack } from "react-icons/io";
 import { BsShieldCheck } from "react-icons/bs";
 import Footer from "@/components/layout/Footer";
 
 export const schema = yup
   .object({
-    username: yup.string().required("نام کاربری الزامی است"),
-    password: yup
-      .string()
-      .required("رمز عبور الزامی است")
-      .min(6, "رمز عبور حداقل باید 6 کاراکتر باشد"),
+    phoneNumber: yup.string().required("شماره موبایل الزامی است"),
   })
   .required();
 type FormDataSignin = yup.InferType<typeof schema>;
@@ -34,8 +29,8 @@ function page() {
   });
 
   const onSubmit: SubmitHandler<FormDataSignin> = async (data) => {
-    console.log(data);
-    router.push("/dashboard")
+    localStorage.setItem("phoneNumber", data.phoneNumber);
+    router.push("/verify-otp");
   };
 
   return (
@@ -43,7 +38,9 @@ function page() {
       {/* Header */}
       <div className=" w-full bg-white shadow-sm py-6 flex items-center gap-x-2 pr-4">
         <img src="/header-icon.png" alt="" className="w-14 h-12" />
-        <p className=" sm:text-xl font-semibold">سامانه کنترل و مدیریت وندینگ</p>
+        <p className=" sm:text-xl font-semibold">
+          سامانه کنترل و مدیریت وندینگ
+        </p>
       </div>
       {/* Body */}
       <div className="grid grid-cols-12 py-4 xl:px-16">
@@ -60,22 +57,14 @@ function page() {
                 <form onSubmit={handleSubmit(onSubmit)}>
                   <TextField
                     errors={errors}
-                    label="نام کاربری یا موبایل"
-                    name="username"
+                    label="شماره موبایل"
+                    name="phoneNumber"
                     register={register}
-                    placeholder="نام کاربری یا موبایل خود را وارد کنید"
+                    placeholder="  شماره موبایل خود را وارد کنید"
                     Icon={LuUser}
                   />
-                  <TextField
-                    errors={errors}
-                    label="رمز عبور"
-                    name="password"
-                    register={register}
-                    placeholder="رمز عبور خود را وارد کنید"
-                    Icon={LuLock}
-                    isPassword
-                  />
-                  <div className=" flex items-center justify-between my-8">
+
+                  {/* <div className=" flex items-center justify-between my-8">
                     <div className="flex items-center  ">
                       <input
                         type="checkbox"
@@ -90,13 +79,14 @@ function page() {
                         <span>فراموشی رمز عبور ؟</span>
                       </Link>
                     </div>
+                  </div> */}
+                  <div className=" mt-8">
+                    <FormBtn
+                      isLoading={isLoading}
+                      btnTitle="ورود"
+                      Icon={IoIosArrowBack}
+                    />
                   </div>
-                  <FormBtn
-                    isLoading={isLoading}
-                    btnTitle="ورود"
-                    Icon={IoIosArrowBack}
-
-                  />
                 </form>
                 <div className=" flex items-center gap-x-3 sm:px-8 mt-8">
                   <div className="bg-green-50 p-2 rounded-full">
@@ -112,13 +102,12 @@ function page() {
           </div>
         </div>
         <div className="xl:col-span-8">
-          <img src="/login-bg.png" alt="" className=" hidden xl:block"/>
+          <img src="/login-bg.png" alt="" className=" hidden xl:block" />
         </div>
-
       </div>
 
       {/* Footer */}
-      <Footer/>
+      <Footer />
     </div>
   );
 }
