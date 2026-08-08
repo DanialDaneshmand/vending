@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from "react";
-import { Eye, Pencil, MoreHorizontal } from "lucide-react";
+import { Eye, Pencil } from "lucide-react";
 import StyledPagination from "@/components/ui/Pagination";
 import Link from "next/link";
+import { LuTrash2 } from "react-icons/lu";
 
-// آیکون کوچک دستگاه برای بخش نام دستگاه
 const DeviceMiniIcon = () => (
   <svg
     className="w-4 h-4 text-blue-500 shrink-0 ml-1"
@@ -29,6 +29,7 @@ interface DeviceRow {
   code1: string;
   code2: string;
   location: string;
+  section:string;
   status: "فعال" | "آنلاین" | "آفلاین";
   lastSeen: string;
   inventory: "مناسب" | "کم";
@@ -42,6 +43,7 @@ const devicesData: DeviceRow[] = [
     code1: "VM-101",
     code2: "VM-101",
     location: "طبقه همکف - ورودی اصلی",
+    section:"طبقه اول",
     status: "فعال",
     lastSeen: "۲ دقیقه پیش",
     inventory: "کم",
@@ -53,6 +55,7 @@ const devicesData: DeviceRow[] = [
     code1: "VM-205",
     code2: "VM-205",
     location: "طبقه ۲ - سالن انتظار",
+    section:"_",
     status: "آنلاین",
     lastSeen: "۵ دقیقه پیش",
     inventory: "مناسب",
@@ -64,6 +67,7 @@ const devicesData: DeviceRow[] = [
     code1: "VM-110",
     code2: "VM-110",
     location: "طبقه ۱ - راهروی شرقی",
+    section:"_",
     status: "فعال",
     lastSeen: "۱ دقیقه پیش",
     inventory: "مناسب",
@@ -75,6 +79,7 @@ const devicesData: DeviceRow[] = [
     code1: "VM-301",
     code2: "VM-301",
     location: "طبقه ۳ - کنار آسانسور",
+    section:"_",
     status: "آفلاین",
     lastSeen: "۴۵ دقیقه پیش",
     inventory: "کم",
@@ -86,6 +91,7 @@ const devicesData: DeviceRow[] = [
     code1: "VM-103",
     code2: "VM-103",
     location: "طبقه ۱ - لابی اصلی",
+    section:"_",
     status: "فعال",
     lastSeen: "۳ دقیقه پیش",
     inventory: "مناسب",
@@ -97,6 +103,7 @@ const devicesData: DeviceRow[] = [
     code1: "VM-402",
     code2: "VM-402",
     location: "طبقه ۴ - اتاق کنفرانس",
+    section:"_",
     status: "آفلاین",
     lastSeen: "۲ ساعت پیش",
     inventory: "کم",
@@ -108,6 +115,7 @@ const devicesData: DeviceRow[] = [
     code1: "VM-202",
     code2: "VM-202",
     location: "طبقه ۲ - سالن پذیرایی",
+    section:"_",
     status: "آنلاین",
     lastSeen: "۱ دقیقه پیش",
     inventory: "مناسب",
@@ -119,6 +127,7 @@ const devicesData: DeviceRow[] = [
     code1: "VM-305",
     code2: "VM-305",
     location: "طبقه ۳ - انتهای راهرو",
+    section:"_",
     status: "آنلاین",
     lastSeen: "۷ دقیقه پیش",
     inventory: "مناسب",
@@ -130,6 +139,7 @@ const devicesData: DeviceRow[] = [
     code1: "VM-105",
     code2: "VM-105",
     location: "طبقه ۱ - کنار در خروج",
+    section:"_",
     status: "آفلاین",
     lastSeen: "۳۵ دقیقه پیش",
     inventory: "کم",
@@ -141,6 +151,7 @@ const devicesData: DeviceRow[] = [
     code1: "VM-401",
     code2: "VM-401",
     location: "طبقه ۴ - ورودی شمالی",
+    section:"_",
     status: "آنلاین",
     lastSeen: "۲ دقیقه پیش",
     inventory: "مناسب",
@@ -171,15 +182,12 @@ export default function DeviceManagementTable() {
                 شناسه دستگاه
               </th>
               <th className="px-4 py-2 font-normal text-center">مکان</th>
-              <th className="px-4 py-2 font-normal text-nowrap">
+              <th className="px-4 py-2 font-normal text-center">بخش</th>
+              <th className="px-4 py-2 font-normal text-nowrap text-center">
                 وضعیت دستگاه
               </th>
-              <th className="px-4 py-2 font-normal text-nowrap">
-                آخرین ارتباط
-              </th>
-              <th className="px-4 py-2 font-normal">موجودی</th>
-              <th className="px-4 py-2 font-normal text-nowrap">
-                درآمد امروز{" "}
+              <th className="px-4 py-2 font-normal text-nowrap text-center">
+                 موجودی
               </th>
               <th className="px-4 py-2 font-normal w-40 text-center">عملیات</th>
             </tr>
@@ -199,8 +207,11 @@ export default function DeviceManagementTable() {
                   {device.code2}
                 </td>
                 {/* مکان */}
-                <td className="px-4 py-3 border-y border-gray-100 text-slate-500 text-[13px] text-nowrap">
+                <td className="px-4 text-center py-3 border-y border-gray-100 text-slate-500 text-[13px] text-nowrap">
                   {device.location}
+                </td>
+                <td className="px-4 py-3 border-y text-center border-gray-100 text-slate-500 text-[13px] text-nowrap">
+                  {device.section}
                 </td>
                 {/* وضعیت */}
                 <td className="px-4 text-center py-3 border-y border-gray-100 ">
@@ -216,10 +227,7 @@ export default function DeviceManagementTable() {
                     {device.status}
                   </span>
                 </td>
-                {/* آخرین ارتباط */}
-                <td className="px-4 py-3 border-y border-gray-100 text-slate-500 text-xs">
-                  {device.lastSeen}
-                </td>
+                
                 {/* موجودی */}
                 <td className="px-4 py-3 text-center border-y border-gray-100">
                   <span
@@ -232,24 +240,19 @@ export default function DeviceManagementTable() {
                     {device.inventory}
                   </span>
                 </td>
-                {/* درآمد */}
-                <td className="px-4 py-3 text-center border-y border-gray-100 text-slate-700 text-[14px] font-medium">
-                  {device.income}
-                </td>
+                
                 {/* عملیات */}
                 <td className="px-4 py-3 rounded-l-lg border-y border-l border-gray-100">
                   <div className="flex items-center justify-center gap-2">
                     <Link href={`/devices/${device.id}`}>
-                      <button className="flex items-center gap-1 px-2 py-1 text-blue-600  border border-gray-200 cursor-pointer rounded-md text-[12px] font-medium transition-colors">
+                      <button className="flex items-center gap-1 px-2 h-8 text-blue-600  border border-gray-200 cursor-pointer rounded-md text-[12px] font-medium transition-colors">
                         <Eye className="w-3.5 h-3.5" /> مشاهده
                       </button>
                     </Link>
-                    <button className="flex items-center gap-1 px-2 py-1 text-slate-600 border border-gray-200 cursor-pointer rounded-md text-[12px] font-medium transition-colors">
-                      <Pencil className="w-3.5 h-3.5 text-blue-600" /> ویرایش
+                    <button className="flex items-center gap-1 px-2 h-8 text-slate-600 border border-gray-200 cursor-pointer rounded-md text-[12px] font-medium transition-colors">
+                      <LuTrash2 className="w-3.5 h-3.5 text-red-600" /> 
                     </button>
-                    <button className="py-1 px-2 cursor-pointer border border-r-gray-200 rounded-md text-gray-400  transition-colors">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
+                    
                   </div>
                 </td>
               </tr>

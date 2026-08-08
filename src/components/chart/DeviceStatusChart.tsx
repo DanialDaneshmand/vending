@@ -3,20 +3,20 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import Link from "next/link";
 
-// ۱. تعریف ساختار تایپ داده‌ها
+
 interface DeviceStatus {
   name: string;
-  value: number; // تعداد دستگاه‌ها
-  percentage: number; // درصد
-  color: string; // رنگ اختصاصی سگمنت
+  value: number; 
+  percentage: number;
+  color: string; 
 }
 
-// ۲. آرایه داده‌ها بر اساس تصویر
 const devicesData: DeviceStatus[] = [
-  { name: "آنلاین", value: 12, percentage: 60, color: "#22c55e" }, // سبز
-  { name: "آفلاین", value: 5, percentage: 25, color: "#cbd5e1" }, // خاکستری
-  { name: "غیرفعال", value: 3, percentage: 15, color: "#ef4444" }, // قرمز
+  { name: "روشن", value: 12, percentage: 60, color: "#22c55e" }, 
+  { name: "آفلاین", value: 5, percentage: 25, color: "#cbd5e1" }, 
+  { name: "خاموش", value: 3, percentage: 15, color: "#ef4444" }, 
 ];
 
 export default function DeviceStatusChart() {
@@ -96,7 +96,7 @@ export default function DeviceStatusChart() {
               </div>
               {/* درصد زیر نام */}
               <span className="text-[11px] font-medium text-gray-400 mr-4.5">
-                ({item.percentage.toLocaleString("fa-IR")}٪)
+                ({item.value.toLocaleString("fa-IR")})
               </span>
             </div>
           ))}
@@ -105,13 +105,13 @@ export default function DeviceStatusChart() {
 
       {/* دکمه فوتر برای هدایت به صفحه تمام دستگاه‌ها */}
       <div className="mt-4 pt-4 border-t border-gray-50 flex justify-end">
-        <a
-          href="#"
+        <Link
+          href="/devices"
           className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors"
         >
           <span>مشاهده همه دستگاه‌ها</span>
           <ChevronLeft size={14} />
-        </a>
+        </Link>
       </div>
     </div>
   );

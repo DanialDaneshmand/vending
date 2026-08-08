@@ -11,7 +11,7 @@ const CommandHistory = () => {
   ];
 
   return (
-      <div className="  bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden p-4">
+      <div className=" h-full bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden p-4">
 
         {/* هدر بخش */}
         <div className="flex justify-between items-center mb-6">

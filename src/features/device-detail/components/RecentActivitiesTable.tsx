@@ -12,6 +12,9 @@ const activities = [
   {
     id: 1,
     time: "10:12:45",
+    date:"1405/12/4",
+    count:5,
+    userId:"13g343cdx",
     type: "پرداخت",
     category: "payment",
     detail: "نوشابه کوکاکولا",
@@ -22,6 +25,9 @@ const activities = [
   {
     id: 2,
     time: "10:11:10",
+    date:"1405/12/4",
+    count:5,
+    userId:"13g343cdx",
     type: "بازی",
     category: "game",
     detail: "بازی ماشین جنگی",
@@ -32,6 +38,9 @@ const activities = [
   {
     id: 3,
     time: "10:09:32",
+    date:"1405/12/4",
+    count:5,
+    userId:"13g343cdx",
     type: "پرداخت",
     category: "payment",
     detail: "چیپس نمکی",
@@ -42,6 +51,9 @@ const activities = [
   {
     id: 4,
     time: "10:08:21",
+    date:"1405/12/4",
+    count:5,
+    userId:"13g343cdx",
     type: "بازی",
     category: "game",
     detail: "بازی تیراندازی",
@@ -80,15 +92,15 @@ const RecentActivitiesTable = ({ activeTab,setActiveTab }: RecentActivitiesTable
 
       {/* محتوای جدول */}
       <div className="overflow-x-auto">
-        <table className="w-full text-right min-w-3xl border-collapse">
+        <table className="w-full text-right min-w-xl border-collapse">
           <thead className=" bg-[#F9FAFC] rounded-t-lg">
             <tr className="text-[#94a3b8] text-[13px] font-medium border-b border-gray-50">
-              <th className="px-6 py-4 font-medium">زمان</th>
-              <th className="px-6 py-4 font-medium ">نوع</th>
-              <th className="px-6 py-4 font-medium">جزئیات</th>
-              <th className="px-6 py-4 font-medium">مبلغ</th>
-              <th className="px-6 py-4 font-medium">روش پرداخت</th>
+              <th className="px-6 py-4 font-medium">تاریخ</th>
+              <th className="px-6 py-4 font-medium ">زمان</th>
+              <th className="px-6 py-4 font-medium text-center">مبلغ</th>
               <th className="px-6 py-4 font-medium text-center">وضعیت</th>
+              <th className="px-6 py-4 font-medium text-center">تعداد بازی</th>
+              
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -97,37 +109,25 @@ const RecentActivitiesTable = ({ activeTab,setActiveTab }: RecentActivitiesTable
                 key={item.id}
                 className="hover:bg-gray-50/50 transition-colors"
               >
+                <td className="px-6 py-4 text-[#475569] text-sm font-medium ">
+                  {item.date}
+                </td>
                 <td className="px-6 py-4 text-[#475569] text-sm font-medium">
                   {item.time}
                 </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`p-1.5 rounded-lg ${item.category === "payment" ? "bg-purple-50 text-purple-500" : "bg-blue-50 text-blue-500"}`}
-                    >
-                      {item.category === "payment" ? (
-                        <Wallet size={16} />
-                      ) : (
-                        <Gamepad2 size={16} />
-                      )}
-                    </div>
-                    <span className="text-[#475569] text-sm">{item.type}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-[#475569] text-sm">
-                  {item.detail}
-                </td>
-                <td className="px-6 py-4 text-[#475569] text-sm font-bold">
+                <td className="px-6 py-4 text-[#475569] text-sm font-bold text-center">
                   {item.amount}
-                </td>
-                <td className="px-6 py-4 text-[#64748b] text-sm">
-                  {item.method}
                 </td>
                 <td className="px-6 py-4 text-center">
                   <span className="px-3 py-1 bg-green-50 text-green-600 text-[12px] font-bold rounded-md">
                     {item.status}
                   </span>
                 </td>
+                <td className="px-6 py-4 text-[#475569] text-sm font-medium text-center">
+                  {item.count}
+                </td>
+                
+                
               </tr>
             ))}
           </tbody>

@@ -26,16 +26,13 @@ const MetricCard = ({
         {/* {React.cloneElement(icon as React.ReactElement, { size: 24 })} */}
         {icon}
       </div>
-      <div className="text-right">
+      <div className="text-right flex flex-col justify-between   ">
         <div className="text-gray-500 text-sm font-medium mb-1">{label}</div>
         <div className="text-gray-800 text-xl font-bold">{value}</div>
         <div className="text-gray-400 text-xs mt-1">{unit}</div>
       </div>
     </div>
-    <div className="flex items-center gap-1 text-green-500 text-xs font-medium justify-center">
-      <span>{trend}</span>
-      <span className="text-gray-400 font-normal">نسبت به دیروز</span>
-    </div>
+    
   </div>
 );
 

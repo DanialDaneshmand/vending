@@ -1,6 +1,5 @@
 import PageTitle from "@/components/shared/PageTitle";
 import LocationManagement from "@/features/places/components/LocationManagementTable";
-import PlacesMap from "@/features/places/components/PlacesMap";
 
 export default function page() {
   return (
@@ -8,13 +7,11 @@ export default function page() {
       {/* Page Title */}
       <PageTitle title="مکان ها" description="داشبورد / مکان ها" />
       {/* Location Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-        <div >
+      <div className="grid grid-cols-12  gap-4 mt-4">
+        <div className="col-span-12 lg:col-span-8">
           <LocationManagement/>
         </div>
-        <div>
-          <PlacesMap/>
-        </div>
+        
       </div>
     </section>
   );

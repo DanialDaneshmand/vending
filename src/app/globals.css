@@ -131,3 +131,8 @@
 body {
   font-family: var(--font-vazir);
 }
+
+
+button {
+  cursor: pointer !important;
+}

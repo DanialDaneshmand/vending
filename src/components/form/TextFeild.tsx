@@ -17,7 +17,7 @@ type TextFieldProps<T extends FieldValues> = {
   errors: FieldErrors<T>;
   type?: string;
   placeholder: string;
-  Icon: IconType;
+  Icon?: IconType;
   isPassword?: boolean;
 };
 
@@ -42,19 +42,21 @@ export default function TextField<T extends FieldValues>({
   };
 
   return (
-    <div className="flex flex-col my-4 w-full">
+    <div className={`flex flex-col ${Icon ? "my-4" : ""} w-full`}>
       <label className="mb-2 text-[#414A53]" htmlFor={name}>
         {label}
       </label>
       <div className="flex items-center relative">
-        <span>
-          <Icon className=" absolute right-2 text-xl bottom-4 text-[#71717A]" />
-        </span>
+        {Icon && (
+          <span>
+            <Icon className=" absolute right-2 text-xl bottom-4 text-[#71717A]" />
+          </span>
+        )}
         <input
           id={name}
           type={typeValue}
           dir={dir}
-          className={`bg-white placeholder:text-sm border outline-0 rounded-lg  px-2 py-3 w-full pr-10 border-gray-200`}
+          className={`bg-white placeholder:text-sm border outline-0 rounded-lg  px-2 py-3 w-full ${Icon ? "organizationID" : "pr-2"} border-gray-200`}
           {...register(name)}
           placeholder={placeholder}
         />

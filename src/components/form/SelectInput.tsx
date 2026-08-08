@@ -16,7 +16,7 @@ interface SelectInputProps<T> {
   handleChange: (e: ChangeHandlerEvent) => void;
   name: string;
   options: string[];
-  title: string;
+  title?: string;
 }
 
 export default function SelectInput<T>({

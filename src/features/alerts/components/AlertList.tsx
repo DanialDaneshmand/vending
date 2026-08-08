@@ -139,13 +139,12 @@ export default function AlertList() {
         <table className="w-full text-right min-w-3xl ">
           <thead>
             <tr className="bg-white border-b border-gray-100 text-gray-500 text-xs font-medium">
-              <th className="py-4 px-2 text-center">نوع هشدار</th>
+              <th className="py-4 px-2 ">نوع هشدار</th>
               <th className="py-4 px-2 text-center">دستگاه</th>
               <th className="py-4 px-2 text-center">مکان</th>
               <th className="py-2 px-2 text-center">وضعیت</th>
               <th className="py-2 px-2 text-center">شدت</th>
               <th className="py-2 px-2 text-center">زمان</th>
-              <th className="py-2 px-2 text-center">عملیات</th>
             </tr>
           </thead>
           <tbody className="text-[13px] text-gray-800">
@@ -199,35 +198,7 @@ export default function AlertList() {
                   </div>
                 </td>
 
-                {/* Actions */}
-                <td className="py-2 px-2">
-                  <div className="flex items-center justify-center gap-2">
-                    {/* Confirm Button */}
-                    <button
-                      className={`flex items-center gap-1 px-3 py-1.5 rounded-md border text-[11px] transition-all
-                        ${item.actions.confirm ? "border-blue-100 text-blue-600 hover:bg-blue-50" : "border-gray-100 text-gray-200"}`}
-                    >
-                      <Clock className="w-3.5 h-3.5" />
-                      تأیید
-                    </button>
-
-                    {/* Resolve Button */}
-                    <button
-                      className={`flex items-center gap-1 px-3 py-1.5 rounded-md border text-[11px] transition-all
-                        ${item.actions.resolve ? "border-green-100 text-green-600 hover:bg-green-50" : "border-gray-100 text-gray-200"}`}
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      حل
-                    </button>
-
-                    {/* Details Button */}
-
-                    <button className="flex items-center gap-1 px-3 py-1.5 rounded-md border border-gray-200 text-gray-600 text-[11px] hover:bg-gray-50 transition-all">
-                      <Eye className="w-3.5 h-3.5" />
-                      جزئیات
-                    </button>
-                  </div>
-                </td>
+               
               </tr>
             ))}
           </tbody>

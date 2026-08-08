@@ -14,22 +14,40 @@ interface ChangeHandlerEvent {
 }
 
 const optionsMap = {
-  places: { title: "مکان", options: ["همه وضعیت ها", "فعال", "غیر فعال"] },
-  alertType: { title: "وضعیت اتصال", options: ["شهر ها", "تهران", "مشهد"] },
-  status: { title: "وضعیت دستگاه ", options: ["شهر ها", "تهران", "مشهد"] },
+  places: {
+    title: "مجموعه ها",
+    options: ["همه مجموعه ها", "فعال", "غیر فعال"],
+  },
+  sections: { title: "بخش ها", options: ["همه بخش ها", "فعال", "غیر فعال"] },
+  alertType: {
+    title: "وضعیت اتصال",
+    options: ["وضعیت اتصال ", "تهران", "مشهد"],
+  },
+  status: {
+    title: "وضعیت دستگاه ",
+    options: ["همه وضعیت ها", "تهران", "مشهد"],
+  },
+  inventory: {
+    title: "وضعیت موجودی ",
+    options: ["وضعیت موجودی", "تهران", "مشهد"],
+  },
 };
 
 export default function page() {
-  const [filterValues, setFilterValues] = useState({
-    places: "همه مکان ها",
+  const [filterAndSearchValues, setFilterAndSearchValues] = useState({
+    places: "همه مجموعه ها",
+    sections: "همه بخش ها",
     alertType: "همه انواع",
     status: "همه وضعیت ها",
-    intensity: "همه شدت ها",
+    inventory: "وضعیت موجودی",
+    search: "",
   });
 
+  console.log(filterAndSearchValues);
+
   const handleInputChange = (e: ChangeHandlerEvent) => {
-    setFilterValues({
-      ...filterValues,
+    setFilterAndSearchValues({
+      ...filterAndSearchValues,
       [e.target.name]: e.target.value,
     });
   };
@@ -39,15 +57,15 @@ export default function page() {
       <PageTitle title="دستگاه ها " description="داشبورد / دستگاه ها" />
       {/* Devices Filter Container */}
       <DevicesFilterContainer
-        className="grid grid-cols-12 bg-white lg:grid-cols-9 xl:grid-cols-11 gap-6 sm:gap-4 mt-4 border border-gray-100 shadow-sm p-4 rounded-lg"
-        filterValues={filterValues}
+        className="grid grid-cols-12 bg-white gap-6 sm:gap-4 mt-4 p-0 sm:p-4"
+        filterValues={filterAndSearchValues}
         handleInputChange={handleInputChange}
         optionsMap={optionsMap}
       />
       {/* Devices Cards Section */}
       <DevicesCardsSection />
       {/* Device Management Table */}
-      <DeviceManagementTable/>
+      <DeviceManagementTable />
     </section>
   );
 }

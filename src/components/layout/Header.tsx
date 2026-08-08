@@ -30,7 +30,6 @@ const links = [
     icon: <IoStatsChart />,
   },
   { id: 7, title: "کاربران و نقش ها", href: "/roles-users", icon: <FiUsers /> },
-  { id: 8, title: "تنظیمات", href: "/settings", icon: <IoSettingsOutline /> },
 ];
 
 const Header = () => {
@@ -86,7 +85,7 @@ const Header = () => {
                   src="/profile/prof.webp" // مسیر عکس پروفایل خودت رو بزار
                   alt="Profile"
                   fill
-                  className="object-cover"
+                  className="object-cover object-center"
                 />
               </div>
             </div>

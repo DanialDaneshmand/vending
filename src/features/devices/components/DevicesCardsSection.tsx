@@ -106,10 +106,7 @@ export default function DashboardStats() {
                 {stat.unit}
               </span>
 
-              {/* مقدار ترند پایین (اگر وجود داشته باشد) */}
-              <div className="mt-4 h-4 flex items-center justify-center">
-                {stat.subText}
-              </div>
+              
             </div>
           </div>
         );

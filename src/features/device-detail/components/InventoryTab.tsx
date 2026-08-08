@@ -10,6 +10,15 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import InventoryTable from "./InventoryTable";
+import SelectInput from "@/components/form/SelectInput";
+
+interface HandleChangeArg {
+  target: {
+    value: string | number;
+    name: string;
+  };
+}
 
 // داده‌های نمونه برای موجودی (یک هفته اخیر)
 const data = [
@@ -24,23 +33,20 @@ const data = [
 
 const InventoryTab = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [value, setValue] = useState(1000);
+  const [changeValue, setChangeValue] = useState({
+    count: 0,
+    operator: "افزودن",
+  });
 
-  const handleSave = () => {
-    // onSave(value);
-    setIsEditing(false);
+  const handleChange = (e: HandleChangeArg) => {
+    console.log(e);
   };
 
-  const handleCancel = () => {
-    setValue(1000);
-    setIsEditing(false);
-  };
   return (
     <div className="pt-4">
       {/* Grid اصلی برای ریسپانسیو سازی */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* بخش اول: کارت موجودی کل (اشغال ۱ ستون در حالت بزرگ) */}
-
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 h-full flex flex-col justify-between relative overflow-hidden group transition-all">
             <div className="absolute -top-10 -left-10 w-32 h-32 bg-emerald-50 rounded-full blur-3xl opacity-70 group-hover:bg-emerald-100 transition-colors" />
@@ -50,10 +56,12 @@ const InventoryTab = () => {
                 <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
                   <Package size={28} />
                 </div>
-                <span className="flex items-center gap-1 text-emerald-600 text-xs font-bold bg-emerald-50 px-2 py-1 rounded-lg">
-                  <TrendingUp size={14} />
-                  ۸٪ افزایش
-                </span>
+                <button
+                  onClick={() => setIsEditing(!isEditing)}
+                  className=" py-2 px-5 rounded-lg text-white cursor-pointer bg-emerald-600 font-semibold text-sm"
+                >
+                  تغییر موجودی
+                </button>
               </div>
 
               <h3 className="text-slate-500 text-sm font-medium mb-1">
@@ -61,68 +69,52 @@ const InventoryTab = () => {
               </h3>
 
               <div className="flex items-center gap-2">
-                {isEditing ? (
-                  <div className="flex items-center gap-2 w-full">
-                    <input
-                      type="text"
-                      value={value}
-                      onChange={(e: any) => setValue(e.target.value)}
-                      className="text-2xl font-extrabold text-slate-800 border-b-2 border-emerald-500 outline-none w-32 focus:ring-0 p-0"
-                      autoFocus
-                    />
-                    <span className="text-slate-400 text-xs font-medium">
-                      واحد
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-extrabold text-slate-800">
-                      1000
-                    </span>
-                    <span className="text-slate-400 text-xs font-medium">
-                      واحد
-                    </span>
-                  </div>
-                )}
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-extrabold text-slate-800">
+                    1000
+                  </span>
+                  <span className="text-slate-400 text-xs font-medium">
+                    واحد
+                  </span>
+                </div>
               </div>
             </div>
+              <div
+                className={`${isEditing ? "h-[140] transition-all duration-300" : " h-0 transition-all duration-300"}  overflow-hidden   mt-2 flex flex-col justify-center `}
+              >
+                <div className="flex items-start gap-x-2 w-full">
+                  <input
+                  className={`${changeValue.operator === "افزودن" ? "text-green-600" : "text-red-600"} w-full h-12 outline-0 border mt-2 border-gray-100 rounded-lg p-3  `}
+                  type="number"
+                  name="count"
+                  onChange={(e) =>
+                    handleChange({
+                      target: { value: e.target.value, name: e.target.name },
+                    })
+                  }
+                />
+                <SelectInput
+                  filterValues={changeValue}
+                  handleChange={handleChange}
+                  name="operator"
+                  options={["افزودن", "کاستن"]}
+                />
+                </div>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className=" py-2 px-5 rounded-lg text-white mt-4 cursor-pointer bg-emerald-600 font-semibold text-sm"
+                >
+                  اعمال تغییرات 
+                </button>
+              </div>
 
             <div className="mt-8 relative z-10 flex items-center justify-between">
               <div className="flex items-center gap-2 text-slate-400 text-xs">
                 <Database size={14} />
-                <span>به‌روزرسانی شده از انبار</span>
-              </div>
-
-              <div className="flex gap-2">
-                {!isEditing ? (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="p-2 bg-slate-100 text-slate-600 cursor-pointer rounded-lg hover:bg-emerald-500 hover:text-white transition-all group-hover:shadow-sm"
-                    title="ویرایش موجودی"
-                  >
-                    <Pencil size={16} />
-                  </button>
-                ) : (
-                  <div className="flex gap-1">
-                    <button
-                      onClick={handleSave}
-                      className="p-2 bg-emerald-500 text-white cursor-pointer rounded-lg hover:bg-emerald-600 transition-all"
-                    >
-                      <Check size={16} />
-                    </button>
-                    <button
-                      onClick={handleCancel}
-                      className="p-2 bg-red-50 text-red-500 rounded-lg cursor-pointer hover:bg-red-100 transition-all"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           </div>
         </div>
-
         {/* بخش دوم: نمودار تغییرات موجودی (اشغال ۲ ستون در حالت بزرگ) */}
         <div className="lg:col-span-2 w-full">
           <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 h-full w-full">
@@ -194,7 +186,12 @@ const InventoryTab = () => {
             </div>
           </div>
         </div>
+        {/* Table */}
+        <div className="col-span-1 lg:col-span-3">
+          <InventoryTable />
+        </div>
       </div>
+      {/* Tabel */}
     </div>
   );
 };

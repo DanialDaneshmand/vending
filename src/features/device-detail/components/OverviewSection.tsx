@@ -19,7 +19,7 @@ export default function OverviewSection({
   activeTab,
   setActiveTab,
 }: OverviewSectionProps) {
-  console.log(activeTab);
+  
   const renderTabs = () => {
     switch (activeTab) {
       case "payments":
@@ -44,16 +44,16 @@ export default function OverviewSection({
     <section>
       {activeTab === "overview" && (
         <section className="grid grid-cols-12 gap-4  pt-4">
-          <div className="col-span-12 xl:col-span-5">
+          <div className="col-span-12 xl:col-span-7">
             <KeyMetrics />
           </div>
-          <div className="col-span-12 sm:col-span-6 xl:col-span-4">
+          <div className="col-span-12 sm:col-span-6 xl:col-span-5">
             <EventsCard activeTab={activeTab} setActiveTab={setActiveTab}/>
           </div>
           <div className="col-span-12 sm:col-span-6 xl:col-span-3">
             <DeviceStatusCard />
           </div>
-          <div className="col-span-12">
+          <div className="col-span-12 xl:col-span-9">
             <RecentActivitiesTable
               activeTab={activeTab}
               setActiveTab={setActiveTab}

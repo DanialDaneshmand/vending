@@ -1,4 +1,3 @@
-import React from "react";
 import {
   ChevronLeft,
   AlertTriangle,
@@ -6,8 +5,8 @@ import {
   Info,
   OctagonAlert,
 } from "lucide-react";
+import Link from "next/link";
 
-// ۱. تعریف دیتای هشدارها
 const alerts = [
   {
     id: 1,
@@ -34,7 +33,6 @@ const alerts = [
   },
 ];
 
-// تابع کمکی برای انتخاب آیکون و رنگ بر اساس نوع هشدار
 const getAlertStyle = (type: string) => {
   switch (type) {
     case "critical":
@@ -82,13 +80,13 @@ export default function RecentAlerts() {
             ۷
           </span>
         </div>
-        <a
-          href="#"
+        <Link
+          href="/alerts"
           className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700"
         >
           <span>مشاهده همه</span>
           <ChevronLeft size={14} />
-        </a>
+        </Link>
       </div>
 
       {/* لیست هشدارها */}
