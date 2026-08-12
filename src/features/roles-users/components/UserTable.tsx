@@ -1,10 +1,12 @@
-"use client"
+"use client";
 
 import StyledPagination from "@/components/ui/Pagination";
-import React, { useMemo, useState } from "react";
-import { FaPlus } from "react-icons/fa6";
-import { GoShieldCheck } from "react-icons/go";
-import { LuSearch } from "react-icons/lu";
+import React, { useId, useMemo, useState } from "react";
+import { FaEye, FaPlus } from "react-icons/fa6";
+import { LuPencilLine, LuSearch } from "react-icons/lu";
+import CreateUserModal from "./CreateUserModal";
+import { Trash2 } from "lucide-react";
+import Link from "next/link";
 
 const users = [
   {
@@ -87,33 +89,44 @@ const users = [
 ];
 
 const UserTable = () => {
-    const [currentPage, setCurrentPage] = useState(1);
-      const [pageSize, setPageSize] = useState(5);
-      const paginatedData = useMemo(() => {
-        const startIndex = (currentPage - 1) * pageSize;
-        return users.slice(startIndex, startIndex + pageSize);
-      }, [currentPage, pageSize, users]);
-    
-      const totalPages = Math.ceil(users.length / pageSize);
+  const [isCreateUser, setIsCreateUser] = useState(false);
+  const [editId,setEditId]=useState<number|undefined>(undefined)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return users.slice(startIndex, startIndex + pageSize);
+  }, [currentPage, pageSize, users]);
+
+  const totalPages = Math.ceil(users.length / pageSize);
   return (
     <div className="  bg-white rounded-lg border border-gray-100 shadow-sm p-4">
       {/* Header Actions */}
       <div>
         {/* Btns */}
         <div className="flex items-center justify-center sm:justify-start  gap-4 mb-4 ">
-          <button className="flex items-center justify-center gap-2 bg-[#2563EB] text-white px-5 py-2 rounded-sm text-sm font-medium cursor-pointer shadow-sm  transition-all">
+          <button
+            onClick={() => setIsCreateUser(true)}
+            className="flex items-center justify-center gap-2 bg-[#2563EB] text-white px-5 py-2 rounded-sm text-sm font-medium cursor-pointer shadow-sm  transition-all"
+          >
             <span>
               <FaPlus />
             </span>
             <span>افزودن کاربر</span>
           </button>
-          <button className="flex items-center justify-center gap-x-2  bg-white text-[#2563EB] border cursor-pointer border-[#2563EB] px-5 py-2 rounded-sm text-sm font-medium transition-all">
-            <span>
-              <GoShieldCheck />
-            </span>
-            <span>تعریف نقش</span>
-          </button>
         </div>
+        {/* Create User Modal */}
+        <CreateUserModal
+          onClose={() => setIsCreateUser(false)}
+          open={isCreateUser}
+        />
+        <CreateUserModal
+          onClose={() => setEditId(undefined)}
+          open={Boolean(editId)}
+          editId={editId}
+        />
+        {/* Edit User Modal */}
+
         {/* Search And Filter Container */}
         <div className=" grid grid-cols-12 gap-x-4 mb-4">
           <div className="col-span-12 sm:col-span-6">
@@ -143,18 +156,27 @@ const UserTable = () => {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-xl sm:min-w-3xl text-right border-collapse">
+        <table className="min-w-xl sm:min-w-3xl w-full text-right border-collapse">
           <thead>
             <tr className="text-gray-800 text-sm  border-b border-gray-100">
-              <th className="py-2 pr-4 font-bold bg-[#F9FAFC] rounded-tr-lg w-40">نام</th>
-              <th className="py-2 font-bold bg-[#F9FAFC] text-center ml-4">نقش</th>
-              <th className="py-2 font-bold bg-[#F9FAFC] text-center">شماره تماس</th>
-              <th className="py-2 font-bold bg-[#F9FAFC]">وضعیت</th>
-              <th className="py-2 font-bold bg-[#F9FAFC] text-center">آخرین ورود</th>
-              <th className="py-2 font-bold text-center bg-[#F9FAFC] rounded-tl-lg">عملیات</th>
+              <th className="py-2 pr-4 font-bold bg-[#F9FAFC] rounded-tr-lg w-40">
+                نام
+              </th>
+              <th className="py-2 font-bold bg-[#F9FAFC] text-center ml-4">
+                نقش
+              </th>
+              <th className="py-2 font-bold bg-[#F9FAFC] text-center">
+                شماره تماس
+              </th>
+              <th className="py-2 font-bold bg-[#F9FAFC] text-center">
+                آخرین ورود
+              </th>
+              <th className="py-2 font-bold text-center bg-[#F9FAFC] rounded-tl-lg">
+                عملیات
+              </th>
             </tr>
           </thead>
-          <tbody >
+          <tbody>
             {paginatedData.map((user) => (
               <tr
                 key={user.id}
@@ -181,44 +203,38 @@ const UserTable = () => {
                 <td className="py-4 text-sm text-center text-gray-600 font-mono">
                   {user.phone}
                 </td>
-                <td className="py-4">
-                  <span
-                    className={`px-3 py-1 rounded-sm text-xs font-bold ${user.sColor}`}
-                  >
-                    {user.status}
-                  </span>
-                </td>
+
                 <td className="py-4 text-center">
                   <div className="text-sm text-gray-600">{user.date}</div>
                   <div className="text-xs text-gray-400">{user.time}</div>
                 </td>
                 <td className="py-4 text-center">
-                  <button className="p-2 rounded-sm bg-white border border-gray-200 text-gray-500 hover:bg-gray-100 transition-all">
-                    <svg
-                      className="w-4 h-4"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle cx="12" cy="12" r="2" />
-                      <circle cx="12" cy="6" r="2" />
-                      <circle cx="12" cy="18" r="2" />
-                    </svg>
-                  </button>
+                  <div className="flex justify-center gap-x-1 items-center">
+                    <Link href={`/roles-users/${user.id}`} className="flex items-center justify-center py-1 gap-x-2  bg-white text-gray-500 hover:text-blue-600 border cursor-pointer border-gray-400 hover:border-blue-600 px-2 rounded-sm text-xs font-medium transition-all">
+                      
+                      <span>تعریف دسترسی</span>
+                    </Link>
+                    <button onClick={()=>setEditId(user.id)} className="p-1 text-gray-400 border hover:border-blue-600 border-gray-400 rounded-sm hover:text-blue-600  transition-all ">
+                      <LuPencilLine />
+                    </button>
+                    <button className="p-1 text-gray-400 border hover:border-red-500 border-gray-400 hover:text-red-500  rounded-sm  transition-all ">
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-         
       </div>
       {/* Pagination Section */}
-        <StyledPagination
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          setPageSize={setPageSize}
-        />
+      <StyledPagination
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        setPageSize={setPageSize}
+      />
     </div>
   );
 };

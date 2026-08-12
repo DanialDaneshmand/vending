@@ -34,15 +34,7 @@ const GameTab = () => {
             <div className="absolute -top-10 -left-10 w-32 h-32 bg-blue-50 rounded-full blur-3xl opacity-70 group-hover:bg-blue-100 transition-colors" />
 
             <div className="relative z-10">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
-                  <Gamepad2 size={28} />
-                </div>
-                <span className="flex items-center gap-1 text-green-500 text-xs font-bold bg-green-50 px-2 py-1 rounded-lg">
-                  <TrendingUp size={14} />
-                  ۱۲٪ افزایش
-                </span>
-              </div>
+              
 
               <h3 className="text-slate-500 text-sm font-medium mb-1">
                 کل بازی‌های ثبت شده

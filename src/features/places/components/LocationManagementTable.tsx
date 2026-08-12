@@ -67,20 +67,25 @@ const locationsData = [
 
 export default function LocationManagement() {
   const [id, setId] = useState<number | undefined>(undefined);
-  const [isCreate,setIsCreate]=useState(false)
-
+  const [isCreate, setIsCreate] = useState(false);
+  const handleConfirm = (id: number | undefined) => {
+    console.log(id);
+  };
   return (
     <div className="p-4 border border-gray-100 rounded-lg shadow-sm">
       {/* هدر */}
       <div className="flex  items-center mb-4">
-        <button onClick={()=>setIsCreate(true)} className="flex cursor-pointer items-center gap-2 bg-[#1D4ED8] text-white px-4 py-2.5 rounded-md  transition-all  font-medium text-sm">
-          <span className="text-xs sm:text-sm">ثبت مکان جدید</span>
+        <button
+          onClick={() => setIsCreate(true)}
+          className="flex cursor-pointer items-center gap-2 bg-[#1D4ED8] text-white px-4 py-2.5 rounded-md  transition-all  font-medium text-sm"
+        >
+          <span className="text-xs sm:text-sm">ثبت مجموعه جدید</span>
           <div className=" text-xs sm:text-sm">
             <FaPlus />
           </div>
         </button>
         {/* Create Place */}
-        <CreateBranchModal onClose={()=>(setIsCreate(false))} open={isCreate}/>
+        <CreateBranchModal onClose={() => setIsCreate(false)} open={isCreate} />
       </div>
 
       {/* بخش جدول */}
@@ -88,7 +93,9 @@ export default function LocationManagement() {
         <table className="w-full text-right border-collapse min-w-lg">
           <thead className="bg-gray-50/50">
             <tr>
-              <th className="p-4 text-xs font-bold text-gray-500">نام مکان</th>
+              <th className="p-4 text-xs font-bold text-gray-500">
+                نام مجموعه
+              </th>
               <th className="p-4 text-xs font-bold text-gray-500">شهر</th>
               <th className="p-4 text-xs font-bold text-gray-500 text-center">
                 تعداد دستگاه
@@ -125,14 +132,14 @@ export default function LocationManagement() {
                 <td className="p-4  text-sm text-gray-600 text-center font-semibold">
                   {loc.devices}
                 </td>
-                <td className=" flex items-center  py-4 gap-x-2 justify-center text-center">
-                  <Link href={`/places/${loc.id}`}>
-                    <FaEye className=" text-blue-600"/>
+                <td className=" flex items-center   py-4 gap-x-2 justify-center text-center">
+                  <Link href={`/places/${loc.id}`} className="text-xs border text-gray-400 border-gray-400 py-1 px-2 hover:border-blue-600 hover:text-blue-600 rounded-sm">
+                    مشاهده مجموعه
                   </Link>
                   <button
                     onClick={() => setId(loc.id)}
-                    className="p-2  cursor-pointer text-red-500  rounded-lg transition-all"
-                    title="حذف مکان"
+                    className="p-2  cursor-pointer text-gray-400 hover:text-red-500  rounded-lg transition-all"
+                    title="حذف مجموعه"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -145,8 +152,8 @@ export default function LocationManagement() {
         <ConfirmModal
           onClose={() => setId(undefined)}
           open={Boolean(id)}
-          title=" حذف مکان"
-          id={id}
+          title=" حذف مجموعه"
+          handleConfirm={() => handleConfirm(id)}
         />
       </div>
     </div>

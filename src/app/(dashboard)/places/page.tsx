@@ -5,7 +5,7 @@ export default function page() {
   return (
     <section className="p-4">
       {/* Page Title */}
-      <PageTitle title="مکان ها" description="داشبورد / مکان ها" />
+      <PageTitle title="مجموعه ها" description="داشبورد / مجموعه ها" />
       {/* Location Section */}
       <div className="grid grid-cols-12  gap-4 mt-4">
         <div className="col-span-12 lg:col-span-8">

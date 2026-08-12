@@ -48,7 +48,7 @@ export default function FilterContainer<T>({
       })}
       {isClearFilter && (
         <div className=" flex items-end ">
-          <button className=" flex shadow-xs items-center justify-center gap-x-3 border border-gray-100 rounded-lg px-3 w-full py-3  cursor-pointer text-sm">
+          <button className=" flex shadow-xs bg-white items-center justify-center gap-x-3 border border-gray-100 rounded-lg px-3 w-full py-3  cursor-pointer text-sm">
             <span>
               <LuFilter size={18} />
             </span>

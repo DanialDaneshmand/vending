@@ -1,7 +1,6 @@
 "use client"
 
 import PageTitle from "@/components/shared/PageTitle";
-import EventsCard from "@/features/device-detail/components/EventCard";
 import NavigationTabs from "@/features/device-detail/components/NavigationTabs";
 import OverviewSection from "@/features/device-detail/components/OverviewSection";
 import VendingMachineCard from "@/features/device-detail/components/VendingMachinCard";

@@ -68,7 +68,7 @@ const DeviceControlCard = () => {
             className=" py-2 rounded-lg outline-0 px-2 w-full border border-gray-100 shadow-sm bg-white"
           />
         </div>
-        <button className="py-2 px-5 rounded-lg bg-emerald-600 text-white font-semibold">
+        <button className="py-2 px-5 rounded-lg bg-emerald-600 text-white font-medium">
           ثبت
         </button>
       </div>

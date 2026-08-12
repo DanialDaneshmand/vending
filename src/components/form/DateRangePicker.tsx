@@ -1,8 +1,9 @@
+
 "use client";
 
-import { Dispatch, SetStateAction, useState, useEffect } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import DatePicker from "react-multi-date-picker";
-import DateObject from "react-date-object"; // اضافه شد برای مدیریت تاریخ‌ها
+import DateObject from "react-date-object";
 import persian from "react-date-object/calendars/persian";
 import persianFa from "react-date-object/locales/persian_fa";
 import "react-multi-date-picker/styles/layouts/mobile.css";
@@ -22,57 +23,46 @@ export default function DateRangePicker<T extends DateFilterBase>({
   value = [],
   setFilterValues,
 }: Props<T>) {
-  // مقدار اولیه استیت داخلی را بر اساس value دریافتی یا بازه امروز-فردا ست می‌کنیم
-  const [dates, setDates] = useState(
-    value.length > 0
-      ? value
-      : [
-          new DateObject(
-            new Date(new Date().setDate(new Date().getDate() + 1)),
-          ),
-          new DateObject(),
-          // روش دستی: تبدیل به تاریخ JS، اضافه کردن یک روز، و تبدیل مجدد به DateObject
-        ],
-  );
-  // یک useEffect می‌گذاریم که اگر در ابتدا مقداری نبود، استیت پدر هم آپدیت شود
-  useEffect(() => {
-    if (dates.length === 2) {
-      setFilterValues(
-        (prev) =>
-          ({
-            ...prev,
-            fromDate: dates[0].format("YYYY/MM/DD"),
-            toDate: dates[1].format("YYYY/MM/DD"),
-          }) as T,
-      );
-    }
-  }, []);
+  // مقدار اولیه را فقط از value می‌گیریم، اگر نبود آرایه خالی است (بدون تاریخ پیش‌فرض)
+  const [dates, setDates] = useState(value && value.length > 0 ? value : []);
 
   return (
     <div className="w-full ">
       <DatePicker
         range
-        value={dates}
-        onChange={(dates: any) => {
-          setDates(dates);
-          if (dates.length !== 2) return;
+        onChange={(newDates: any) => {
+          setDates(newDates);
 
-          setFilterValues(
-            (prev) =>
-              ({
-                ...prev,
-                fromDate: dates[0].format("YYYY/MM/DD"),
-                toDate: dates[1].format("YYYY/MM/DD"),
-              }) as T,
-          );
+          // فقط اگر بازه کامل انتخاب شده باشد (دو تاریخ)، فیلترها را آپدیت کن
+          if (newDates && newDates.length === 2) {
+            setFilterValues(
+              (prev) =>
+                ({
+                  ...prev,
+                  fromDate: newDates[0].format("YYYY/MM/DD"),
+                  toDate: newDates[1].format("YYYY/MM/DD"),
+                }) as T,
+            );
+          } else {
+            // اگر کاربر تاریخ‌ها را پاک کرد، فیلترها را هم خالی کن
+            setFilterValues(
+              (prev) =>
+                ({
+                  ...prev,
+                  fromDate: "",
+                  toDate: "",
+                }) as T,
+            );
+          }
         }}
         containerClassName="w-full"
+
         className="w-full"
         calendar={persian}
         locale={persianFa}
         calendarPosition="bottom-right"
         dateSeparator=" - "
-        render={(value, openCalendar) => {
+        render={(val, openCalendar) => {
           return (
             <div
               className=" w-full  group"
@@ -85,7 +75,8 @@ export default function DateRangePicker<T extends DateFilterBase>({
 
               <div className="flex items-center gap-x-2 justify-between w-full px-4 py-3 bg-white border border-gray-100 rounded-lg shadow-xs cursor-pointer  transition-all">
                 <span className="text-sm font-medium text-[#1E293B] flex-1 text-center">
-                  {value || "انتخاب بازه زمانی"}
+                  {/* نمایش مقدار انتخاب شده یا متن پیش‌فرض */}
+                  {val || "انتخاب بازه زمانی"}
                 </span>
                 <span>
                   <IoCalendarClearOutline className=" text-gray-500 text-lg" />

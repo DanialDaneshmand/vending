@@ -117,13 +117,10 @@ export default function SectionInfoTable({section,setSection}:SectionInfoTablePr
               </td>
 
               {/* عملیات */}
-              <td className="bg-white py-4 px-6 rounded-l-xl border-y border-l border-gray-100/80 text-center">
-                <div className="flex justify-center">
-                  <button
-                    onClick={() => setSection(section)}
-                    className="p-2 text-gray-400 hover:text-blue-600  rounded-lg transition-all "
-                  >
-                    <FaEye />
+              <td className="bg-white py-2  px-6 rounded-l-xl border-y border-l border-gray-100/80 text-center">
+                <div className="flex justify-center items-center">
+                  <button onClick={()=>setSection(section)} className="text-xs h-6 border text-gray-400 border-gray-400  px-2 hover:border-blue-600 hover:text-blue-600 rounded-sm">
+                     جزییات
                   </button>
                   <button
                     onClick={() => handleDelete(section.id)}

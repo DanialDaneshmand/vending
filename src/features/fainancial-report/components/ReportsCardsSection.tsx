@@ -1,10 +1,4 @@
-import React from "react";
-import {
-  HiOutlineWallet,
-  HiOutlineTrophy,
-  HiOutlineGift,
-  HiOutlineArrowTrendingUp,
-} from "react-icons/hi2";
+import { GrTransaction } from "react-icons/gr";
 import { IoGameControllerOutline } from "react-icons/io5";
 import { LuWallet } from "react-icons/lu";
 
@@ -33,14 +27,7 @@ const StatCard = ({
       </div>
     </div>
 
-    {/* فوتر: درصد تغییرات */}
-    <div className="w-full mt-4 flex justify-center items-center gap-1 border-t border-gray-50 pt-3">
-      <span className="text-gray-400 text-xs">نسبت به دوره قبل</span>
-      <div className="flex items-center text-green-500 text-xs font-bold">
-        <span>{change}</span>
-        <HiOutlineArrowTrendingUp className="w-4 h-4 ml-0.5" />
-      </div>
-    </div>
+    
   </div>
 );
 
@@ -50,7 +37,6 @@ export default function ReportsCardsSection() {
       title: "درآمد کل",
       value: "۱۲,۴۵۰,۰۰۰",
       unit: "تومان",
-      change: "۲۳٪",
       icon: LuWallet ,
       iconBg: "bg-[#E8DEFE]",
       iconColor: "text-[#3611A4]",
@@ -59,33 +45,23 @@ export default function ReportsCardsSection() {
       title: "تعداد بازی",
       value: "۳,۲۵۶",
       unit: "بازی",
-      change: "۱۸٪",
       icon: IoGameControllerOutline,
       iconBg: "bg-[#E1EFFF]",
       iconColor: "text-[#3D6BC5]",
     },
+    
     {
-      title: "برد / باخت",
-      value: "۱,۹۸۷ / ۱,۲۶۹",
-      unit: "برد / باخت",
-      change: "۶۱٪", // نرخ برد
-      icon: HiOutlineTrophy,
-      iconBg: "bg-[#F9DFE2]",
-      iconColor: "text-[#DB7269]",
-    },
-    {
-      title: "جوایز توزیع شده",
+      title: "تعداد تراکنش",
       value: "۴۸",
       unit: "عدد",
-      change: "۱۵٪",
-      icon: HiOutlineGift,
+      icon: GrTransaction ,
       iconBg: "bg-[#FFE7D4]",
       iconColor: "text-[#EF7E2B]",
     },
   ];
 
   return (
-    <div className=" mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className=" mt-4 grid grid-cols-1 sm:grid-cols-3  gap-4">
       {stats.map((stat, index) => (
         <div key={index}>
           <StatCard {...stat} />

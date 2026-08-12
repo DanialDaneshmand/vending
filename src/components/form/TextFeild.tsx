@@ -19,6 +19,7 @@ type TextFieldProps<T extends FieldValues> = {
   placeholder: string;
   Icon?: IconType;
   isPassword?: boolean;
+  isRequired?: boolean;
 };
 
 export default function TextField<T extends FieldValues>({
@@ -31,6 +32,7 @@ export default function TextField<T extends FieldValues>({
   placeholder,
   Icon,
   isPassword,
+  isRequired,
 }: TextFieldProps<T>) {
   const error = errors[name];
   const [typeValue, setTypeValue] = useState(isPassword ? "password" : "text");
@@ -44,6 +46,7 @@ export default function TextField<T extends FieldValues>({
   return (
     <div className={`flex flex-col ${Icon ? "my-4" : ""} w-full`}>
       <label className="mb-2 text-[#414A53]" htmlFor={name}>
+        {isRequired && <span className="ml-1 text-red-600">*</span>}
         {label}
       </label>
       <div className="flex items-center relative">
@@ -56,7 +59,7 @@ export default function TextField<T extends FieldValues>({
           id={name}
           type={typeValue}
           dir={dir}
-          className={`bg-white placeholder:text-sm border outline-0 rounded-lg  px-2 py-3 w-full ${Icon ? "organizationID" : "pr-2"} border-gray-200`}
+          className={`bg-white placeholder:text-sm border outline-0 rounded-lg  px-2 py-3 w-full ${Icon ? "pr-6" : "pr-2"} border-gray-200`}
           {...register(name)}
           placeholder={placeholder}
         />

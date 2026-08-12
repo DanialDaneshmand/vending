@@ -89,11 +89,7 @@ const KeyMetrics = () => {
         ))}
       </div>
 
-      {/* فوتر راهنما */}
-      <div className="mt-6 flex items-center justify-center gap-2 text-gray-400 text-xs">
-        <Info size={14} />
-        <span>اعداد نسبت به دیروز در همین بازه زمانی محاسبه شده‌اند.</span>
-      </div>
+      
     </div>
   );
 };
