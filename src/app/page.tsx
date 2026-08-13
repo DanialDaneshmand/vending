@@ -6,7 +6,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import TextField from "@/components/form/TextFeild";
 import FormBtn from "@/components/ui/FormBtn";
-import { LuUser } from "react-icons/lu";
+import { LuPhone, LuUser } from "react-icons/lu";
 import { IoIosArrowBack } from "react-icons/io";
 import { BsShieldCheck } from "react-icons/bs";
 import Footer from "@/components/layout/Footer";
@@ -61,7 +61,7 @@ function page() {
                     name="phoneNumber"
                     register={register}
                     placeholder="  شماره موبایل خود را وارد کنید"
-                    Icon={LuUser}
+                    Icon={LuPhone }
                   />
 
                   {/* <div className=" flex items-center justify-between my-8">
