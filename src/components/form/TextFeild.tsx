@@ -59,7 +59,7 @@ export default function TextField<T extends FieldValues>({
           id={name}
           type={typeValue}
           dir={dir}
-          className={`bg-white placeholder:text-sm border outline-0 rounded-lg  px-2 py-3 w-full ${Icon ? "pr-6" : "pr-2"} border-gray-200`}
+          className={`bg-white placeholder:text-sm border outline-0 rounded-lg  px-4 pr-8 py-3 w-full ${Icon ? "pr-6" : "pr-2"} border-gray-200`}
           {...register(name)}
           placeholder={placeholder}
         />
