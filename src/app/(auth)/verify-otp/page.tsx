@@ -45,6 +45,7 @@ const VerifyOtpPage = () => {
     try {
       // logic for verification
       toast.success("کد با موفقیت تایید شد");
+      router.push("/dashboard")
     } catch (error) {
       toast.error("کد صحیح نمی باشد .");
     }
@@ -95,15 +96,31 @@ const VerifyOtpPage = () => {
                   کد ۶ رقمی ارسال شده به موبایل شما را وارد کنید
                 </p>
 
-                <div dir="ltr" className="flex bg-gray-50 xl:bg-white py-2 rounded-md  justify-center mb-8">
+                <div
+                  dir="ltr"
+                  className="flex bg-gray-50 xl:bg-white py-2 rounded-md  justify-center mb-8"
+                >
                   <OtpInput
                     value={otp}
-                    onChange={setOtp}
+                    onChange={(value) => {
+                      // فقط اعداد انگلیسی مجاز هستند
+                      if (/^\d*$/.test(value)) {
+                        setOtp(value);
+                      }
+                    }}
                     numInputs={6}
                     renderInput={(props) => (
                       <input
                         {...props}
-                        className="w-9! bg-white h-9! sm:w-13! sm:h-13! mx-1 text-center text-md sm:text-lg font-bold text-gray-700  border-2 border-gray-300 rounded-md focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-200"
+                        type="tel"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        onKeyDown={(e) => {
+                          if (e.key.length === 1 && !/^\d$/.test(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
+                        className="w-9! bg-white h-9! sm:w-13! sm:h-13! mx-1 text-center text-md sm:text-lg font-bold text-gray-700 border-2 border-gray-300 rounded-md focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-200"
                       />
                     )}
                   />
@@ -140,8 +157,8 @@ const VerifyOtpPage = () => {
                     onClick={() => router.push("/")}
                     className="flex items-center cursor-pointer  gap-x-1 text-gray-400 text-xs hover:text-gray-600 transition-colors"
                   >
-                     بازگشت به صفحه قبل
-                     <IoIosArrowBack />
+                    بازگشت به صفحه قبل
+                    <IoIosArrowBack />
                   </button>
                 </div>
               </div>
