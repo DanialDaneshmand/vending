@@ -73,7 +73,7 @@ const VerifyOtpPage = () => {
   };
 
   return (
-    <div className="w-full  bg-[#F3F7FE]" dir="rtl">
+    <div className="w-full min-h-screen  bg-[#F3F7FE]" dir="rtl">
       {/* Header */}
       <div className="w-full bg-white shadow-sm py-6 flex items-center gap-x-2 pr-4">
         <img src="/header-icon.png" alt="" className="w-14 h-12" />
