@@ -3,83 +3,23 @@ import { useFilteredData } from "../hooks/useFilteredData";
 import SelectInput from "@/components/form/SelectInput";
 import { DateObject } from "react-multi-date-picker";
 
-interface FilterValues {
-  fromDate: string;
-  toDate: string;
-  places: string;
-  sections: string;
-  startTime: DateObject | "";
-  endTime: DateObject | "";
-  searchQuery: string;
-}
 
 interface FinancialReportTableProps {
-  filterValues: FilterValues;
+  filteredData:{
+    id: number,
+    date: string,
+    time: string,
+    location: string,
+    sectionName: string,
+    deviceName:string,
+    deviceId:string,
+    devices: number,
+    games: number,
+    income: string,
+  }[]
 }
 
-// داده‌ها را خارج از کامپوننت تعریف می‌کنیم تا با هر رندر دوباره ساخته نشوند
-const data = [
-  {
-    id: 1,
-    date: "1405/05/20",
-    time: "10:20",
-    location: "پاساژ کوروش",
-    sectionName: "راهرو ورودی",
-    deviceName: "دستگاه ۱",
-    deviceId: "cx123-f12",
-    devices: 12,
-    games: 890,
-    income: "۳,۵۸۰,۰۰۰",
-  },
-  {
-    id: 2,
-    date: "1405/05/21",
-    time: "14:45",
-    location: "مجتمع تیراژه",
-    sectionName: "طبقه دوم",
-    deviceName: "دستگاه واقعیت مجازی",
-    deviceId: "vr-909-x",
-    devices: 4,
-    games: 150,
-    income: "۱,۲۰۰,۰۰۰",
-  },
-  {
-    id: 3,
-    date: "1405/05/22",
-    time: "18:30",
-    location: "ایران مال",
-    sectionName: "شهربازی سرپوشیده",
-    deviceName: "سیمولاتور رانندگی",
-    deviceId: "sim-racer-01",
-    devices: 8,
-    games: 420,
-    income: "۵,۱۰۰,۰۰۰",
-  },
-  {
-    id: 4,
-    date: "1405/06/01",
-    time: "21:15",
-    location: "پالادیوم",
-    sectionName: "فودکورت",
-    deviceName: "دستگاه چنگک",
-    deviceId: "claw-m-55",
-    devices: 2,
-    games: 600,
-    income: "۲,۴۵۰,۰۰۰",
-  },
-  {
-    id: 5,
-    date: "1405/06/05",
-    time: "09:00",
-    location: "بام لند",
-    sectionName: "محوطه باز",
-    deviceName: "بسکتبال آرکید",
-    deviceId: "hoop-a2",
-    devices: 6,
-    games: 310,
-    income: "۱,۸۹۰,۰۰۰",
-  },
-];
+
 
 // تابع کمکی برای تبدیل مبلغ (رشته فارسی با کاما) به عدد برای مقایسه
 const parsePersianNumber = (value: string) => {
@@ -93,20 +33,11 @@ const parsePersianNumber = (value: string) => {
 };
 
 export default function FinancialReportTable({
-  filterValues,
+  filteredData,
 }: FinancialReportTableProps) {
   const [sort, setSort] = useState("none");
 
-  const formattedFilters = {
-    ...filterValues,
-    startTime: filterValues.startTime
-      ? filterValues.startTime.format("HH:mm")
-      : "",
-    endTime: filterValues.endTime ? filterValues.endTime.format("HH:mm") : "",
-  };
-
-  // ۱. اول داده‌ها را فیلتر می‌کنیم
-  const filteredData = useFilteredData(data, formattedFilters);
+  
 
   const sortedData = useMemo(() => {
     // اگر وضعیت none بود، داده‌های فیلتر شده را بدون هیچ تغییری برگردان

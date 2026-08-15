@@ -12,7 +12,7 @@ const users = [
   {
     id: 1,
     name: "علی محمدی",
-    role: "مدیر سیستم",
+    role: "مدیر کل",
     rColor: "bg-[#F5F3FF] text-[#7C3AED]",
     phone: "0912 345 6789",
     status: "فعال",
@@ -23,7 +23,7 @@ const users = [
   {
     id: 2,
     name: "سارا نوری",
-    role: "مدیر ارشد",
+    role: "مدیر مجموعه",
     rColor: "bg-[#FDF2F8] text-[#DB2777]",
     phone: "0901 234 5678",
     status: "فعال",
@@ -56,7 +56,7 @@ const users = [
   {
     id: 5,
     name: "حسین کریمی",
-    role: "مشاهده‌گر",
+    role: "مدیر مجموعه",
     rColor: "bg-[#F1F5F9] text-[#64748B]",
     phone: "0918 765 4321",
     status: "غیرفعال",
@@ -78,7 +78,7 @@ const users = [
   {
     id: 7,
     name: "امیرحسین سلطانی",
-    role: "مشاهده‌گر",
+    role: "اپراتور",
     rColor: "bg-[#F1F5F9] text-[#64748B]",
     phone: "0903 888 9999",
     status: "غیرفعال",

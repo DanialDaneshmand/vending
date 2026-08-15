@@ -71,12 +71,16 @@ export default function CreateDeviceModal({
             />
           </div>
           <div>
-            <TextField
-              errors={errors}
+            <Select
+              control={control}
               label="آیدی دستگاه"
               name="deviceID"
-              register={register}
-              placeholder="آیدی دستگاه را وارد کنید"
+              errors={errors}
+              options={[
+                { id: 1, label: "انتخاب دستگاه", value: "" },
+                { id: 2, label: "12cdx35", value: "12cdx35" },
+                { id: 3, label: "12cdx36", value: "12cdx36" },
+              ]}
             />
           </div>
         </div>
