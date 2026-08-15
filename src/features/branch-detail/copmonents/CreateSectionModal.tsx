@@ -7,6 +7,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import Modal from "@/components/shared/Modal";
 import TextField from "@/components/form/TextFeild";
 import { FaPlus } from "react-icons/fa6";
+import Select from "@/components/form/Select";
 
 interface CreateSectionModalProps {
   onClose: () => void;
@@ -15,7 +16,7 @@ interface CreateSectionModalProps {
 
 export const schema = yup
   .object({
-    organizationID: yup.string().required("آیدی مجموعه الزامی است"),
+    organizationID: yup.string().required(" مجموعه الزامی است"),
     sectionName: yup.string().required("نام بخش الزامی است"),
   })
   .required();
@@ -26,6 +27,7 @@ export default function CreateSectionModal({
   open,
 }: CreateSectionModalProps) {
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors, isLoading },
@@ -42,12 +44,17 @@ export default function CreateSectionModal({
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-6">
           <div>
-            <TextField
-              errors={errors}
-              label="آیدی مجموعه"
+            
+            <Select
+              control={control}
+              label="مجموعه"
               name="organizationID"
-              register={register}
-              placeholder="آیدی مجموعه را وارد کنید"
+              errors={errors}
+              options={[
+                { id: 1, label: "انتخاب مجموعه", value: "12cdx34" },
+                { id: 2, label: "مجموعه 2", value: "12cdx35" },
+                { id: 3, label: "مجموعه 3", value: "12cdx36" },
+              ]}
             />
           </div>
           <div>

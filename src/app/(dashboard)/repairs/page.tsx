@@ -88,7 +88,7 @@ export default function Page() {
                 <div className="flex gap-2 shrink-0 self-end sm:self-center">
                   <button
                     onClick={() => handleClick(item.id)}
-                    className="py-1 px-4 flex items-center gap-x-2 cursor-pointer rounded-sm transition-all text-sm bg-blue-600 text-white font-medium"
+                    className="py-1 px-4 flex items-center gap-x-2 cursor-pointer rounded-sm transition-all text-sm bg-emerald-600 text-white font-medium"
                   >
                     <span>حل شده</span>
                     <FaCheck className="text-sm"/>

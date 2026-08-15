@@ -1,4 +1,4 @@
-import { Controller, FieldErrors } from "react-hook-form";
+import { Controller } from "react-hook-form";
 
 type SelectProps = {
   control: any;

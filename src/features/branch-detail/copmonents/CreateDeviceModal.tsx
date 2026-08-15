@@ -7,6 +7,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import Modal from "@/components/shared/Modal";
 import TextField from "@/components/form/TextFeild";
 import { FaPlus } from "react-icons/fa6";
+import Select from "@/components/form/Select";
 
 interface CreateDeviceModalProps {
   onClose: () => void;
@@ -15,8 +16,8 @@ interface CreateDeviceModalProps {
 
 export const schema = yup
   .object({
-    organizationID: yup.string().required("آیدی مجموعه الزامی است"),
-    sectionID: yup.string().required("آیدی بخش الزامی است"),
+    organizationID: yup.string().required("نام مجموعه الزامی است"),
+    sectionID: yup.string().required("نام بخش الزامی است"),
     deviceID: yup.string().required("آیدی دستگاه الزامی است"),
   })
   .required();
@@ -27,6 +28,7 @@ export default function CreateDeviceModal({
   open,
 }: CreateDeviceModalProps) {
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors, isLoading },
@@ -43,21 +45,29 @@ export default function CreateDeviceModal({
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 py-4 sm:grid-cols-3 gap-4">
           <div>
-            <TextField
-              errors={errors}
-              label="آیدی مجموعه"
+            <Select
+              control={control}
+              label="مجموعه"
               name="organizationID"
-              register={register}
-              placeholder="آیدی مجموعه را وارد کنید"
+              errors={errors}
+              options={[
+                { id: 1, label: "انتخاب مجموعه", value: "12cdx34" },
+                { id: 2, label: "مجموعه 2", value: "12cdx35" },
+                { id: 3, label: "مجموعه 3", value: "12cdx36" },
+              ]}
             />
           </div>
           <div>
-            <TextField
-              errors={errors}
-              label="آیدی بخش"
+            <Select
+              control={control}
+              label="بخش"
               name="sectionID"
-              register={register}
-              placeholder="آیدی بخش را وارد کنید"
+              errors={errors}
+              options={[
+                { id: 1, label: "انتخاب بخش", value: "12cdx34" },
+                { id: 2, label: "بخش 1", value: "12cdx35" },
+                { id: 3, label: "بخش 2", value: "12cdx36" },
+              ]}
             />
           </div>
           <div>
