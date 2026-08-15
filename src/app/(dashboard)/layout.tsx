@@ -14,7 +14,7 @@ export default function layout({ children }: layoutProps) {
       </div>
       <div className="col-span-12 md:col-span-10 ">
         <Header />
-        <main>{children}</main>
+        <main className="min-h-[440]">{children}</main>
         <Footer />
       </div>
     </section>

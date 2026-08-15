@@ -3,7 +3,7 @@
 import { toPersianNumbers } from "@/utils/toPersianNumber";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FaGamepad, FaRegBell, FaRegClock } from "react-icons/fa6";
+import { FaGamepad, FaRegBell, FaRegClock, FaScrewdriverWrench } from "react-icons/fa6";
 import { FiUsers } from "react-icons/fi";
 import { IoGameControllerOutline, IoStatsChart } from "react-icons/io5";
 import {
@@ -12,6 +12,7 @@ import {
   IoSettingsOutline,
   IoStatsChartSharp,
 } from "react-icons/io5";
+import { LuWrench } from "react-icons/lu";
 
 const links = [
   { id: 1, title: "داشبورد", href: "/dashboard", icon: <IoHome /> },
@@ -20,6 +21,7 @@ const links = [
   { id: 5, title: "هشدار ها ", href: "/alerts", icon: <FaRegBell /> },
   { id: 6, title: "گزارش مالی", href: "/financial-report", icon: <IoStatsChart /> },
   { id: 7, title: "کاربران و نقش ها", href: "/roles-users", icon: <FiUsers /> },
+  { id: 8, title: "تعمیرات", href: "/repairs", icon: <LuWrench /> },
 ];
 
 export default function Sidebar() {

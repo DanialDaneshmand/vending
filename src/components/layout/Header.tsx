@@ -4,32 +4,28 @@ import React, { useState } from "react";
 import { Bell, Mail, Maximize, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { toPersianNumbers } from "@/utils/toPersianNumber";
-import { HiBars4 } from "react-icons/hi2";
-import { FaBars, FaGamepad, FaRegBell, FaRegClock } from "react-icons/fa6";
+
+import { FaBars, FaGamepad, FaRegBell } from "react-icons/fa6";
 import {
   IoClose,
+  IoGameControllerOutline,
   IoHome,
   IoLocationOutline,
-  IoSettingsOutline,
   IoStatsChart,
 } from "react-icons/io5";
 import { FiUsers } from "react-icons/fi";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { LuWrench } from "react-icons/lu";
 
 const links = [
   { id: 1, title: "داشبورد", href: "/dashboard", icon: <IoHome /> },
-  { id: 2, title: "دستگاه ها", href: "/devices", icon: <FaGamepad /> },
+  { id: 2, title: "دستگاه ها", href: "/devices", icon: <IoGameControllerOutline /> },
   { id: 3, title: "مکان ها", href: "/places", icon: <IoLocationOutline /> },
-
   { id: 5, title: "هشدار ها ", href: "/alerts", icon: <FaRegBell /> },
-  {
-    id: 6,
-    title: "گزارش مالی",
-    href: "/financial-report",
-    icon: <IoStatsChart />,
-  },
+  { id: 6, title: "گزارش مالی", href: "/financial-report", icon: <IoStatsChart /> },
   { id: 7, title: "کاربران و نقش ها", href: "/roles-users", icon: <FiUsers /> },
+  { id: 8, title: "تعمیرات", href: "/repairs", icon: <LuWrench /> },
 ];
 
 const Header = () => {

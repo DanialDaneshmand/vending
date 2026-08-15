@@ -37,9 +37,10 @@ const InventoryTab = () => {
     count: 0,
     operator: "افزودن",
   });
+console.log(changeValue);
 
   const handleChange = (e: HandleChangeArg) => {
-    console.log(e);
+    setChangeValue({...changeValue,[e.target.name]:e.target.value})
   };
 
   return (
@@ -80,11 +81,11 @@ const InventoryTab = () => {
               </div>
             </div>
               <div
-                className={`${isEditing ? "h-[140] transition-all duration-300" : " h-0 transition-all duration-300"}  overflow-hidden   mt-2 flex flex-col justify-center `}
+                className={`${isEditing ? "h-[165] transition-all duration-300" : " h-0 transition-all duration-300"}  overflow-hidden   mt-2 flex flex-col justify-center `}
               >
                 <div className="flex items-start gap-x-2 w-full">
                   <input
-                  className={`${changeValue.operator === "افزودن" ? "text-green-600" : "text-red-600"} w-full h-12 outline-0 border mt-2 border-gray-100 rounded-lg p-3  `}
+                  className={`${changeValue.operator === "افزودن" ? "text-green-600 border-green-600" : "text-red-600 border-red-600"} w-full h-12 outline-0 border mt-2  rounded-lg p-3  `}
                   type="number"
                   name="count"
                   onChange={(e) =>

@@ -34,7 +34,7 @@ export default function DevicesFilterContainer<T>({
   const [isFilter, setIsFilter] = useState(false);
   return (
     <div>
-      {/* Show Filer Container Btn */}
+      {/* Show Filter Container Btn */}
       <div className=" mt-4 block sm:hidden">
         <button
           onClick={() => setIsFilter((prev) => !prev)}
@@ -45,7 +45,7 @@ export default function DevicesFilterContainer<T>({
         </button>
       </div>
       <div
-        className={`${className} ${isFilter ? " transition-all duration-100 h-180 border border-gray-100 shadow-sm p-4 rounded-lg" : "h-0 sm:h-auto transition-all duration-100"}  overflow-hidden`}
+        className={`${className} ${isFilter ? " transition-all duration-100 h-180 border border-gray-100 shadow-sm p-4 rounded-lg" : "h-0 sm:h-auto transition-all duration-100"}  `}
       >
         {/* Search Container */}
         <div
