@@ -57,7 +57,7 @@ export const useFilteredData = (data: DeviceData[], filters: FilterValues) => {
         const query = filters.searchQuery.toLowerCase();
         const matchesSearch =
           String(item.id).toLowerCase().includes(query) ||
-          item.location.toLowerCase().includes(query);
+          item.deviceId.toLowerCase().includes(query);
         if (!matchesSearch) return false;
       }
 

@@ -6,18 +6,20 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import TextField from "@/components/form/TextFeild";
 import FormBtn from "@/components/ui/FormBtn";
-import { LuPhone, LuUser } from "react-icons/lu";
+import { LuPhone } from "react-icons/lu";
 import { IoIosArrowBack } from "react-icons/io";
 import { BsShieldCheck } from "react-icons/bs";
 import Footer from "@/components/layout/Footer";
+import { useSendOtp } from "@/features/auth/hooks/useSendOtp";
 
 export const schema = yup
   .object({
-    phoneNumber: yup.string().required("شماره موبایل الزامی است"),
+    phone_number: yup.string().required("شماره موبایل الزامی است"),
   })
   .required();
 type FormDataSignin = yup.InferType<typeof schema>;
 function page() {
+  const { isLoging, sendOtp } = useSendOtp();
   const router = useRouter();
   const {
     register,
@@ -29,8 +31,15 @@ function page() {
   });
 
   const onSubmit: SubmitHandler<FormDataSignin> = async (data) => {
-    localStorage.setItem("phoneNumber", data.phoneNumber);
-    router.push("/verify-otp");
+    sendOtp(
+      { phone_number: data.phone_number },
+      {
+        onSuccess: () => {
+          router.push("/verify-otp");
+        },
+      },
+    );
+    localStorage.setItem("phoneNumber", data.phone_number);
   };
 
   return (
@@ -58,10 +67,10 @@ function page() {
                   <TextField
                     errors={errors}
                     label="شماره موبایل"
-                    name="phoneNumber"
+                    name="phone_number"
                     register={register}
                     placeholder="  شماره موبایل خود را وارد کنید"
-                    Icon={LuPhone }
+                    Icon={LuPhone}
                   />
 
                   {/* <div className=" flex items-center justify-between my-8">

@@ -20,10 +20,20 @@ import { LuWrench } from "react-icons/lu";
 
 const links = [
   { id: 1, title: "داشبورد", href: "/dashboard", icon: <IoHome /> },
-  { id: 2, title: "دستگاه ها", href: "/devices", icon: <IoGameControllerOutline /> },
+  {
+    id: 2,
+    title: "دستگاه ها",
+    href: "/devices",
+    icon: <IoGameControllerOutline />,
+  },
   { id: 3, title: "مکان ها", href: "/places", icon: <IoLocationOutline /> },
   { id: 5, title: "هشدار ها ", href: "/alerts", icon: <FaRegBell /> },
-  { id: 6, title: "گزارش مالی", href: "/financial-report", icon: <IoStatsChart /> },
+  {
+    id: 6,
+    title: "گزارش مالی",
+    href: "/financial-report",
+    icon: <IoStatsChart />,
+  },
   { id: 7, title: "کاربران و نقش ها", href: "/roles-users", icon: <FiUsers /> },
   { id: 8, title: "تعمیرات", href: "/repairs", icon: <LuWrench /> },
 ];
@@ -44,26 +54,7 @@ const Header = () => {
           </div>
 
           {/* بخش سمت چپ: پروفایل و آیکون‌ها */}
-          <div className="flex items-center gap-6">
-            {/* آیکون‌های ابزار (Full Screen, Messages, Notifications) */}
-            <div className="flex items-center gap-x-6 text-gray-800 border-l border-gray-200 pl-6">
-              <button className=" text-sm cursor-pointer">
-                <Maximize />
-              </button>
-
-              <button className="hover:text-gray-800 transition-colors cursor-pointer">
-                <Mail />
-              </button>
-
-              {/* بخش اعلان‌ها همراه با نشانگر تعداد */}
-              <button className="relative hover:text-gray-800 transition-colors cursor-pointer">
-                <Bell />
-                <span className="absolute -top-3 -right-2 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
-                  {toPersianNumbers(4)}
-                </span>
-              </button>
-            </div>
-
+          <div className="flex items-center gap-6 border-r pr-2">
             {/* پروفایل کاربر */}
             <div className="flex items-center gap-3">
               <div className="text-left flex flex-col items-end">
@@ -95,26 +86,7 @@ const Header = () => {
             <FaBars className="text-xl text-gray-800" />
           </button>
           {/* بخش سمت چپ: پروفایل و آیکون‌ها */}
-          <div className="flex items-center gap-6">
-            {/* آیکون‌های ابزار (Full Screen, Messages, Notifications) */}
-            <div className="flex items-center gap-x-3 text-gray-800 border-l border-gray-200 pl-6">
-              <button className=" text-sm cursor-pointer">
-                <Maximize size={20} />
-              </button>
-
-              <button className="hover:text-gray-800 transition-colors cursor-pointer">
-                <Mail size={20} />
-              </button>
-
-              {/* بخش اعلان‌ها همراه با نشانگر تعداد */}
-              <button className="relative hover:text-gray-800 transition-colors cursor-pointer">
-                <Bell size={20} />
-                <span className="absolute -top-3 -right-2 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
-                  {toPersianNumbers(4)}
-                </span>
-              </button>
-            </div>
-
+          <div className="flex items-center gap-6 border-r pr-2">
             {/* پروفایل کاربر */}
             <div className="flex items-center gap-3">
               <div className="text-left flex flex-col items-end">

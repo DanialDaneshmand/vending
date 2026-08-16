@@ -7,8 +7,11 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { IoIosArrowBack } from "react-icons/io";
 import Footer from "@/components/layout/Footer";
+import { useVerifyOtp } from "@/features/auth/hooks/useVerifyOtp";
+import { useSendOtp } from "@/features/auth/hooks/useSendOtp";
+import Spinner from "@/components/ui/Spinner";
 
-const RESEND_OTP = 120;
+const RESEND_OTP = 15;
 
 const VerifyOtpPage = () => {
   const [otp, setOtp] = useState("");
@@ -16,6 +19,8 @@ const VerifyOtpPage = () => {
   const [isResending, setIsResending] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const router = useRouter();
+  const { isSendingOtp, verifyOtp } = useVerifyOtp();
+  const { isLoging, sendOtp } = useSendOtp();
 
   useEffect(() => {
     const phone = localStorage.getItem("phoneNumber");
@@ -43,10 +48,19 @@ const VerifyOtpPage = () => {
       return;
     }
     try {
-      // logic for verification
-      toast.success("کد با موفقیت تایید شد");
-      router.push("/dashboard")
-    } catch (error) {
+      if (phoneNumber && otp.length === 6) {
+        verifyOtp(
+          { phone_number: phoneNumber, code: otp },
+          {
+            onSuccess: () => {
+              router.push("/dashboard");
+            },
+          },
+        );
+      }
+    } catch (error: any) {
+      console.log(error.response.data);
+
       toast.error("کد صحیح نمی باشد .");
     }
   };
@@ -59,8 +73,7 @@ const VerifyOtpPage = () => {
       return;
     }
     try {
-      // logic for resend otp
-      toast.success("کد جدید ارسال شد!");
+      sendOtp({ phone_number: phoneNumber });
       setTimeLeft(RESEND_OTP);
       setOtp("");
     } catch (error: any) {
@@ -128,21 +141,29 @@ const VerifyOtpPage = () => {
 
                 {timeLeft > 0 ? (
                   <button
+                  disabled={isLoging}
                     onClick={handleVerify}
                     className=" cursor-pointer bg-[#032062] text-white w-full py-3  items-center rounded-lg my-2 font-bold flex justify-center gap-x-2"
                   >
                     <span>تایید و ورود</span>
-                    <span>
-                      <IoIosArrowBack className="text-[#F6711A] text-2xl" />
-                    </span>
+                    {isLoging ? (
+                      <Spinner />
+                    ) : (
+                      <span>
+                        <IoIosArrowBack className="text-[#F6711A] text-2xl" />
+                      </span>
+                    )}
                   </button>
                 ) : (
                   <button
                     onClick={handleResend}
                     disabled={isResending}
-                    className=" cursor-pointer bg-[#032062] text-white w-full py-3  items-center rounded-lg my-2 font-bold flex justify-center gap-x-2"
+                    className=" cursor-pointer bg-[#032062] text-white w-full py-3 items-center rounded-lg my-2 font-bold flex justify-center gap-x-2"
                   >
-                    {isResending ? "در حال ارسال..." : "ارسال مجدد کد"}
+                    <span>ارسال مجدد کد</span>
+                    <span>
+                      <Spinner />
+                    </span>
                   </button>
                 )}
 

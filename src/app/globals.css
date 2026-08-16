@@ -136,3 +136,24 @@ body {
 button {
   cursor: pointer !important;
 }
+
+
+@media (min-width: 1026px) {
+  .sidebar-width{
+    width: 224px !important ;
+  }
+}
+
+@media (min-width: 1435px) {
+  .sidebar-width{
+    width: 238px !important ;
+  }
+}
+
+
+
+@media (min-width: 2550px) {
+  .sidebar-width{
+    width: 424px !important ;
+  }
+}

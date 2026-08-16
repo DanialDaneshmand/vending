@@ -34,22 +34,23 @@ export default function DevicesFilterContainer<T>({
   const [isFilter, setIsFilter] = useState(false);
   return (
     <div>
-      {/* Show Filter Container Btn */}
+      {/* Mobile Filter Container*/}
       <div className=" mt-4 block sm:hidden">
         <button
           onClick={() => setIsFilter((prev) => !prev)}
-          className="flex justify-center w-full items-center h-[45] font-medium cursor-pointer gap-2 px-4 py-2 border border-gray-100 shadow-xs rounded-md text-sm text-gray-800 hover:bg-gray-50 transition-all"
+          className="flex bg-white justify-center w-full items-center h-[45] font-medium cursor-pointer gap-2 px-4 py-2 border border-gray-100 shadow-xs rounded-md text-sm text-gray-800 hover:bg-gray-50 transition-all"
         >
           <FaSlidersH className="w-4 h-4" />
           <span>فیلتر کردن دستگاه ها</span>
         </button>
       </div>
+
       <div
-        className={`${className} ${isFilter ? " transition-all duration-100 h-180 border border-gray-100 shadow-sm p-4 rounded-lg" : "h-0 sm:h-auto transition-all duration-100"}  `}
+        className={`${className} ${isFilter ? " transition-all duration-100 h-180 border border-gray-100 shadow-sm p-4 rounded-lg" : "h-0 sm:h-auto transition-all duration-100"}  overflow-hidden`}
       >
         {/* Search Container */}
         <div
-          className={` col-span-12 md:col-span-6 order-2 md:order-1 flex items-center`}
+          className={` col-span-12 lg:col-span-6 order-2 lg:order-1 flex items-center`}
         >
           <div className="flex flex-col w-full ">
             <label htmlFor="" className="text-sm font-bold mb-2 mr-1">
@@ -74,7 +75,7 @@ export default function DevicesFilterContainer<T>({
           </div>
         </div>
         {/*Exel Btn */}
-        <div className="order-1 md:order-2 flex flex-col items-end  sm:flex-row justify-between gap-4 sm:gap-4 col-span-12 md:col-span-6">
+        <div className="order-1 lg:order-2 flex flex-col items-end  sm:flex-row justify-between gap-4 sm:gap-4 col-span-12 lg:col-span-6">
           <button className="flex justify-center w-full items-center h-[45] font-medium cursor-pointer gap-2 px-4 py-2 border border-gray-100 shadow-xs rounded-md text-sm text-gray-800 hover:bg-gray-50 transition-all">
             <Download className="w-4 h-4" />
             خروجی اکسل
@@ -91,7 +92,7 @@ export default function DevicesFilterContainer<T>({
             return (
               <div
                 key={key}
-                className="col-span-12 sm:col-span-5 md:col-span-2 flex items-center"
+                className="col-span-12 sm:col-span-5 lg:col-span-2 flex items-center"
               >
                 <div className="w-full">
                   <SelectInput

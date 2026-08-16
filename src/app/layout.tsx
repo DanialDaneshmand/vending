@@ -3,12 +3,14 @@ import "./globals.css";
 import localFont from "next/font/local";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
+import QueryProvider from "@/providers/ReactQueryProvider";
+import { Toaster } from 'react-hot-toast'; 
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "سامانه مدیریت و کنترل وندینگ",
-  description:"سامانه مدیریت و کنترل وندینگ",
+  description: "سامانه مدیریت و کنترل وندینگ",
 };
 
 const Vazir = localFont({
@@ -18,7 +20,6 @@ const Vazir = localFont({
       weight: "300",
       style: "normal",
     },
-    
   ],
   variable: "--font-vazir",
   display: "swap",
@@ -34,7 +35,10 @@ export default function RootLayout({
       lang="fa"
       className={cn("h-full", "antialiased", "font-sans", geist.variable)}
     >
-      <body className={`bg-[#FAFBFD] ${Vazir.variable}`} dir="rtl">{children}</body>
+      <body className={`bg-[#FAFBFD] ${Vazir.variable}`} dir="rtl">
+        <Toaster/>
+        <QueryProvider>{children}</QueryProvider>
+      </body>
     </html>
   );
 }

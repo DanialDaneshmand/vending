@@ -27,7 +27,7 @@ const links = [
 export default function Sidebar() {
   const pathName = usePathname();
   return (
-    <aside className=" h-screen fixed top-0 right-0 bottom-0 md:w-[130] lg:w-[185] xl:w-[225] bg-linear-to-b from-[#04275F] to-[#033074] ">
+    <aside className=" h-screen sidebar-width fixed top-0 right-0 bottom-0 md:w-[130] lg:w-[170]  bg-linear-to-b from-[#04275F] to-[#033074] ">
       <div className="p-5">
         <img src="/icon.png" alt="" className="w-12 h-10 rounded-xl object-center " />
       </div>
