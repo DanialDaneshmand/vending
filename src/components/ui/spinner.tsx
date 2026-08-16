@@ -14,7 +14,7 @@ const Spinner: React.FC<SpinnerProps> = ({ size = 'md', color = 'border-t-[#F671
 
   return (
     <div className={`
-      w-6 h-6 border-4
+      w-6 h-6  border-4
       ${color} 
       border-gray-200 
       rounded-full 
