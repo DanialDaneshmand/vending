@@ -15,8 +15,8 @@ export default function FormBtn({ btnTitle, Icon, isLoading }: FormBtnProps) {
     >
           <span>{btnTitle}</span>
 
-      {isLoading ? (
-        <Spinner />
+      { isLoading ? (
+        <Spinner /> 
       ) : (
           Icon && (
             <span className=" text-[#F6711A]">
