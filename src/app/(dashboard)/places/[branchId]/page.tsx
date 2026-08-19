@@ -5,14 +5,10 @@ import DeviceListSection from "@/features/branch-detail/copmonents/DeviceListSec
 import SectionInfoTable from "@/features/branch-detail/copmonents/SectionInfoTable";
 import { useState } from "react";
 
-interface SectionType {
-  id: string;
-  name: string;
-  deviceCount: number;
-}
+
 
 export default function page() {
-  const [section, setSection] = useState<SectionType|null>(null);
+  const [sectionId, setSectionId] = useState<string|null>(null);
 
   return (
     <section className=" p-4">
@@ -20,10 +16,10 @@ export default function page() {
       <BranchReportsCardsSection />
       <div className=" grid grid-cols-12 gap-4 mt-4">
         <div className="col-span-12 lg:col-span-6">
-          <SectionInfoTable section={section} setSection={setSection}/>
+          <SectionInfoTable  setSectionId={setSectionId}/>
         </div>
         <div className="col-span-12 lg:col-span-6">
-          <DeviceListSection section={section} setSection={setSection}/>
+          <DeviceListSection sectionId={sectionId} />
         </div>
       </div>
     </section>

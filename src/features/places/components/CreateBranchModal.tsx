@@ -7,6 +7,8 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import Modal from "@/components/shared/Modal";
 import TextField from "@/components/form/TextFeild";
 import { FaPlus } from "react-icons/fa6";
+import UseGetProfile from "@/shared/hooks/useGetProfile";
+import { useCreateLocation } from "../hooks/useCreateLocation";
 
 interface CreateBranchModalProps {
   onClose: () => void;
@@ -15,7 +17,7 @@ interface CreateBranchModalProps {
 
 export const schema = yup
   .object({
-    organizationName: yup.string().required("نام مجموعه الزامی است"),
+    name: yup.string().required("نام مجموعه الزامی است"),
   })
   .required();
 type FormValues = yup.InferType<typeof schema>;
@@ -24,6 +26,9 @@ export default function CreateBranchModal({
   onClose,
   open,
 }: CreateBranchModalProps) {
+  const { isgettingprofile, profile } = UseGetProfile();
+  const { createLocation, isCreatingLocation } = useCreateLocation();
+  
   const {
     register,
     handleSubmit,
@@ -34,7 +39,18 @@ export default function CreateBranchModal({
   });
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    console.log(data);
+    console.log({ name: data.name, manager_id: profile.id });
+    
+    if (!isgettingprofile) {
+      createLocation(
+        { name: data.name, manager_id: profile.id },
+        {
+          onSuccess: () => {
+            onClose();
+          },
+        },
+      );
+    }
   };
   return (
     <Modal onClose={onClose} open={open} title="افزودن مجموعه جدید">
@@ -43,7 +59,7 @@ export default function CreateBranchModal({
           <TextField
             errors={errors}
             label="نام مجموعه"
-            name="organizationName"
+            name="name"
             register={register}
             placeholder="نام مجموعه را وارد کنید"
           />

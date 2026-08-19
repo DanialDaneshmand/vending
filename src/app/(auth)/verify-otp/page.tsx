@@ -11,7 +11,7 @@ import { useVerifyOtp } from "@/features/auth/hooks/useVerifyOtp";
 import { useSendOtp } from "@/features/auth/hooks/useSendOtp";
 import Spinner from "@/components/ui/Spinner";
 
-const RESEND_OTP = 15;
+const RESEND_OTP = 120;
 
 const VerifyOtpPage = () => {
   const [otp, setOtp] = useState("");
@@ -141,7 +141,7 @@ const VerifyOtpPage = () => {
 
                 {timeLeft > 0 ? (
                   <button
-                  disabled={isLoging}
+                    disabled={isLoging}
                     onClick={handleVerify}
                     className=" cursor-pointer bg-[#032062] text-white w-full py-3  items-center rounded-lg my-2 font-bold flex justify-center gap-x-2"
                   >
@@ -161,9 +161,11 @@ const VerifyOtpPage = () => {
                     className=" cursor-pointer bg-[#032062] text-white w-full py-3 items-center rounded-lg my-2 font-bold flex justify-center gap-x-2"
                   >
                     <span>ارسال مجدد کد</span>
-                    <span>
-                      <Spinner />
-                    </span>
+                    {isResending && (
+                      <span>
+                        <Spinner />
+                      </span>
+                    )}
                   </button>
                 )}
 

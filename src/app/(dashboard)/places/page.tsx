@@ -9,6 +9,7 @@ export default function page() {
       {/* Location Section */}
       <div className="grid grid-cols-12  gap-4 mt-4">
         <div className="col-span-12 lg:col-span-8">
+          
           <LocationManagement/>
         </div>
         

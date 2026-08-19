@@ -6,7 +6,7 @@ type SelectProps = {
   isRequire?: boolean;
   name: string;
   className?: string;
-  options: { id: number; label: string; value: string }[];
+  options: { id: string; label: string; value: string }[];
   errors: any;
   isReadOnly?: boolean;
 };
@@ -31,9 +31,9 @@ export default function Select({
       <Controller
         control={control}
         name={name}
-        rules={{ required: isRequire }}
         render={({ field }) => (
           <select
+          
           disabled={isReadOnly}
             {...field}
             className={`w-full outline-0 border h-12 text-gray-500 text-sm border-gray-200 rounded-md p-1 bg-white ${className}`}

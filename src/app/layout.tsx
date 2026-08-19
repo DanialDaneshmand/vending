@@ -5,6 +5,7 @@ import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import QueryProvider from "@/providers/ReactQueryProvider";
 import { Toaster } from 'react-hot-toast'; 
+import 'react-loading-skeleton/dist/skeleton.css'
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 

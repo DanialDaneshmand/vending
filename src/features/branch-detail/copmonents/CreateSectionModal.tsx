@@ -8,6 +8,9 @@ import Modal from "@/components/shared/Modal";
 import TextField from "@/components/form/TextFeild";
 import { FaPlus } from "react-icons/fa6";
 import Select from "@/components/form/Select";
+import UseGetLocations from "@/shared/hooks/useGetLocations";
+import { useCreateSection } from "../hooks/useCreateSection";
+import { useParams } from "next/navigation";
 
 interface CreateSectionModalProps {
   onClose: () => void;
@@ -16,8 +19,7 @@ interface CreateSectionModalProps {
 
 export const schema = yup
   .object({
-    organizationID: yup.string().required(" مجموعه الزامی است"),
-    sectionName: yup.string().required("نام بخش الزامی است"),
+    name: yup.string().required("نام بخش الزامی است"),
   })
   .required();
 type FormValues = yup.InferType<typeof schema>;
@@ -26,6 +28,10 @@ export default function CreateSectionModal({
   onClose,
   open,
 }: CreateSectionModalProps) {
+  const { isGettingLocations, locations } = UseGetLocations();
+  const {createSection,isCreatingSection}=useCreateSection();
+  const {branchId}=useParams();
+  
   const {
     control,
     register,
@@ -37,32 +43,23 @@ export default function CreateSectionModal({
   });
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    console.log(data);
+    createSection({name:data.name,location_id:String(branchId)},{
+      onSuccess:()=>{
+        onClose();
+      }
+    })
   };
   return (
     <Modal onClose={onClose} open={open} title="افزودن بخش جدید">
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-6">
-          <div>
-            
-            <Select
-              control={control}
-              label="مجموعه"
-              name="organizationID"
-              errors={errors}
-              options={[
-                { id: 1, label: "انتخاب مجموعه", value: "12cdx34" },
-                { id: 2, label: "مجموعه 2", value: "12cdx35" },
-                { id: 3, label: "مجموعه 3", value: "12cdx36" },
-              ]}
-            />
-          </div>
+        <div className="grid grid-cols-1 gap-4 py-6">
           <div>
             <TextField
               errors={errors}
               label="نام بخش"
-              name="sectionName"
+              name="name"
               register={register}
+              isRequired
               placeholder="نام بخش را وارد کنید"
             />
           </div>

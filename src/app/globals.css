@@ -138,7 +138,20 @@ button {
 }
 
 
-@media (min-width: 1026px) {
+
+@media (min-width: 768px) {
+  .sidebar-width{
+    width: 130px !important ;
+  }
+}
+
+@media (min-width: 1020px) {
+  .sidebar-width{
+    width: 170px !important ;
+  }
+}
+
+@media (min-width: 1200px) {
   .sidebar-width{
     width: 224px !important ;
   }

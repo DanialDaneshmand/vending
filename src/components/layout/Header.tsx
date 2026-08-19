@@ -17,6 +17,7 @@ import { FiUsers } from "react-icons/fi";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { LuWrench } from "react-icons/lu";
+import UseGetProfile from "@/shared/hooks/useGetProfile";
 
 const links = [
   { id: 1, title: "داشبورد", href: "/dashboard", icon: <IoHome /> },
@@ -41,6 +42,8 @@ const links = [
 const Header = () => {
   const [isShow, setIsShow] = useState(false);
   const pathName = usePathname();
+  const { isgettingprofile, profile } = UseGetProfile();
+
   return (
     <>
       {/* Desktap Header */}

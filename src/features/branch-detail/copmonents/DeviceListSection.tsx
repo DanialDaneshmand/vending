@@ -4,16 +4,10 @@ import React, { Dispatch, SetStateAction, useState } from "react";
 import { Trash2, Plus, Smartphone, Circle } from "lucide-react";
 import { FaPlus } from "react-icons/fa6";
 import CreateDeviceModal from "./CreateDeviceModal";
-
-interface SectionType {
-  id: string;
-  name: string;
-  deviceCount: number;
-}
+import UseGetDevicesSection from "../hooks/useGetDevicesSection";
 
 interface DeviceListSectionProps {
-  section: SectionType | null;
-  setSection: Dispatch<SetStateAction<SectionType | null>>;
+  sectionId: string | null;
 }
 
 // دیتای استاتیک برای دستگاه‌های یک بخش
@@ -27,19 +21,16 @@ const initialDevices = [
 ];
 
 export default function DeviceListSection({
-  section,
-  setSection,
+  sectionId,
 }: DeviceListSectionProps) {
   const [devices, setDevices] = useState(initialDevices);
   const [isCreateDevice, setIsCreateDevice] = useState(false);
+  const {devicesSection,isGettingDevicesSection}=UseGetDevicesSection(sectionId as string);
 
-  const handleDelete = (id: string) => {
-    if (confirm("آیا از حذف این دستگاه اطمینان دارید؟")) {
-      setDevices(devices.filter((device) => device.id !== id));
-    }
-  };
+  console.log(devicesSection);
+  
 
-  // تابع کمکی برای تعیین رنگ Badge وضعیت
+  const handleDelete = (id: string) => {};
   const getStatusStyles = (status: string) => {
     switch (status) {
       case "روشن":
@@ -58,7 +49,7 @@ export default function DeviceListSection({
       className=" mx-auto p-4 border border-gray-100 shadow-sm bg-white rounded-lg pt-8 h-full"
       dir="rtl"
     >
-      {section ? (
+      {sectionId ? (
         <div>
           {/* هدر صفحه: عنوان و دکمه افزودن */}
           <div className="flex items-center justify-between mb-8">
@@ -139,8 +130,10 @@ export default function DeviceListSection({
           </div>
         </div>
       ) : (
-        <div className="w-full h-full flex items-center justify-center"> 
-          <h3 className="text-gray-500 font-semibold ">برای نماش تعداد دستگاه ها یک بخش را انتخاب کنید.</h3>
+        <div className="w-full h-full flex items-center justify-center">
+          <h3 className="text-gray-500 font-semibold ">
+            برای نماش تعداد دستگاه ها یک بخش را انتخاب کنید.
+          </h3>
         </div>
       )}
     </div>

@@ -28,7 +28,7 @@ export default function ConfirmModal({
       <div className="w-full flex items-center justify-center gap-4">
         <button
           onClick={handleClick}
-          className=" py-2 w-full rounded-lg bg-emerald-600 text-white font-semibold"
+          className=" py-2 w-full rounded-lg bg-blue-600 text-white font-semibold"
         >
           تایید
         </button>
