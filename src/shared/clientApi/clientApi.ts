@@ -65,10 +65,10 @@ clientApi.interceptors.response.use(
 
         // درخواست رفرش توکن (آدرس اندپوینت را مطابق بک‌اندمت تغییر بده)
         const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/refresh`, {
-          token: refreshToken,
+          refresh_token: refreshToken,
         });
 
-        const { accessToken: newAccessToken } = response.data;
+        const { access_token: newAccessToken } = response.data;
 
         // ذخیره توکن جدید در لوکال استوریج
         localStorage.setItem('accessToken', newAccessToken);

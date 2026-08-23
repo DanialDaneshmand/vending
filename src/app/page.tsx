@@ -11,6 +11,8 @@ import { IoIosArrowBack } from "react-icons/io";
 import { BsShieldCheck } from "react-icons/bs";
 import Footer from "@/components/layout/Footer";
 import { useSendOtp } from "@/features/auth/hooks/useSendOtp";
+import { useEffect } from "react";
+import axios from "axios";
 
 export const schema = yup
   .object({
@@ -21,6 +23,7 @@ type FormDataSignin = yup.InferType<typeof schema>;
 function page() {
   const { isLoging, sendOtp } = useSendOtp();
   const router = useRouter();
+
   const {
     register,
     handleSubmit,
