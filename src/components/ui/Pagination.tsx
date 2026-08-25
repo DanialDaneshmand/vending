@@ -4,8 +4,7 @@ import React, { Dispatch, SetStateAction } from "react";
 import {
   IoIosArrowBack,
   IoIosArrowForward,
-  IoMdArrowBack,
-  IoMdArrowForward,
+ 
 } from "react-icons/io";
 
 interface StyledPaginationProps {
@@ -40,7 +39,7 @@ const StyledPagination: React.FC<StyledPaginationProps> = ({
   return (
     <div className=" flex items-center justify-between px-4">
       {/* Right */}
-      <div className="py-4 w-full border-t border-gray-100 bg-white flex flex-row-reverse items-center justify-center sm:justify-between dir-ltr font-[vazirmatn]">
+      <div className="py-4 w-full  border-gray-100 bg-white flex flex-row-reverse items-center justify-center sm:justify-between dir-ltr font-[vazirmatn]">
         {/* بخش سمت چپ: انتخاب تعداد ردیف */}
         <div className="hidden sm:block">
           {/* <div className="flex  items-center gap-2 border border-gray-300 rounded-lg px-3 py-1.5 text-gray-500 text-[13px] cursor-pointer hover:bg-gray-50 transition-colors select-none group">

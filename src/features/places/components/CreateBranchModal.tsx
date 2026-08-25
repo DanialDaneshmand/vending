@@ -32,6 +32,7 @@ export default function CreateBranchModal({
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isLoading },
   } = useForm<FormValues>({
     resolver: yupResolver(schema),
@@ -47,6 +48,7 @@ export default function CreateBranchModal({
         {
           onSuccess: () => {
             onClose();
+            reset()
           },
         },
       );

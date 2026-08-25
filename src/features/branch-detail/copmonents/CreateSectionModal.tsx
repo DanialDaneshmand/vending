@@ -35,6 +35,7 @@ export default function CreateSectionModal({
   const {
     control,
     register,
+    reset,
     handleSubmit,
     formState: { errors, isLoading },
   } = useForm<FormValues>({
@@ -46,6 +47,7 @@ export default function CreateSectionModal({
     createSection({name:data.name,location_id:String(branchId)},{
       onSuccess:()=>{
         onClose();
+        reset();
       }
     })
   };

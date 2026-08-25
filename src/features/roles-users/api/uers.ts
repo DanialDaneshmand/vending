@@ -2,7 +2,11 @@ import clientApi from "@/shared/clientApi/clientApi";
 
 
 export async function createUserApi(data:{username:string,phone:string,role:string}){
-    return await clientApi.post("/users",data).then(({data})=>data);
+    const newData={
+        ...data,
+        full_name:data.username
+    }
+    return await clientApi.post("/users",newData).then(({data})=>data);
 }
 
 export async function getUserListApi(){

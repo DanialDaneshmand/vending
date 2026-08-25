@@ -8,11 +8,14 @@ import TextField from "@/components/form/TextFeild";
 import Select from "@/components/form/Select";
 import { useCreateUser } from "../hooks/useCreateUser";
 import AddNewButton from "@/components/ui/AddNewButton";
+import useGetSingleUser from "@/shared/hooks/useGetSingleUser";
+import { useEffect } from "react";
+import { useUpdateUser } from "@/shared/hooks/useUpdateUser";
 
 interface CreateUserModalProps {
   onClose: () => void;
   open: boolean;
-  editId?: number;
+  editId?: string;
 }
 
 const options = [
@@ -40,22 +43,44 @@ export default function CreateUserModal({
 }: CreateUserModalProps) {
   const { createUser, isCreatingUser } = useCreateUser();
 
+  const { isGettingUser, user } = useGetSingleUser(editId as string);
+  const { isUpdatingUser, updateUser } = useUpdateUser();
+
   const {
     register,
     control,
     handleSubmit,
+    reset,
     formState: { errors, isLoading },
   } = useForm<FormValues>({
     resolver: yupResolver(schema),
     mode: "onBlur",
   });
 
+  useEffect(() => {
+    if (user) {
+      reset({
+        username: user.full_name,
+        role: user.role,
+        phone: user.phone,
+      });
+    }
+  }, [user, reset]);
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    createUser(data, {
-      onSuccess: () => {
-        onClose();
-      },
-    });
+    if (editId) {
+      updateUser({id:editId,data},{
+        onSuccess:()=>{
+          onClose();
+          reset()
+        }
+      })
+    } else {
+      createUser(data, {
+        onSuccess: () => {
+          onClose();
+        },
+      });
+    }
   };
   return (
     <Modal
@@ -102,7 +127,7 @@ export default function CreateUserModal({
             <span>ویرایش کاربر </span>
           </button>
         ) : (
-          <AddNewButton isLoading={isCreatingUser} title="ثبت کاربر جدید"/>
+          <AddNewButton isLoading={isCreatingUser} title="ثبت کاربر جدید" />
         )}
       </form>
     </Modal>

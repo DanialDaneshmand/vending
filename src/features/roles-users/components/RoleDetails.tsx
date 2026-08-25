@@ -3,6 +3,7 @@ import { FiUsers } from "react-icons/fi";
 import { GoShieldCheck } from "react-icons/go";
 import { IoClose, IoSettingsOutline } from "react-icons/io5";
 import { LuEye, LuFileText } from "react-icons/lu";
+import UseGetUserList from "../hooks/useGetUserList";
 
 // دیتا برای لیست مجوزها
 const permissions = [
@@ -39,6 +40,7 @@ const permissions = [
 ];
 
 const RoleDetails = () => {
+  
   return (
     <div className="w-full  bg-white rounded-lg shadow-sm border border-gray-100 p-4 flex flex-col">
       <div className="flex items-center justify-between mb-8">
