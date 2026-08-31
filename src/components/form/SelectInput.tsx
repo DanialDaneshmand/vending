@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -10,12 +11,16 @@ interface ChangeHandlerEvent {
   };
 }
 
-// تعریف به صورت Generic <T>
+interface OptionType {
+  id: string;
+  title: string;
+}
+
 interface SelectInputProps<T> {
-  filterValues: T; // به جای تایپ سخت، T می‌گیرد
+  filterValues: T;
   handleChange: (e: ChangeHandlerEvent) => void;
   name: string;
-  options: string[];
+  options: OptionType[];
   title?: string;
 }
 
@@ -39,30 +44,37 @@ export default function SelectInput<T>({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const label = (filterValues as any)[name] || "انتخاب کنید...";
+  // --- اصلاح اصلی اینجاست ---
+  // پیدا کردن عنوان (title) بر اساس مقدار ذخیره شده در استیت (id)
+  const getLabel = () => {
+    const currentValue = (filterValues as any)[name];
+    if (!currentValue) return "انتخاب کنید...";
+
+    // جستجو در لیست آپشن‌ها برای پیدا کردن عنوان مربوط به این ID
+    const selectedOption = options?.find((opt) => opt.id === currentValue);
+
+    // اگر آپشن پیدا شد عنوانش رو برگردون، در غیر این صورت خود مقدار رو نشون بده
+    return selectedOption ? selectedOption.title : currentValue;
+  };
+
+  const label = getLabel();
 
   return (
     <div dir="rtl" className="relative flex flex-col w-full" ref={ref}>
-      {/* Button */}
-      <label htmlFor="" className="text-sm  mb-2 mr-1 text-gray-800">
-          {title}
-        </label>
+      {/* Label */}
+      <label className="text-sm mb-2 mr-1 text-gray-800">
+        {title}
+      </label>
+
       <button
         onClick={() => setOpen((prev) => !prev)}
         className="
-          flex  gap-2 border border-gray-100 px-3 py-2   items-center justify-between
-          w-full
-          bg-white
-          shadow-xs 
-          rounded-lg
-          text-sm text-[#09090B]
-          transition cursor-pointer
-           
-           font-medium
+          flex gap-2 border border-gray-100 px-3 py-2 items-center justify-between
+          w-full bg-white shadow-xs rounded-lg text-sm text-[#09090B]
+          transition cursor-pointer font-medium
         "
       >
-        
-        <span className=" flex flex-col items-start">
+        <span className="flex flex-col items-start">
           <span className="mt-2">{label}</span>
         </span>
 
@@ -78,34 +90,30 @@ export default function SelectInput<T>({
         <div
           className="
             absolute top-full mt-2 right-0
-            w-full
-            bg-white
-            border border-gray-200
-            rounded-xl
-            shadow-sm
-            overflow-hidden
-            z-50
+            w-full bg-white border border-gray-200
+            rounded-xl shadow-sm overflow-hidden z-50
           "
         >
-          {options.map((item) => (
+          {options.map((item: OptionType) => (
             <button
-              key={item}
+              key={item.id}
               onClick={() => {
                 handleChange({
                   target: {
                     name,
-                    value: item,
+                    value: item.id,
                   },
                 });
                 setOpen(false);
               }}
               className={`
+
                 w-full text-right px-4 py-2 text-sm
                 hover:bg-gray-100 transition
-                ${(filterValues as any)[name] === item ? "bg-gray-100 font-medium" : ""}
+                ${(filterValues as any)[name] === item.id ? "bg-gray-100 font-medium" : ""}
               `}
             >
-              {item}
+              {item.title}
             </button>
           ))}
         </div>

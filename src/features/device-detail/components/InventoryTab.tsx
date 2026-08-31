@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Package, TrendingUp, Database, Pencil, Check, X } from "lucide-react";
+import { Package, Database } from "lucide-react";
 import {
   AreaChart,
   Area,
@@ -12,6 +12,11 @@ import {
 } from "recharts";
 import InventoryTable from "./InventoryTable";
 import SelectInput from "@/components/form/SelectInput";
+import useGetDeviceTransactions from "../hooks/useGetDeviceTransactions";
+import { useParams } from "next/navigation";
+import { useAddManualInventory } from "../hooks/useAddManualInventory";
+import useGetDeviceDetail from "@/shared/hooks/useGetDeviceDetail";
+import toast from "react-hot-toast";
 
 interface HandleChangeArg {
   target: {
@@ -20,7 +25,7 @@ interface HandleChangeArg {
   };
 }
 
-// داده‌های نمونه برای موجودی (یک هفته اخیر)
+// داده‌های نمونه برای نمودار
 const data = [
   { day: "شنبه", count: 120 },
   { day: "یکشنبه", count: 150 },
@@ -35,17 +40,75 @@ const InventoryTab = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [changeValue, setChangeValue] = useState({
     count: 0,
-    operator: "افزودن",
+    operator: "increase", // مقدار پیش‌فرض مطابق با id در SelectInput
   });
-console.log(changeValue);
+
+  const { deviceId } = useParams();
+
+  const { device, isGettingDevice } = useGetDeviceDetail(deviceId as string);
+
+  const { deviceTransactions, isGettingDeviceTransactions } =
+    useGetDeviceTransactions(deviceId as string);
+  const { addManualInventory, isAddingManualInventory } =
+    useAddManualInventory();
 
   const handleChange = (e: HandleChangeArg) => {
-    setChangeValue({...changeValue,[e.target.name]:e.target.value})
+    setChangeValue({ ...changeValue, [e.target.name]: e.target.value });
+  };
+
+  const handleAddInventory = () => {
+    const numericValue = +changeValue.count;
+    const currentInventory = device?.inventory_level || 0; // دریافت موجودی فعلی از API
+
+    // ۱. بررسی اینکه مقدار صفر نباشد
+    if (numericValue === 0) {
+      toast.error("لطفاً یک مقدار غیر از صفر را وارد کنید");
+      return;
+    }
+
+    // ۲. بررسی اینکه اگر عملیات "کم کردن" است، مقدار از موجودی فعلی بیشتر نباشد
+    if (
+      changeValue.operator === "decrease" &&
+      numericValue > currentInventory
+    ) {
+      toast.error(
+        `مقدار وارد شده بیشتر از موجودی فعلی (${currentInventory}) است و نمی‌توان آن را کم کرد`,
+      );
+      return;
+    }
+
+    // تعیین متن دلیل و مقدار نهایی دلتا
+    const reasonText =
+      changeValue.operator === "increase" ? "افزودن" : "کم کردن";
+    const finalDelta =
+      changeValue.operator === "decrease"
+        ? -Math.abs(numericValue)
+        : Math.abs(numericValue);
+
+    // ارسال درخواست به API
+    addManualInventory(
+      {
+        deviceId: deviceId as string,
+        payload: {
+          delta: finalDelta,
+          reason: reasonText,
+        },
+      },
+      {
+        onSuccess: () => {
+          setIsEditing(false);
+          setChangeValue({ count: 0, operator: "increase" });
+          toast.success("موجودی با موفقیت به‌روز شد");
+        },
+        onError: () => {
+          toast.error("خطایی در ثبت تغییرات رخ داد");
+        },
+      },
+    );
   };
 
   return (
     <div className="pt-4">
-      {/* Grid اصلی برای ریسپانسیو سازی */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* بخش اول: کارت موجودی کل (اشغال ۱ ستون در حالت بزرگ) */}
         <div className="lg:col-span-1">
@@ -72,7 +135,7 @@ console.log(changeValue);
               <div className="flex items-center gap-2">
                 <div className="flex items-baseline gap-2">
                   <span className="text-3xl font-extrabold text-slate-800">
-                    1000
+                    {device?.inventory_level}
                   </span>
                   <span className="text-slate-400 text-xs font-medium">
                     واحد
@@ -80,14 +143,15 @@ console.log(changeValue);
                 </div>
               </div>
             </div>
-              <div
-                className={`${isEditing ? "h-[165] transition-all duration-300" : " h-0 transition-all duration-300"}  overflow-hidden   mt-2 flex flex-col justify-center `}
-              >
-                <div className="flex items-start gap-x-2 w-full">
-                  <input
-                  className={`${changeValue.operator === "افزودن" ? "text-green-600 border-green-600" : "text-red-600 border-red-600"} w-full h-12 outline-0 border mt-2  rounded-lg p-3  `}
+            <div
+              className={`${isEditing ? "h-[165] transition-all duration-300" : " h-0 transition-all duration-300"}  overflow-hidden   mt-2 flex flex-col justify-center `}
+            >
+              <div className="flex items-start gap-x-2 w-full">
+                <input
+                  className={`${changeValue.operator === "increase" ? "text-green-600 border-green-600" : "text-red-600 border-red-600"} w-full h-12 outline-0 border mt-2  rounded-lg p-3  `}
                   type="number"
                   name="count"
+                  value={changeValue.count}
                   onChange={(e) =>
                     handleChange({
                       target: { value: e.target.value, name: e.target.name },
@@ -98,16 +162,20 @@ console.log(changeValue);
                   filterValues={changeValue}
                   handleChange={handleChange}
                   name="operator"
-                  options={["افزودن", "کاستن"]}
+                  options={[
+                    { id: "increase", title: "افزودن" },
+                    { id: "decrease", title: "کم کردن" },
+                  ]}
                 />
-                </div>
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className=" py-2 px-5 rounded-lg text-white mt-4 cursor-pointer bg-emerald-600 font-semibold text-sm"
-                >
-                  اعمال تغییرات 
-                </button>
               </div>
+              <button
+                onClick={handleAddInventory}
+                disabled={isAddingManualInventory || +changeValue.count === 0}
+                className="py-2 px-5 rounded-lg text-white mt-4 cursor-pointer bg-emerald-600 font-semibold text-sm disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                {isAddingManualInventory ? "در حال ثبت..." : "اعمال تغییرات"}
+              </button>
+            </div>
 
             <div className="mt-8 relative z-10 flex items-center justify-between">
               <div className="flex items-center gap-2 text-slate-400 text-xs">
@@ -116,7 +184,6 @@ console.log(changeValue);
             </div>
           </div>
         </div>
-        {/* بخش دوم: نمودار تغییرات موجودی (اشغال ۲ ستون در حالت بزرگ) */}
         <div className="lg:col-span-2 w-full">
           <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 h-full w-full">
             <div className="flex justify-between items-center mb-6">
@@ -192,7 +259,6 @@ console.log(changeValue);
           <InventoryTable />
         </div>
       </div>
-      {/* Tabel */}
     </div>
   );
 };

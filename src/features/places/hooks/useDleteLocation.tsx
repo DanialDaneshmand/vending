@@ -13,7 +13,7 @@ export function useDeleteLocation() {
         toast.success("مجموعه مورد نظر با موفقیت حذف شد");
       },
       onError: (err) => {
-        toast.error("مشکلی در حذف مجموعه جدید پیش امده است");
+        toast.error("مشکلی در حذف مجموعه  پیش امده است");
       },
     },
   );

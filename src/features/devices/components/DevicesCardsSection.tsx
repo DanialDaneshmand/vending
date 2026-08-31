@@ -1,7 +1,9 @@
-import React from "react";
-import { Wifi, CloudOff, AlertTriangle } from "lucide-react";
 
-// آیکون اختصاصی دستگاه (کارت اول سمت راست) برای شباهت ۱۰۰ درصدی به تصویر
+import React, { useMemo } from "react";
+import { Wifi, CloudOff, AlertTriangle } from "lucide-react";
+import UseGetDevicesList from "@/shared/hooks/useGetDevicesList";
+
+// آیکون اختصاصی دستگاه
 const DeviceIcon = ({ className }: { className?: string }) => (
   <svg
     className={className}
@@ -21,80 +23,94 @@ const DeviceIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const statsData = [
-  {
-    id: 1,
-    title: "کل دستگاه‌ها",
-    value: "۲۰",
-    unit: "دستگاه",
-    icon: DeviceIcon,
-    iconColor: "text-[#6D28D9]", // بنفش تیره
-    iconBg: "bg-[#F5F3FF]", // پس‌زمینه بنفش ملایم
-    subText: null,
-  },
-  {
-    id: 2,
-    title: "دستگاه‌های آنلاین",
-    value: "۱۲",
-    unit: "دستگاه",
-    icon: Wifi,
-    iconColor: "text-[#15803D]", // سبز تیره
-    iconBg: "bg-[#E8F5E9]", // پس‌زمینه سبز ملایم
-    subText: (
-      <span className="text-[#15803D] text-xs font-bold flex items-center gap-0.5 justify-center">
-        <span>↑</span>
-        <span className="ml-1">%۶۰ از کل</span>
-      </span>
-    ),
-  },
-  {
-    id: 3,
-    title: "دستگاه‌های آفلاین",
-    value: "۶",
-    unit: "دستگاه",
-    icon: CloudOff,
-    iconColor: "text-[#B91C1C]", // قرمز تیره
-    iconBg: "bg-[#FEE2E2]", // پس‌زمینه قرمز ملایم
-    subText: (
-      <span className="text-[#B91C1C] text-xs font-bold flex items-center gap-0.5 justify-center">
-        <span>↓</span>
-        <span className="ml-1">%۳۰ از کل</span>
-      </span>
-    ),
-  },
-  {
-    id: 4,
-    title: "موجودی کم",
-    value: "۲",
-    unit: "دستگاه",
-    icon: AlertTriangle,
-    iconColor: "text-[#C2410C]", // نارنجی تیره
-    iconBg: "bg-[#FFF3E0]", // پس‌زمینه نارنجی ملایم
-    subText: (
-      <span className="text-[#C2410C] text-xs font-bold">نیاز به بررسی</span>
-    ),
-  },
-];
+// کامپوننت اسکلتون برای حالت لودینگ
+const StatsSkeleton = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+    {[...Array(4)].map((_, i) => (
+      <div key={i} className="bg-white px-5 py-6 rounded-lg border border-gray-100 shadow-sm flex items-center justify-between animate-pulse">
+        <div className="w-14 h-14 rounded-full bg-gray-200 shrink-0" />
+        <div className="flex flex-col items-center justify-center flex-1 text-center pr-2 gap-2">
+          <div className="h-3 w-20 bg-gray-200 rounded-full" />
+          <div className="h-8 w-12 bg-gray-200 rounded-full" />
+          <div className="h-3 w-16 bg-gray-200 rounded-full" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
 export default function DashboardStats() {
+  const { devicesList, isGettingDevicesList } = UseGetDevicesList();
+
+  const stats = useMemo(() => {
+    const items = devicesList?.items || [];
+    const total = items.length;
+    const online = items.filter((d: any) => d.power_on === true).length;
+    const offline = items.filter((d: any) => d.power_on === false).length;
+    const lowInventory = items.filter((d: any) => d.inventory_status === "low").length;
+
+    return [
+      {
+        id: 1,
+        title: "کل دستگاه‌ها",
+        value: total,
+        unit: "دستگاه",
+        icon: DeviceIcon,
+        iconColor: "text-[#6D28D9]",
+        iconBg: "bg-[#F5F3FF]",
+        subText: null,
+      },
+      {
+        id: 2,
+        title: "دستگاه‌های آنلاین",
+        value: online,
+        unit: "دستگاه",
+        icon: Wifi,
+        iconColor: "text-[#15803D]",
+        iconBg: "bg-[#E8F5E9]",
+        subText: null, // درصد حذف شد
+      },
+      {
+        id: 3,
+        title: "دستگاه‌های آفلاین",
+        value: offline,
+        unit: "دستگاه",
+        icon: CloudOff,
+        iconColor: "text-[#B91C1C]",
+        iconBg: "bg-[#FEE2E2]",
+        subText: null, // درصد حذف شد
+      },
+      {
+        id: 4,
+        title: "موجودی کم",
+        value: lowInventory,
+        unit: "دستگاه",
+        icon: AlertTriangle,
+        iconColor: "text-[#C2410C]",
+        iconBg: "bg-[#FFF3E0]",
+        subText: "نیاز به بررسی",
+      },
+    ];
+  }, [devicesList]);
+
+  // نمایش اسکلتون در هنگام لودینگ
+  if (isGettingDevicesList) return <StatsSkeleton />;
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-      {statsData.map((stat) => {
+      {stats.map((stat) => {
         const Icon = stat.icon;
         return (
           <div
             key={stat.id}
-            className="bg-white px-5 py-6 rounded-lg border border-gray-100 shadow-sm flex items-center justify-between  transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
+            className="bg-white px-5 py-6 rounded-lg border border-gray-100 shadow-sm flex items-center justify-between transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
           >
-            {/* بخش راست: آیکون دایره‌ای با پس‌زمینه رنگی */}
-            <div className="h-full ">
-                <div
-              className={`w-14 h-14 rounded-full ${stat.iconBg} flex items-center justify-center shrink-0 shadow-inner`}
-            >
-              <Icon className={`w-7 h-7 ${stat.iconColor}`} />
+            <div className="h-full">
+
+              <div className={`w-14 h-14 rounded-full ${stat.iconBg} flex items-center justify-center shrink-0 shadow-inner`}>
+                <Icon className={`w-7 h-7 ${stat.iconColor}`} />
+              </div>
             </div>
-            </div>
-            {/* بخش چپ: اطلاعات متنی وسط‌چین شده */}
             <div className="flex flex-col items-center justify-center flex-1 text-center pr-2">
               <span className="text-[12px] font-bold text-gray-500 mb-2">
                 {stat.title}
@@ -102,11 +118,18 @@ export default function DashboardStats() {
               <span className="text-3xl font-extrabold text-slate-800 tracking-tight leading-none">
                 {stat.value}
               </span>
-              <span className="text-[11px] text-gray-400 mt-2 font-medium">
-                {stat.unit}
-              </span>
-
-              
+              <div className="flex flex-col items-center mt-2">
+                <span className="text-[11px] text-gray-400 font-medium">
+                  {stat.unit}
+                </span>
+                {stat.subText && (
+                  <span className={`text-xs font-bold mt-1 ${
+                    stat.id === 4 ? "text-[#C2410C]" : "text-gray-500"
+                  }`}>
+                    {stat.subText}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         );

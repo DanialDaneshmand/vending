@@ -1,44 +1,36 @@
+
+import React, { useState } from "react";
 import SelectInput from "@/components/form/SelectInput";
+import UseGetAllSection from "@/shared/hooks/useGetAllSections";
+import UseGetLocations from "@/shared/hooks/useGetLocations";
 import { Download } from "lucide-react";
-import { useState } from "react";
 import { FaSlidersH } from "react-icons/fa";
 import { LuFilter, LuSearch } from "react-icons/lu";
-
-interface OptionsMap {
-  [key: string]: {
-    title: string;
-    options: string[];
-  };
-}
-
-interface ChangeHandlerEvent {
-  target: {
-    name: string;
-    value: string;
-  };
-}
 
 interface FilterContainerProps<T> {
   filterValues: T;
   className: string;
-  optionsMap: OptionsMap;
-  handleInputChange: (e: ChangeHandlerEvent) => void;
+  handleInputChange: (e: any) => void;
+  onReset: () => void;
 }
 
 export default function DevicesFilterContainer<T>({
   className,
-  optionsMap,
   filterValues,
   handleInputChange,
+  onReset,
 }: FilterContainerProps<T>) {
   const [isFilter, setIsFilter] = useState(false);
+  const { locations } = UseGetLocations();
+  const { sectionsList } = UseGetAllSection();
+
   return (
-    <div>
+    <div className="w-full">
       {/* Mobile Filter Container*/}
-      <div className=" mt-4 block sm:hidden">
+      <div className="mt-4 block sm:hidden">
         <button
           onClick={() => setIsFilter((prev) => !prev)}
-          className="flex bg-white justify-center w-full items-center h-[45] font-medium cursor-pointer gap-2 px-4 py-2 border border-gray-100 shadow-xs rounded-md text-sm text-gray-800 hover:bg-gray-50 transition-all"
+          className="flex bg-white justify-center w-full items-center h-[45px] font-medium cursor-pointer gap-2 px-4 py-2 border border-gray-100 shadow-xs rounded-md text-sm text-gray-800 hover:bg-gray-50 transition-all"
         >
           <FaSlidersH className="w-4 h-4" />
           <span>فیلتر کردن دستگاه ها</span>
@@ -46,9 +38,13 @@ export default function DevicesFilterContainer<T>({
       </div>
 
       <div
-        className={`${className} ${isFilter ? " transition-all duration-100 h-180 border border-gray-100 shadow-sm p-4 rounded-lg" : "h-0 sm:h-auto transition-all duration-100"}  overflow-hidden`}
+        className={`${className} ${
+          isFilter 
+            ? "transition-all duration-100 h-auto border border-gray-100 shadow-sm p-4 rounded-lg" 
+            : "h-0 sm:h-auto transition-all duration-100"
+        } overflow-hidden sm:overflow-visible`}
       >
-        {/* Search Container */}
+          {/* Search Container */}
         <div
           className={` col-span-12 lg:col-span-6 order-2 lg:order-1 flex items-center`}
         >
@@ -87,25 +83,93 @@ export default function DevicesFilterContainer<T>({
             <span>پاکسازی فیلتر ها</span>
           </button>
         </div>
-        <div className="order-3 col-span-12 grid grid-cols-10 gap-4">
-          {Object.entries(optionsMap).map(([key, value]) => {
-            return (
-              <div
-                key={key}
-                className="col-span-12 sm:col-span-5 lg:col-span-2 flex items-center"
-              >
-                <div className="w-full">
-                  <SelectInput
-                    name={key}
-                    title={value.title}
-                    options={value.options}
-                    filterValues={filterValues as any}
-                    handleChange={handleInputChange}
-                  />
-                </div>
-              </div>
-            );
-          })}
+
+        <div className="order-3 col-span-12 grid grid-cols-10 gap-4 mt-4">
+          {/* مجموعه ها */}
+          <div className="col-span-12 sm:col-span-5 lg:col-span-2 flex items-center">
+            <div className="w-full">
+              <SelectInput
+                name="places"
+                title="مجموعه ها"
+                options={[
+                  { id: "all_places", title: "همه مجموعه ها" },
+                  ...(locations?.items?.map((item: any) => ({ id: item.id, title: item.name })) || [])
+                ]}
+                filterValues={filterValues as any}
+                handleChange={handleInputChange}
+              />
+            </div>
+          </div>
+
+          {/* بخش ها */}
+          <div className="col-span-12 sm:col-span-5 lg:col-span-2 flex items-center">
+            <div className="w-full">
+              <SelectInput
+                name="sections"
+                title="بخش ها"
+                options={[
+                  { id: "all_sections", title: "همه بخش ها" },
+                  ...(sectionsList?.items?.map((item: any) => ({ id: item.id, title: item.name })) || [])
+                ]}
+                filterValues={filterValues as any}
+                handleChange={handleInputChange}
+              />
+            </div>
+          </div>
+
+          {/* وضعیت دستگاه */}
+          <div className="col-span-12 sm:col-span-5 lg:col-span-2 flex items-center">
+            <div className="w-full">
+              <SelectInput
+                name="status"
+                title="وضعیت دستگاه"
+                options={[
+                  { id: "all_status", title: "همه وضعیت ها" },
+                  { id: "pending", title: "در انتظار بررسی" },
+                  { id: "online", title: "آنلاین" },
+                  { id: "offline", title: "آفلاین" },
+                  { id: "disabled", title: "مسدود شده" },
+                  { id: "maintenance", title: "در حال تعمیر" },
+                ]}
+                filterValues={filterValues as any}
+                handleChange={handleInputChange}
+              />
+            </div>
+          </div>
+
+          {/* وضعیت اتصال */}
+          <div className="col-span-12 sm:col-span-5 lg:col-span-2 flex items-center">
+            <div className="w-full">
+              <SelectInput
+                name="alertType"
+                title="وضعیت اتصال"
+                options={[
+                  { id: "all_power", title: "همه وضعیت ها" },
+                  { id: "true", title: "روشن" },
+                  { id: "false", title: "خاموش" },
+                ]}
+                filterValues={filterValues as any}
+                handleChange={handleInputChange}
+              />
+            </div>
+          </div>
+
+          {/* وضعیت موجودی */}
+          <div className="col-span-12 sm:col-span-5 lg:col-span-2 flex items-center">
+            <div className="w-full">
+              <SelectInput
+                name="inventory"
+                title="وضعیت موجودی"
+                options={[
+                  { id: "all_inventory", title: "همه وضعیت ها" },
+                  { id: "ok", title: "مناسب" },
+                  { id: "low", title: "کم" },
+                ]}
+                filterValues={filterValues as any}
+                handleChange={handleInputChange}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

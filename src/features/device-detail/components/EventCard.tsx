@@ -2,67 +2,46 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import { CheckCircle2, AlertTriangle, Info } from 'lucide-react';
 import { TabsType } from '../Types';
-
-// تعریف ساختار داده برای هر رویداد
-interface EventItem {
-  id: number;
-  title: string;
-  description: string;
-  time: string;
-  date: string;
-  type: 'success' | 'warning' | 'info';
-}
+import { useParams } from 'next/navigation';
+import useGetDeviceDetail from '@/shared/hooks/useGetDeviceDetail';
+import useGetDeviceAlerts from '../hooks/useGetDeviceAlerts';
 
 interface EventsCardProps {
   activeTab: TabsType;
   setActiveTab: Dispatch<SetStateAction<TabsType>>;
 }
 
-const eventsData: EventItem[] = [
-  {
-    id: 1,
-    title: 'دستگاه آنلاین شد',
-    description: 'دستگاه با موفقیت به سرور متصل شد.',
-    time: '۱۰:۱۵',
-    date: 'امروز',
-    type: 'success',
-  },
-  {
-    id: 2,
-    title: 'کمبود محصول',
-    description: 'تعداد ۵ عدد نوشابه انرژی‌زا',
-    time: '۰۹:۴۲',
-    date: 'امروز',
-    type: 'warning',
-  },
-  {
-    id: 3,
-    title: 'بازکردن درب دستگاه',
-    description: 'درب دستگاه توسط کاربر سرویس باز شد.',
-    time: '۰۹:۳۰',
-    date: 'امروز',
-    type: 'info',
-  },
-  {
-    id: 4,
-    title: 'پرداخت موفق',
-    description: 'مبلغ ۱۲,۰۰۰ تومان',
-    time: '۰۹:۲۸',
-    date: 'امروز',
-    type: 'success',
-  },
-  {
-    id: 5,
-    title: 'قطع و وصل برق',
-    description: 'دستگاه به مدت ۳ ثانیه قطع و وصل شد.',
-    time: '۰۸:۵۷',
-    date: 'امروز',
-    type: 'warning',
-  },
-];
+const EventsCard = ({ activeTab, setActiveTab }: EventsCardProps) => {
+  const { deviceId } = useParams();
+  const { device, isGettingDevice } = useGetDeviceDetail(deviceId as string);
+  const { deviceAlerts, isGettingDeviceAlerts } = useGetDeviceAlerts(deviceId as string, device?.location_id);
 
-const EventsCard = ({activeTab,setActiveTab}:EventsCardProps) => {
-  // تابع کمکی برای رندر کردن آیکون‌ها بر اساس نوع رویداد
+
+  // فرمت زمان ISO به ساعت:دقیقه فارسی
+  const formatTime = (isoDate: string) => {
+    if (!isoDate) return "---";
+    try {
+      return new Date(isoDate).toLocaleTimeString("fa-IR", { 
+        hour: "2-digit", 
+        minute: "2-digit" 
+      });
+    } catch (e) {
+      return "---";
+    }
+  };
+
+  // تبدیل Severity به تایپ آیکون
+  const mapSeverityToType = (severity: string) => {
+    switch (severity?.toLowerCase()) {
+      case 'critical':
+      case 'error': return 'warning'; // برای موارد بحرانی از آیکون هشدار استفاده می‌کنیم
+      case 'warning': return 'warning';
+      case 'info': return 'info';
+      case 'success': return 'success';
+      default: return 'info';
+    }
+  };
+
   const renderIcon = (type: string) => {
     switch (type) {
       case 'success':
@@ -72,52 +51,91 @@ const EventsCard = ({activeTab,setActiveTab}:EventsCardProps) => {
       case 'info':
         return <div className="p-1.5 rounded-full bg-blue-50 text-blue-500"><Info size={20} /></div>;
       default:
-        return null;
+        return <div className="p-1.5 rounded-full bg-gray-50 text-gray-500"><Info size={20} /></div>;
     }
   };
 
-  return (
-    <div className=" w-full bg-white rounded-lg shadow-sm border border-gray-100 p-4 h-full " >
-      {/* هدر کارت */}
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-gray-800 font-bold text-lg">آخرین رویدادها</h3>
-        {
-          activeTab==="overview"&&<button onClick={()=>setActiveTab("events")} className="text-blue-500 text-sm font-medium cursor-pointer transition-colors">
-          مشاهده همه
-        </button>
-        }
-      </div>
-
-      {/* لیست رویدادها */}
-      <div className="relative">
-        {/* خط عمودی تایم‌لاین (پس‌زمینه) */}
-
+  // --- Skeleton حالت لودینگ ---
+  if (isGettingDeviceAlerts || isGettingDevice) {
+    return (
+      <div className="w-full bg-white rounded-lg shadow-sm border border-gray-100 p-4 h-full animate-pulse">
+        <div className="flex justify-between items-center mb-6">
+          <div className="h-6 w-32 bg-gray-200 rounded-lg"></div>
+          <div className="h-4 w-20 bg-gray-200 rounded-lg"></div>
+        </div>
         <div className="space-y-0">
-          {eventsData.map((event, index) => (
-            <div 
-              key={event.id} 
-              className={`flex items-start gap-4 py-4 ${index !== eventsData.length - 1 ? 'border-b border-gray-100' : ''}`}
-            >
-              {/* بخش آیکون و دایره تایم‌لاین */}
-              <div className="relative flex flex-col items-center">
-                {renderIcon(event.type)}
-                {/* نقطه کوچک روی خط تایم‌لاین */}
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex items-start gap-4 py-4 border-b border-gray-100 last:border-0">
+              <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-1/3 bg-gray-200 rounded"></div>
+                <div className="h-3 w-1/2 bg-gray-200 rounded"></div>
               </div>
-
-              {/* محتوای متنی */}
-              <div className="flex-1">
-                <div className="text-gray-700 font-semibold text-sm mb-1">{event.title}</div>
-
-                <div className="text-gray-400 text-xs leading-relaxed">{event.description}</div>
-              </div>
-
-              {/* بخش زمان و تاریخ */}
-              <div className="text-left flex flex-col items-end ">
-                <span className="text-gray-600 font-bold text-sm">{event.time}</span>
-                <span className="text-gray-400 text-xs">{event.date}</span>
-              </div>
+              <div className="h-8 w-12 bg-gray-200 rounded"></div>
             </div>
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  const alerts = deviceAlerts?.items || [];
+
+  return (
+    <div className="w-full bg-white rounded-lg shadow-sm border border-gray-100 p-4 h-full">
+      <div className="flex justify-between items-center mb-6">
+
+        <h3 className="text-gray-800 font-bold text-lg">آخرین رویدادها</h3>
+        {activeTab === "overview" && (
+          <button 
+            onClick={() => setActiveTab("events")} 
+            className="text-blue-500 text-sm font-medium cursor-pointer transition-colors hover:underline"
+          >
+            مشاهده همه
+          </button>
+        )}
+      </div>
+
+      <div className="relative">
+        <div className="space-y-0">
+          {alerts.length > 0 ? (
+            alerts.map((event: any, index:any) => (
+              <div 
+                key={event.id || index} 
+                className={`flex items-start gap-4 py-4 ${index !== alerts.length - 1 ? 'border-b border-gray-100' : ''}`}
+              >
+                <div className="relative flex flex-col items-center">
+                  {renderIcon(mapSeverityToType(event.severity))}
+                </div>
+
+                <div className="flex-1">
+                  <div className="text-gray-700 font-semibold text-sm mb-1">
+                    {event.message || "بدون پیام"}
+                  </div>
+                  {/* نمایش وضعیت تایید شده یا حل شده به عنوان توضیحات */}
+                  <div className="text-gray-400 text-xs leading-relaxed">
+                    {event.resolved ? 'این رویداد حل شده است' : event.acknowledged ? 'این رویداد تایید شده است' : 'در انتظار بررسی'}
+                  </div>
+                </div>
+
+                <div className="text-left flex flex-col items-end">
+                  <span className="text-gray-600 font-bold text-sm">
+                    {formatTime(event.created_at)}
+                  </span>
+                  <span className="text-gray-400 text-xs">
+                    {event.created_at ? 'امروز' : '---'}
+                  </span>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="bg-gray-50 p-4 rounded-full text-gray-300 mb-3">
+                <Info size={40} />
+              </div>
+              <p className="text-gray-400 text-sm">هیچ هشداری برای این دستگاه یافت نشد.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

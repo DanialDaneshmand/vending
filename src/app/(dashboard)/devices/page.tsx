@@ -1,71 +1,50 @@
+
 "use client";
 
+import React, { useState } from "react";
 import PageTitle from "@/components/shared/PageTitle";
 import DevicesCardsSection from "@/features/devices/components/DevicesCardsSection";
 import DevicesFilterContainer from "@/features/devices/components/DevicesFilterContainer";
 import DeviceManagementTable from "@/features/devices/components/DevicesManagementTable";
-import { useState } from "react";
 
-interface ChangeHandlerEvent {
-  target: {
-    name: string;
-    value: string;
-  };
-}
-
-const optionsMap = {
-  places: {
-    title: "مجموعه ها",
-    options: ["همه مجموعه ها", "فعال", "غیر فعال"],
-  },
-  sections: { title: "بخش ها", options: ["همه بخش ها", "فعال", "غیر فعال"] },
-  alertType: {
-    title: "وضعیت اتصال",
-    options: ["وضعیت اتصال ", "تهران", "مشهد"],
-  },
-  status: {
-    title: "وضعیت دستگاه ",
-    options: ["همه وضعیت ها", "تهران", "مشهد"],
-  },
-  inventory: {
-    title: "وضعیت موجودی ",
-    options: ["وضعیت موجودی", "تهران", "مشهد"],
-  },
-};
-
-export default function page() {
-  const [filterAndSearchValues, setFilterAndSearchValues] = useState({
+export default function DevicesPage() {
+  const initialFilters = {
     places: "همه مجموعه ها",
     sections: "همه بخش ها",
-    alertType: "همه انواع",
+    alertType: "وضعیت اتصال ", 
     status: "همه وضعیت ها",
     inventory: "وضعیت موجودی",
     search: "",
-  });
-
-  console.log(filterAndSearchValues);
-
-  const handleInputChange = (e: ChangeHandlerEvent) => {
-    setFilterAndSearchValues({
-      ...filterAndSearchValues,
-      [e.target.name]: e.target.value,
-    });
   };
+
+  const [filterAndSearchValues, setFilterAndSearchValues] = useState(initialFilters);
+
+  const handleInputChange = (e: any) => {
+    const { name, value } = e.target;
+    setFilterAndSearchValues((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const resetFilters = () => {
+    setFilterAndSearchValues(initialFilters);
+  };
+
   return (
     <section className="p-4">
-      {/* Page Title */}
       <PageTitle title="دستگاه ها " description="داشبورد / دستگاه ها" />
-      {/* Devices Filter Container */}
+
       <DevicesFilterContainer
         className="grid grid-cols-12 bg-white gap-6 sm:gap-4 mt-4 p-0 sm:p-4"
         filterValues={filterAndSearchValues}
         handleInputChange={handleInputChange}
-        optionsMap={optionsMap}
+        onReset={resetFilters} // ارسال تابع پاکسازی
       />
-      {/* Devices Cards Section */}
+
       <DevicesCardsSection />
-      {/* Device Management Table */}
-      <DeviceManagementTable />
+
+      <DeviceManagementTable filters={filterAndSearchValues} />
     </section>
   );
 }
