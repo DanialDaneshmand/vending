@@ -13,7 +13,7 @@ const PROTECTED_ROUTES = [
 // صفحاتی که فقط کاربر غیر-لاگین باید ببیند
 const PUBLIC_ONLY_ROUTES = ['/', '/verify-otp'];
 
-export function proxy(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value;
   const { pathname } = request.nextUrl;
 
