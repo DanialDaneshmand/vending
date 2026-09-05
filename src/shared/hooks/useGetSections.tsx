@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getSectionsApi } from "../api/getSections";
+import { getSectionsApi } from "../api/section";
 
 export default function UseGetSections(id: string) {
   const {

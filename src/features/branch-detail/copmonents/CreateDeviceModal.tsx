@@ -87,6 +87,7 @@ export default function CreateDeviceModal({
                 { id: "1", label: "انتخاب دستگاه", value: "" },
                 { id: "2", label: "12cdx35", value: "12cdx35" },
                 { id: "3", label: "12cdx36", value: "12cdx36" },
+                { id: "4", label: "12cdx37", value: "12cdx37" },
               ]}
             />
           </div>

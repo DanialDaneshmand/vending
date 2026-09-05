@@ -92,8 +92,8 @@ export default function DevicesFilterContainer<T>({
                 name="places"
                 title="مجموعه ها"
                 options={[
-                  { id: "all_places", title: "همه مجموعه ها" },
-                  ...(locations?.items?.map((item: any) => ({ id: item.id, title: item.name })) || [])
+                  { id: "all", title: "همه مجموعه ها" },
+                  ...(locations?.items?.map((item: any) => ({ id: item.id, name: item.name })) || [])
                 ]}
                 filterValues={filterValues as any}
                 handleChange={handleInputChange}
@@ -108,8 +108,8 @@ export default function DevicesFilterContainer<T>({
                 name="sections"
                 title="بخش ها"
                 options={[
-                  { id: "all_sections", title: "همه بخش ها" },
-                  ...(sectionsList?.items?.map((item: any) => ({ id: item.id, title: item.name })) || [])
+                  { id: "all", title: "همه بخش ها" },
+                  ...(sectionsList?.items?.map((item: any) => ({ id: item.id, name: item.name })) || [])
                 ]}
                 filterValues={filterValues as any}
                 handleChange={handleInputChange}
@@ -124,12 +124,12 @@ export default function DevicesFilterContainer<T>({
                 name="status"
                 title="وضعیت دستگاه"
                 options={[
-                  { id: "all_status", title: "همه وضعیت ها" },
-                  { id: "pending", title: "در انتظار بررسی" },
-                  { id: "online", title: "آنلاین" },
-                  { id: "offline", title: "آفلاین" },
-                  { id: "disabled", title: "مسدود شده" },
-                  { id: "maintenance", title: "در حال تعمیر" },
+                  { id: "all_status", name: "همه وضعیت ها" },
+                  { id: "pending", name: "در انتظار بررسی" },
+                  { id: "online", name: "آنلاین" },
+                  { id: "offline", name: "آفلاین" },
+                  { id: "disabled", name: "مسدود شده" },
+                  { id: "maintenance", name: "در حال تعمیر" },
                 ]}
                 filterValues={filterValues as any}
                 handleChange={handleInputChange}
@@ -144,9 +144,9 @@ export default function DevicesFilterContainer<T>({
                 name="alertType"
                 title="وضعیت اتصال"
                 options={[
-                  { id: "all_power", title: "همه وضعیت ها" },
-                  { id: "true", title: "روشن" },
-                  { id: "false", title: "خاموش" },
+                  { id: "all_power", name: "همه وضعیت ها" },
+                  { id: "true", name: "روشن" },
+                  { id: "false", name: "خاموش" },
                 ]}
                 filterValues={filterValues as any}
                 handleChange={handleInputChange}
@@ -161,9 +161,9 @@ export default function DevicesFilterContainer<T>({
                 name="inventory"
                 title="وضعیت موجودی"
                 options={[
-                  { id: "all_inventory", title: "همه وضعیت ها" },
-                  { id: "ok", title: "مناسب" },
-                  { id: "low", title: "کم" },
+                  { id: "all_inventory", name: "همه وضعیت ها" },
+                  { id: "ok", name: "مناسب" },
+                  { id: "low", name: "کم" },
                 ]}
                 filterValues={filterValues as any}
                 handleChange={handleInputChange}

@@ -4,23 +4,31 @@ import ElegantTimePicker from "@/components/form/TimeRangeFilter";
 import { Dispatch, SetStateAction } from "react";
 import { DateObject } from "react-multi-date-picker";
 
+// ۱. ابتدا یک اینترفیس برای آیتم‌های هر آپشن تعریف می‌کنیم
+interface OptionItem {
+  id: string;
+  name: string;
+}
+
+// ۲. تایپ OptionsMap را اصلاح می‌کنیم تا آرایه‌ای از آبجکت‌ها را بپذیرد
 interface OptionsMap {
   [key: string]: {
     title: string;
-    options: string[];
+    options: OptionItem[]; // از string[] به OptionItem[] تغییر کرد
   };
 }
 
 interface TimeFilterState {
   startTime: DateObject | "";
   endTime: DateObject | "";
-  [key: string]: any; // در صورت وجود فیلدهای دیگر در آبجکت شما
+  [key: string]: any;
 }
 
 interface DateFilterBase {
   fromDate?: string;
   toDate?: string;
 }
+
 interface ChangeHandlerEvent {
   target: {
     name: string;
@@ -48,7 +56,15 @@ export default function ReportsFilterContainer<
   return (
     <div className={`${className}`}>
       <div className="col-span-12 sm:col-span-6 xl:col-span-4 ">
-        <DateRangePicker setFilterValues={setFilterValues} />
+        <DateRangePicker
+          // پاس دادن مقادیر تاریخ از استیت اصلی به کامپوننت
+          value={
+            filterValues.fromDate
+              ? [filterValues.fromDate, filterValues.toDate]
+              : []
+          }
+          setFilterValues={setFilterValues}
+        />
       </div>
       <div className="col-span-12 sm:col-span-6 xl:col-span-4 flex justify-center">
         <ElegantTimePicker
@@ -56,12 +72,14 @@ export default function ReportsFilterContainer<
           filterValues={filterValues}
         />
       </div>
+
       {Object.entries(optionsMap).map(([key, value]) => {
         return (
           <div key={key} className="col-span-12 sm:col-span-6 xl:col-span-2">
             <SelectInput
               name={key}
               title={value.title}
+              // حالا value.options شامل آرایه‌ای از {id, name} است
               options={value.options}
               filterValues={filterValues as any}
               handleChange={handleInputChange}

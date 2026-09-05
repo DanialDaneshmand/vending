@@ -1,18 +1,28 @@
-export const prepareTrendData = (filteredData:any) => {
-  // ۱. گروه‌بندی بر اساس تاریخ
-  const totalsByDate = filteredData.reduce((acc:any, item:any) => {
-    const date = item.date; // فرض می‌کنیم فرمت تاریخ در دیتای تو "۰۱/۰۶" یا مشابه است
-    const incomeValue = parseInt(item.income.replace(/,/g, "").replace(/[۰-۹]/g, (d:any) => "0123456789"["\u06F0\u06F1\u06F2\u06F3\u06F4\u06F5\u06F6\u06F7\u06F8\u06F9".indexOf(d)])) || 0;
-    
+import moment from "moment-jalaali";
+
+// ⚠️ این خط بسیار مهم است و باعث می‌شود کل سیستم moment فارسی شود
+moment.loadPersian({ dialect: "persian-modern" });
+
+export const prepareTrendData = (filteredData: any[]) => {
+  if (!filteredData || filteredData.length === 0) return [];
+
+  const totalsByDate = filteredData.reduce((acc: Record<string, number>, item: any) => {
+    const date = item.occurred_at ? item.occurred_at.split("T")[0] : "Unknown";
+    const incomeValue = item.total || 0;
+
     acc[date] = (acc[date] || 0) + incomeValue;
     return acc;
   }, {});
 
-  // ۲. تبدیل به آرایه و مرتب‌سازی بر اساس تاریخ (بسیار مهم برای نمودار خطی)
   return Object.keys(totalsByDate)
-    .sort((a, b) => a.localeCompare(b)) // مرتب‌سازی تاریخ‌ها برای اینکه خط نمودار درست رسم شود
-    .map(date => ({
-      date: date,
-      value: totalsByDate[date]
-    }));
+    .sort((a, b) => a.localeCompare(b))
+    .map((date) => {
+      // حالا دیگر نیازی به نوشتن .locale نیست، چون loadPersian را در بالا صدا زدیم
+      const jalaliDate = moment(date).format("jD jMMMM"); // نتیجه: «۷ شهریور»
+
+      return {
+        date: jalaliDate,
+        value: totalsByDate[date],
+      };
+    });
 };

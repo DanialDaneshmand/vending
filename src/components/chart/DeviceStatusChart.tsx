@@ -1,43 +1,79 @@
+
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import Link from "next/link";
-
+import useGetDashboardInfo from "@/features/dashboard/hooks/useGetDashboardInfo";
 
 interface DeviceStatus {
   name: string;
-  value: number; 
-  percentage: number;
-  color: string; 
+  value: number;
+  color: string;
 }
-
-const devicesData: DeviceStatus[] = [
-  { name: "روشن", value: 12, percentage: 60, color: "#22c55e" }, 
-  { name: "آفلاین", value: 5, percentage: 25, color: "#cbd5e1" }, 
-  { name: "خاموش", value: 3, percentage: 15, color: "#ef4444" }, 
-];
 
 export default function DeviceStatusChart() {
   const [mounted, setMounted] = useState(false);
+  const { dashboardInfo, isgettingDashboardInfo } = useGetDashboardInfo();
+
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
+  // استخراج و تبدیل دیتای دستگاه‌ها از مسیر kpis.devices
+  const devicesData: DeviceStatus[] = React.useMemo(() => {
+    const deviceKpis = dashboardInfo?.kpis?.devices;
+    if (!deviceKpis) return [];
+
+    return [
+      { 
+        name: "روشن", 
+        value: deviceKpis.online || 0, 
+        color: "#22c55e" 
+      },
+      { 
+        name: "آفلاین", 
+        value: deviceKpis.offline || 0, 
+        color: "#cbd5e1" 
+      },
+      { 
+        name: "در انتظار", 
+        value: deviceKpis.pending || 0, 
+        color: "#ef4444" 
+      },
+    ].filter(item => item.value > 0); // فقط نمایش مواردی که مقدار دارند
+  }, [dashboardInfo]);
+
+  // محاسبه کل دستگاه‌ها از دیتای بک‌اِند
+  const totalDevices = dashboardInfo?.kpis?.devices?.total || 0;
+
+  // نمایش Skeleton در زمان لودینگ یا قبل از مانت شدن
+  if (!mounted || isgettingDashboardInfo) {
     return (
-      <div className="h-[280] w-full max-w-sm bg-white rounded-lg animate-pulse" />
+      <div className="w-full h-[350] rounded-lg border border-gray-100 bg-white p-6 shadow-sm animate-pulse flex flex-col justify-between">
+        <div className="flex justify-between">
+          <div className="w-32 h-4 bg-gray-200 rounded" />
+        </div>
+        <div className="flex items-center justify-between gap-4 my-2">
+          <div className="w-[150] h-[150] bg-gray-100 rounded-full" />
+          <div className="flex flex-col gap-4 w-1/3">
+            <div className="h-6 bg-gray-100 rounded w-full" />
+            <div className="h-6 bg-gray-100 rounded w-full" />
+            <div className="h-6 bg-gray-100 rounded w-full" />
+          </div>
+        </div>
+        <div className="flex justify-end">
+          <div className="w-24 h-4 bg-gray-100 rounded" />
+        </div>
+      </div>
     );
   }
 
-  // محاسبه کل دستگاه‌ها برای نمایش در مرکز نمودار
-  const totalDevices = devicesData.reduce((acc, curr) => acc + curr.value, 0);
-
   return (
     <div
-      className="w-full h-[350]  rounded-lg border border-gray-100 bg-white p-6 shadow-sm flex flex-col justify-between"
+      className="w-full h-[350] rounded-lg border border-gray-100 bg-white p-6 shadow-sm flex flex-col justify-between"
       dir="rtl"
     >
       {/* هدر کارت */}
@@ -45,9 +81,9 @@ export default function DeviceStatusChart() {
         <h3 className="text-sm font-bold text-slate-800">وضعیت دستگاه‌ها</h3>
       </div>
 
-      {/* بخش اصلی: نمودار و راهنما (Legend) */}
+      {/* بخش اصلی: نمودار و راهنما */}
       <div className="flex items-center justify-between gap-4 my-2">
-        {/* نمودار دونات در سمت چپ همراه با نوشته وسط */}
+        {/* نمودار دونات */}
         <div className="relative w-[150] h-[150] shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -55,12 +91,12 @@ export default function DeviceStatusChart() {
                 data={devicesData}
                 cx="50%"
                 cy="50%"
-                innerRadius={52} // شعاع داخلی برای ایجاد حفره دونات
-                outerRadius={70} // شعاع خارجی
-                paddingAngle={0} // بدون فاصله بین سگمنت‌ها طبق تصویر
+                innerRadius={52}
+                outerRadius={70}
+                paddingAngle={0}
                 dataKey="value"
-                startAngle={90} // شروع از نقطه ساعت ۱۲
-                endAngle={-270} // حرکت ساعت‌گرد
+                startAngle={90}
+                endAngle={-270}
               >
                 {devicesData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
@@ -69,7 +105,8 @@ export default function DeviceStatusChart() {
             </PieChart>
           </ResponsiveContainer>
 
-          {/* متن وسط نمودار دونات */}
+
+          {/* متن وسط نمودار */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <span className="text-2xl font-black text-slate-800 leading-none">
               {totalDevices.toLocaleString("fa-IR")}
@@ -82,28 +119,30 @@ export default function DeviceStatusChart() {
 
         {/* راهنمای سمت راست (Legend) */}
         <div className="flex flex-col gap-4">
-          {devicesData.map((item) => (
-            <div key={item.name} className="flex flex-col items-start">
-              {/* نام وضعیت و دایره رنگی */}
-              <div className="flex items-center gap-2">
-                <span
-                  className="w-2.5 h-2.5 rounded-full"
-                  style={{ backgroundColor: item.color }}
-                />
-                <span className="text-xs font-bold text-slate-700">
-                  {item.name}
+          {devicesData.length > 0 ? (
+            devicesData.map((item) => (
+              <div key={item.name} className="flex flex-col items-start">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="text-xs font-bold text-slate-700">
+                    {item.name}
+                  </span>
+                </div>
+                <span className="text-[11px] font-medium text-gray-400 mr-4.5">
+                  ({item.value.toLocaleString("fa-IR")})
                 </span>
               </div>
-              {/* درصد زیر نام */}
-              <span className="text-[11px] font-medium text-gray-400 mr-4.5">
-                ({item.value.toLocaleString("fa-IR")})
-              </span>
-            </div>
-          ))}
+            ))
+          ) : (
+            <span className="text-xs text-gray-400">دیتایی موجود نیست</span>
+          )}
         </div>
       </div>
 
-      {/* دکمه فوتر برای هدایت به صفحه تمام دستگاه‌ها */}
+      {/* دکمه فوتر */}
       <div className="mt-4 pt-4 border-t border-gray-50 flex justify-end">
         <Link
           href="/devices"

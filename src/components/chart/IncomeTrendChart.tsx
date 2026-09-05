@@ -67,7 +67,7 @@ export default function IncomeTrendChart({ chartData }: { chartData: TrendDataPo
         <span className="text-[10px] text-gray-500">درآمد (تومان)</span>
         <div className="flex items-center">
           <div className="w-2.5 h-2.5 rounded-full bg-[#1D72F2] z-10"></div>
-          <div className="w-6 h-[2px] bg-[#1D72F2] -ml-1"></div>
+          <div className="w-6 h-[2] bg-[#1D72F2] -ml-1"></div>
         </div>
       </div>
     </div>

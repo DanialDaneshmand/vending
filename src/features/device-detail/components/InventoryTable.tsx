@@ -35,16 +35,15 @@ const InventoryTable = () => {
 
       <div className="overflow-x-auto">
         {isGettingDeviceInventoryTransactions ? (
-          /* ساختار کاملاً استاندارد: table -> tbody -> tr */
           <table className="w-full text-right min-w-xl border-collapse">
-            <tbody>
+            <tbody className="divide-y divide-gray-50">
               {[...Array(5)].map((_, i) => (
-                <tr key={i} className="border-b border-gray-50 animate-pulse">
-                  <td className="px-6 py-4"><div className="h-4 w-24 bg-gray-200 rounded" /></td>
-                  <td className="px-6 py-4"><div className="h-4 w-20 bg-gray-200 rounded" /></td>
-                  <td className="px-6 py-4"><div className="h-6 w-10 bg-gray-200 rounded mx-auto" /></td>
-                  <td className="px-6 py-4"><div className="h-4 w-20 bg-gray-200 rounded mx-auto" /></td>
-                  <td className="px-6 py-4"><div className="h-8 w-8 bg-gray-200 rounded-full mx-auto" /></td>
+                <tr key={`skeleton-${i}`} className="animate-pulse">
+                  <td className="px-6 py-4"><div className="h-4 w-24 bg-gray-100 rounded" /></td>
+                  <td className="px-6 py-4"><div className="h-4 w-20 bg-gray-100 rounded" /></td>
+                  <td className="px-6 py-4 text-center"><div className="h-6 w-10 bg-gray-100 rounded mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><div className="h-4 w-20 bg-gray-100 rounded mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><div className="h-8 w-8 bg-gray-100 rounded-full mx-auto" /></td>
                 </tr>
               ))}
             </tbody>
@@ -52,24 +51,29 @@ const InventoryTable = () => {
         ) : transactionsArray.length > 0 ? (
           <>
             <table className="w-full text-right min-w-xl border-collapse">
-              <thead className="bg-[#F9FAFC] rounded-t-lg">
+              <thead className="bg-[#F9FAFC]">
                 <tr className="text-[#94a3b8] text-[13px] font-medium border-b border-gray-50">
-                  <th className="px-6 py-4 font-medium">تاریخ</th>
-                  <th className="px-6 py-4 font-medium">زمان</th>
+                  <th className="px-6 py-4 font-medium text-right">تاریخ</th>
+                  <th className="px-6 py-4 font-medium text-right">زمان</th>
                   <th className="px-6 py-4 font-medium text-center">تغییرات</th>
                   <th className="px-6 py-4 font-medium text-center">کاربر</th>
-
                   <th className="px-6 py-4 font-medium text-center">عملیات</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {paginatedData.map((item: any, index: number) => {
                   const isPositive = item.delta >= 0;
-                  const datePart = item.created_at?.split('T')[0].replace(/-/g, '/');
+                  const datePart = item.created_at?.split('T')[0]?.replace(/-/g, '/');
                   const timePart = item.created_at?.split('T')[1]?.substring(0, 8);
 
+                  // حل مشکل Key: ایجاد یک رشته منحصر به فرد برای هر ردیف
+                  const rowKey = item.id && typeof item.id === 'string' 
+                    ? `row-${item.id}` 
+                    : `row-index-${index}`;
+
                   return (
-                    <tr key={item.id || index} className="hover:bg-gray-50/50 transition-colors">
+
+                    <tr key={rowKey} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-6 py-4 text-[#475569] text-sm font-medium">{datePart || "---"}</td>
                       <td className="px-6 py-4 text-[#475569] text-sm font-medium">{timePart || "---"}</td>
                       <td className="px-6 py-4 text-center">
@@ -79,7 +83,10 @@ const InventoryTable = () => {
                       </td>
                       <td className="px-6 py-4 text-[#475569] text-sm font-medium text-center">{item.username || "نامشخص"}</td>
                       <td className="px-6 py-4 text-center">
-                        <button className="p-2 hover:bg-red-50 rounded-full transition-colors text-red-500" onClick={() => console.log(item.id)}>
+                        <button 
+                          className="p-2 hover:bg-red-50 rounded-full transition-colors text-red-500" 
+                          onClick={() => console.log("Deleting item ID:", item.id)}
+                        >
                           <Trash2 size={18} />
                         </button>
                       </td>

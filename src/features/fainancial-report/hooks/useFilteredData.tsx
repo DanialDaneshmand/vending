@@ -1,112 +1,88 @@
+
 import { useMemo } from "react";
+import moment from "moment-jalaali";
 
-// --- Interfaces ---
-export interface DeviceData {
-  id: number;
-  date: string;
-  time: string;
-  location: string;
-  sectionName: string;
-  deviceName: string;
-  deviceId: string;
-  devices: number;
-  games: number;
-  income: string;
-}
-
-interface FilterValues {
-  searchQuery: string;
-  fromDate: string; // تغییر از startDate
-  toDate: string; // تغییر از endDate
-  startTime: string;
-  endTime: string;
-  places: string;
-  sections: string;
-}
-
-// --- Helper Functions ---
-const toEnglishDigits = (str: string | null | undefined): string => {
-  if (!str) return "";
-  const persianDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
-  return str.replace(/[۰-۹]/g, (w) => persianDigits.indexOf(w).toString());
-};
-
-const normalizeDate = (dateStr: string): number => {
-  if (!dateStr) return 0;
-  // Convert "1405/05/20" to 14050520
-  const englishDate = toEnglishDigits(dateStr);
-  return parseInt(englishDate.replace(/\//g, ""), 10);
-};
-
-const timeToMinutes = (timeStr: string): number => {
-  if (!timeStr) return -1;
-  const englishTime = toEnglishDigits(timeStr);
-  const [hours, minutes] = englishTime.split(":").map(Number);
-  return hours * 60 + minutes;
-};
-
-// --- Main Hook ---
-export const useFilteredData = (data: DeviceData[], filters: FilterValues) => {
+export const useFilteredData = (data: any[], filters: any) => {
   return useMemo(() => {
     if (!data) return [];
 
+    // تابع کمکی برای تبدیل اعداد فارسی به انگلیسی در رشته‌ها
+    const farsiToEnglish = (str: string) => {
+      return str.replace(/[۰-۹]/g, (w) => "۰۱۲۳۴۵۶۷۸۹".indexOf(w).toString());
+    };
+
     return data.filter((item) => {
-      // 1. Search Query
-      // فقط اگر searchQuery مقدار داشت و خالی نبود فیلتر کن
+      // ۱. فیلتر جستجو (Search Query)
       if (filters.searchQuery && filters.searchQuery.trim() !== "") {
-        const query = filters.searchQuery.toLowerCase();
-        const matchesSearch =
-          String(item.id).toLowerCase().includes(query) ||
-          item.deviceId.toLowerCase().includes(query);
-        if (!matchesSearch) return false;
+        const query = filters.searchQuery.toLowerCase().trim();
+        const matches = 
+          item.device_name?.toLowerCase().includes(query) ||
+          item.device_code?.toLowerCase().includes(query) ||
+          item.id?.toLowerCase().includes(query);
+        if (!matches) return false;
       }
 
-      // 2. Location / Places Filter
-      // اگر مقدار "همه مجموعه ها" بود یا کلاً خالی بود، از این فیلتر رد شو (Pass)
-      const isAllPlaces =
-        !filters.places ||
-        filters.places === "همه مجموعه ها" ||
-        filters.places === "";
-      if (!isAllPlaces && item.location !== filters.places) {
+      // ۲. فیلتر مجموعه (مقایسه ID به ID)
+      const isAllPlaces = !filters.places || filters.places === "all" || filters.places === "";
+      if (!isAllPlaces && item.location_id !== filters.places) {
         return false;
       }
 
-      // 3. Section Filter
-      const isAllSections =
-        !filters.sections ||
-        filters.sections === "بخش ها" ||
-        filters.sections === "همه بخش ها" ||
-        filters.sections === "";
-      if (!isAllSections && item.sectionName !== filters.sections) {
+      // ۳. فیلتر بخش (مقایسه ID به ID)
+      const isAllSections = !filters.sections || filters.sections === "all" || filters.sections === "";
+      if (!isAllSections && item.section_id !== filters.sections) {
         return false;
       }
 
-      // 4. Date Range Filter
-      // فقط اگر تاریخ مقدار داشت و خالی نبود بررسی کن
-      if (filters.fromDate && filters.fromDate !== "") {
-        const itemDate = normalizeDate(item.date);
-        const start = normalizeDate(filters.fromDate);
-        if (itemDate < start) return false;
-      }
-      if (filters.toDate && filters.toDate !== "") {
-        const itemDate = normalizeDate(item.date);
-        const end = normalizeDate(filters.toDate);
-        if (itemDate > end) return false;
+      // ۴. فیلتر تاریخ (تبدیل اعداد فارسی -> شمسی -> میلادی)
+      if (item.occurred_at) {
+        const itemMoment = moment(item.occurred_at);
+
+        if (filters.fromDate && filters.fromDate !== "") {
+          const engFromDate = farsiToEnglish(filters.fromDate);
+          const startMoment = moment(engFromDate, "jYYYY/jMM/jDD").startOf("day");
+          if (itemMoment.isBefore(startMoment)) return false;
+        }
+
+        if (filters.toDate && filters.toDate !== "") {
+          const engToDate = farsiToEnglish(filters.toDate);
+          const endMoment = moment(engToDate, "jYYYY/jMM/jDD").endOf("day");
+          if (itemMoment.isAfter(endMoment)) return false;
+        }
       }
 
-      // 5. Time Range Filter
-      if (filters.startTime && filters.startTime !== "") {
-        const itemTimeMins = timeToMinutes(item.time);
-        const startMins = timeToMinutes(filters.startTime);
-        if (itemTimeMins < startMins) return false;
-      }
-      if (filters.endTime && filters.endTime !== "") {
-        const itemTimeMins = timeToMinutes(item.time);
-        const endMins = timeToMinutes(filters.endTime);
-        if (itemTimeMins > endMins) return false;
+      // ۵. فیلتر زمان (مدیریت آبجکت‌های DateObject)
+      if (item.occurred_at) {
+        // تبدیل زمان آیتم به دقیقه (از روی ISO string)
+        const itemTimeStr = moment(item.occurred_at).format("HH:mm");
+        const [iH, iM] = itemTimeStr.split(":").map(Number);
+        const itemTotalMins = iH * 60 + iM;
+
+        // بررسی زمان شروع (startTime)
+        if (filters.startTime) {
+          // استخراج ساعت و دقیقه از آبجکت DateObject (مثلاً با متد getHours یا toString)
+          // اگر DateObject است، معمولاً متدی برای گرفتن ساعت دارد یا باید به رشته تبدیل شود
+          const sTime = filters.startTime.toString(); // تبدیل i{} به رشته "HH:mm"
+
+          const [sH, sM] = sTime.split(":").map(Number);
+          if (!isNaN(sH)) {
+            const startTotalMins = sH * 60 + (sM || 0);
+            if (itemTotalMins < startTotalMins) return false;
+          }
+        }
+
+        // بررسی زمان پایان (endTime)
+        if (filters.endTime) {
+          const eTime = filters.endTime.toString();
+          const [eH, eM] = eTime.split(":").map(Number);
+          if (!isNaN(eH)) {
+            const endTotalMins = eH * 60 + (eM || 0);
+            if (itemTotalMins > endTotalMins) return false;
+          }
+        }
       }
 
-      return true; // اگر هیچ‌کدام از شروط بالا باعث return false نشدند، ردیف نمایش داده شود
+      return true;
     });
   }, [data, filters]);
 };

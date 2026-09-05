@@ -31,6 +31,8 @@ export default function DevicesPage() {
     setFilterAndSearchValues(initialFilters);
   };
 
+  
+
   return (
     <section className="p-4">
       <PageTitle title="دستگاه ها " description="داشبورد / دستگاه ها" />

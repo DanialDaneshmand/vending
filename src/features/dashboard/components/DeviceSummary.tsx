@@ -1,18 +1,9 @@
+
+"use client";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-
-interface DeviceRow {
-  id: number;
-  name: string;
-  code1: string;
-  code2: string;
-  location: string;
-  section:string;
-  status: "روشن" | "آنلاین" | "آفلاین";
-  lastSeen: string;
-  inventory: "مناسب" | "کم";
-  income: string;
-}
+import useGetDashboardInfo from "../hooks/useGetDashboardInfo";
+import React from "react";
 
 const DeviceMiniIcon = () => (
   <svg
@@ -33,143 +24,67 @@ const DeviceMiniIcon = () => (
   </svg>
 );
 
-const devicesData: DeviceRow[] = [
-  {
-    id: 1,
-    name: "وندینگ ۱۰۱",
-    code1: "VM-101",
-    code2: "VM-101",
-    location: "طبقه همکف - ورودی اصلی",
-    section:"طبقه اول",
-    status: "آفلاین",
-    lastSeen: "۲ دقیقه پیش",
-    inventory: "کم",
-    income: "۲,۴۵۰,۰۰۰",
-  },
-  {
-    id: 2,
-    name: "وندینگ ۲۰۵",
-    code1: "VM-205",
-    code2: "VM-205",
-    location: "طبقه ۲ - سالن انتظار",
-    section:"_",
-    status: "آنلاین",
-    lastSeen: "۵ دقیقه پیش",
-    inventory: "مناسب",
-    income: "۱,۸۷۰,۰۰۰",
-  },
-  {
-    id: 3,
-    name: "وندینگ ۱۱۰",
-    code1: "VM-110",
-    code2: "VM-110",
-    location: "طبقه ۱ - راهروی شرقی",
-    section:"_",
-    status: "روشن",
-    lastSeen: "۱ دقیقه پیش",
-    inventory: "مناسب",
-    income: "۱,۳۶۰,۰۰۰",
-  },
-  {
-    id: 4,
-    name: "وندینگ ۳۰۱",
-    code1: "VM-301",
-    code2: "VM-301",
-    location: "طبقه ۳ - کنار آسانسور",
-    section:"_",
-    status: "آفلاین",
-    lastSeen: "۴۵ دقیقه پیش",
-    inventory: "کم",
-    income: "۸۹۰,۰۰۰",
-  },
-  {
-    id: 5,
-    name: "وندینگ ۱۰۳",
-    code1: "VM-103",
-    code2: "VM-103",
-    location: "طبقه ۱ - لابی اصلی",
-    section:"_",
-    status: "روشن",
-    lastSeen: "۳ دقیقه پیش",
-    inventory: "مناسب",
-    income: "۱,۹۳۰,۰۰۰",
-  },
-  {
-    id: 6,
-    name: "وندینگ ۴۰۲",
-    code1: "VM-402",
-    code2: "VM-402",
-    location: "طبقه ۴ - اتاق کنفرانس",
-    section:"_",
-    status: "آفلاین",
-    lastSeen: "۲ ساعت پیش",
-    inventory: "کم",
-    income: "۰",
-  },
-  {
-    id: 7,
-    name: "وندینگ ۲۰۲",
-    code1: "VM-202",
-    code2: "VM-202",
-    location: "طبقه ۲ - سالن پذیرایی",
-    section:"_",
-    status: "آنلاین",
-    lastSeen: "۱ دقیقه پیش",
-    inventory: "مناسب",
-    income: "۱,۵۴۰,۰۰۰",
-  },
-  {
-    id: 8,
-    name: "وندینگ ۳۰۵",
-    code1: "VM-305",
-    code2: "VM-305",
-    location: "طبقه ۳ - انتهای راهرو",
-    section:"_",
-    status: "آنلاین",
-    lastSeen: "۷ دقیقه پیش",
-    inventory: "مناسب",
-    income: "۱,۳۲۰,۰۰۰",
-  },
-  {
-    id: 9,
-    name: "وندینگ ۱۰۵",
-    code1: "VM-105",
-    code2: "VM-105",
-    location: "طبقه ۱ - کنار در خروج",
-    section:"_",
-    status: "آفلاین",
-    lastSeen: "۳۵ دقیقه پیش",
-    inventory: "کم",
-    income: "۶۴۰,۰۰۰",
-  },
-  {
-    id: 10,
-    name: "وندینگ ۴۰۱",
-    code1: "VM-401",
-    code2: "VM-401",
-    location: "طبقه ۴ - ورودی شمالی",
-    section:"_",
-    status: "آنلاین",
-    lastSeen: "۲ دقیقه پیش",
-    inventory: "مناسب",
-    income: "۱,۷۸۰,۰۰۰",
-  },
-];
+const getStatusText = (status: string) => {
+  switch (status) {
+    case "online": return "آنلاین";
+    case "offline": return "آفلاین";
+    case "pending": return "در انتظار";
+    default: return status;
+  }
+};
+
+const getInventoryText = (status: string) => {
+  return status === "ok" ? "مناسب" : "کم";
+};
 
 export default function DeviceSummary() {
+  const { dashboardInfo, isgettingDashboardInfo } = useGetDashboardInfo();
+  console.log(dashboardInfo);
   
-  const filteredAndSortedDevices = devicesData
-    .filter(device => device.status !== "آنلاین") 
-    .sort((a, b) => {
-      if (a.status === "آفلاین" && b.status === "روشن") return -1; 
-      if (a.status === "روشن" && b.status === "آفلاین") return 1;  
-      return 0; 
-    });
+
+  // ۱. دریافت دیتای واقعی از بک‌اِند
+  const allDevices = dashboardInfo?.recent_devices || [];
+
+  // ۲. اعمال منطق فیلتر و مرتب‌سازی (دقیقاً مشابه کد استاتیک شما)
+  const filteredAndSortedDevices = React.useMemo(() => {
+    return allDevices
+      .filter((device: any) => device.status !== "online") // حذف آنلاین‌ها
+      .sort((a: any, b: any) => {
+        // اولویت با آفلاین‌ها (بالا قرار بگیرند)
+        if (a.status === "offline" && b.status !== "offline") return -1;
+        if (b.status === "offline" && a.status !== "offline") return 1;
+        return 0;
+      });
+  }, [allDevices]);
+
+  // نمایش Skeleton در زمان لودینگ
+  if (isgettingDashboardInfo) {
+    return (
+      <div className="bg-white h-full rounded-lg p-4 shadow-sm border border-gray-100 overflow-hidden animate-pulse" dir="rtl">
+        <div className="flex justify-between items-center pb-4">
+          <div className="w-32 h-5 bg-gray-200 rounded" />
+          <div className="w-20 h-4 bg-gray-200 rounded" />
+        </div>
+        <div className="flex flex-col gap-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-gray-200 rounded" />
+                <div className="w-24 h-3 bg-gray-200 rounded" />
+              </div>
+              <div className="w-16 h-3 bg-gray-100 rounded" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className=" bg-white h-full rounded-lg p-4 shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-white h-full rounded-lg p-4 shadow-sm border border-gray-100 overflow-hidden" dir="rtl">
       {/* Header */}
       <div className="flex justify-between items-center pb-4">
-        <h2 className=" font-bold text-gray-800">خلاصه دستگاه‌ها</h2>
+        <h2 className="font-bold text-gray-800">خلاصه دستگاه‌ها</h2>
         <Link
           href="/devices"
           className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700"
@@ -179,83 +94,65 @@ export default function DeviceSummary() {
         </Link>
       </div>
 
-      <div
-      className="w-full p-4 bg-white border border-gray-100 shadow-sm rounded-lg mt-4"
-      dir="rtl"
-    >
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-4xl text-right border-separate border-spacing-y-2">
-          <thead>
-            <tr className="text-gray-400 text-sm font-medium">
-              <th className="px-4 py-2 font-normal ">نام دستگاه</th>
-              <th className="px-4 py-2 font-normal text-nowrap">
-                شناسه دستگاه
-              </th>
-              <th className="px-4 py-2 font-normal text-center">مکان</th>
-              <th className="px-4 py-2 font-normal text-center">بخش</th>
-              <th className="px-4 py-2 font-normal text-nowrap text-center">
-                وضعیت دستگاه
-              </th>
-              <th className="px-4 py-2 font-normal text-nowrap text-center">
-                 موجودی
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredAndSortedDevices.map((device) => (
-              <tr
-                key={device.id}
-                className="bg-white hover:bg-slate-50 transition-colors group"
-              >
-                {/* نام دستگاه */}
-                <td className="px-4 py-3 rounded-r-lg text-nowrap border-y border-r border-gray-100 text-slate-700 text-[14px] font-medium flex items-center">
-                  <DeviceMiniIcon /> {device.name}
-                </td>
-                {/* شناسه‌ها */}
-                <td className="px-4 w-16 py-3 text-center border-y border-gray-100 text-slate-500 text-[14px]">
-                  {device.code2}
-                </td>
-                {/* مکان */}
-                <td className="px-4 text-center py-3 border-y border-gray-100 text-slate-500 text-[13px] text-nowrap">
-                  {device.location}
-                </td>
-                <td className="px-4 py-3 border-y text-center border-gray-100 text-slate-500 text-[13px] text-nowrap">
-                  {device.section}
-                </td>
-                {/* وضعیت */}
-                <td className="px-4 text-center py-3 border-y border-gray-100 ">
-                  <span
-                    className={`px-3 py-1 rounded-md text-[11px] font-bold ${
-                      device.status === "روشن"
-                        ? "bg-green-50 text-green-600"
-                        : device.status === "آنلاین"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-50 text-red-500"
-                    }`}
-                  >
-                    {device.status}
-                  </span>
-                </td>
-                
-                {/* موجودی */}
-                <td className="px-4 py-3 text-center border-y border-gray-100">
-                  <span
-                    className={`px-3 py-1 rounded-md text-[11px] font-bold ${
-                      device.inventory === "مناسب"
-                        ? "bg-green-50 text-green-600"
-                        : "bg-orange-50 text-orange-500"
-                    }`}
-                  >
-                    {device.inventory}
-                  </span>
-                </td>
+      {/* Table Section */}
+
+      <div className="w-full p-4 bg-white border border-gray-100 shadow-sm rounded-lg mt-4">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-4xl text-right border-separate border-spacing-y-2">
+            <thead className="text-gray-400 text-sm font-medium">
+              <tr>
+                <th className="px-4 py-2 font-normal text-right">نام دستگاه</th>
+                <th className="px-4 py-2 font-normal text-center">شناسه دستگاه</th>
+                <th className="px-4 py-2 font-normal text-center">مکان</th>
+                <th className="px-4 py-2 font-normal text-center">بخش</th>
+                <th className="px-4 py-2 font-normal text-center">وضعیت دستگاه</th>
+                <th className="px-4 py-2 font-normal text-center">موجودی</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        
+            </thead>
+            <tbody>
+              {filteredAndSortedDevices.length > 0 ? (
+                filteredAndSortedDevices.map((device: any) => (
+                  <tr key={device.id} className="bg-white hover:bg-slate-50 transition-colors group">
+                    <td className="px-4 py-3 rounded-r-lg border-y border-r border-gray-100 text-slate-700 text-[14px] font-medium flex items-center">
+                      <DeviceMiniIcon /> {device.name || device.device_code}
+                    </td>
+                    <td className="px-4 py-3 text-center border-y border-gray-100 text-slate-500 text-[14px]">
+                      {device.device_code}
+                    </td>
+                    <td className="px-4 py-3 text-center border-y border-gray-100 text-slate-500 text-[13px] text-nowrap">
+                      {device.location_name}
+                    </td>
+                    <td className="px-4 py-3 text-center border-y border-gray-100 text-slate-500 text-[13px] text-nowrap">
+                      {device.section_name || "_"}
+                    </td>
+                    <td className="px-4 py-3 text-center border-y border-gray-100">
+                      <span className={`px-3 py-1 rounded-md text-[11px] font-bold ${
+                        device.status === "online" ? "bg-green-50 text-green-600" : 
+                        device.status === "offline" ? "bg-red-50 text-red-500" : "bg-blue-50 text-blue-600"
+                      }`}>
+                        {getStatusText(device.status)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center border-y border-gray-100">
+                      <span className={`px-3 py-1 rounded-md text-[11px] font-bold ${
+                        device.inventory_status === "ok" ? "bg-green-50 text-green-600" : "bg-orange-50 text-orange-500"
+                      }`}>
+                        {getInventoryText(device.inventory_status)}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="py-10 text-center text-gray-400 text-sm">
+                    هیچ دستگاهی با وضعیت مورد نظر یافت نشد.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table >
+        </div>
       </div>
-    </div>
     </div>
   );
 }

@@ -37,7 +37,7 @@ const UserTable = () => {
   // States for Search and Filters
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("active");
 
   // --- Hooks ---
   const { userList, isgettigUserList } = UseGetUserList();
@@ -153,7 +153,7 @@ const UserTable = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="text-sm p-2 w-full rounded-sm border border-gray-200 outline-none text-gray-500"
+              className="text-sm p-2.5 w-full rounded-lg border border-slate-200 outline-none text-slate-500 transition-all focus:border-blue-400"
             >
               <option value="">همه وضعیت‌ها</option>
               <option value="active">فعال</option>
@@ -227,7 +227,7 @@ const UserTable = () => {
                             ) && (
                               <Link
                                 href={`/roles-users/${user.id}`}
-                                className="cursor-pointer border border-gray-400 hover:border-blue-600 px-2 rounded-sm text-xs font-medium transition-all"
+                                className="cursor-pointer border py-1 hover:text-blue-600 border-gray-400 hover:border-blue-600 px-2 rounded-sm text-xs font-medium transition-all"
                               >
                                 <span>تعریف دسترسی</span>
                               </Link>

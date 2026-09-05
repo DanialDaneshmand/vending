@@ -1,3 +1,4 @@
+
 "use client";
 
 import FilterContainer from "@/components/shared/FilterContainer";
@@ -5,7 +6,8 @@ import PageTitle from "@/components/shared/PageTitle";
 import AlertList from "@/features/alerts/components/AlertList";
 import AlertStats from "@/features/alerts/components/AlertsStatus";
 import RecentReports from "@/features/alerts/components/RecentReports";
-import { useState } from "react";
+import useGetAlertList from "@/features/alerts/hooks/useGetAlertList";
+import { useState, useMemo } from "react";
 
 interface ChangeHandlerEvent {
   target: {
@@ -14,93 +16,123 @@ interface ChangeHandlerEvent {
   };
 }
 
+// اصلاح مقادیر مطابق با دیتای سرور
 const optionsMap = {
-  places: { title: "مکان", options: ["همه وضعیت ها", "فعال", "غیر فعال"] },
-  alertType: { title: "نوع هشدار", options: ["شهر ها", "تهران", "مشهد"] },
-  status: { title: "وضعیت", options: ["شهر ها", "تهران", "مشهد"] },
-  intensity: { title: "شدت", options: ["شهر ها", "تهران", "مشهد"] },
+  places: { 
+    title: "مکان", 
+    options: [
+      { id: "all", name: "همه مکان ها" },
+      { id: "tehran", name: "تهران" },
+      { id: "mashhad", name: "مشهد" },
+    ] 
+  },
+  alertType: { 
+    title: "نوع هشدار", 
+    options: [
+      { id: "all", name: "همه انواع" },
+      { id: "hardware_error", name: "خطای سخت‌افزاری" },
+      { id: "network_error", name: "خطای شبکه" },
+    ] 
+  },
+  status: { 
+    title: "وضعیت", 
+    options: [
+      { id: "all", name: "همه وضعیت ها" },
+      { id: "resolved", name: "حل شده" },
+      { id: "unresolved", name: "حل نشده" },
+    ] 
+  },
+  intensity: { 
+    title: "شدت", 
+    options: [
+      { id: "all", name: "همه شدت ها" },
+      { id: "critical", name: "بحرانی" },
+      { id: "warning", name: "بالا" },
+      { id: "info", name: "متوسط" },
+    ] 
+  },
 };
 
-export default function page() {
+export default function Page() {
   const [filterValues, setFilterValues] = useState({
-    places: "همه مکان ها",
-    alertType: "همه انواع",
-    status: "همه وضعیت ها",
-    intensity: "همه شدت ها",
-  });
+  places: "all",
+  alertType: "all",
+  status: "all",
+  intensity: "all",
+});
+
+  const { alertList, isGettingAlertsList } = useGetAlertList();
 
   const handleInputChange = (e: ChangeHandlerEvent) => {
-    setFilterValues({
-      ...filterValues,
+    setFilterValues((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
-  //   const filteredUsers = useMemo(() => {
-  //     return users.filter((user) => {
-  //       const matchesSearch = user.name.includes(filterAndSearchValues.search);
+  const handleClearFilters = () => {
+  setFilterValues({
+  places: "all",
+  alertType: "all",
+  status: "all",
+  intensity: "all",
+});
+};
 
-  //       const matchesStatus =
-  //         filterAndSearchValues.status === "همه وضعیت ها" ||
-  //         user.statusText.trim() === filterAndSearchValues.status.trim();
+  const filteredAlerts = useMemo(() => {
+  const items = alertList?.items || [];
 
-  //       const matchesCity =
-  //         filterAndSearchValues.city === "شهر ها" ||
-  //         user.city.trim() === filterAndSearchValues.city.trim();
+  return items.filter((alert: any) => {
+    const matchesIntensity = 
+      filterValues.intensity === "all" || 
+      alert.severity === filterValues.intensity;
 
-  //       const userDate = new DateObject({
-  //         date: user.registerDate,
-  //         format: "YYYY/MM/DD",
-  //         calendar: persian,
-  //         locale: persian_fa,
-  //       });
+    const matchesType = 
+      filterValues.alertType === "all" || 
+      alert.type === filterValues.alertType;
 
-  //       const fromDate = filterAndSearchValues.fromDate
-  //         ? new DateObject({
-  //             date: filterAndSearchValues.fromDate,
-  //             format: "YYYY/MM/DD",
-  //             calendar: persian,
-  //             locale: persian_fa,
-  //           })
-  //         : null;
+    let matchesStatus = true;
+    if (filterValues.status !== "all") {
+      if (filterValues.status === "resolved") matchesStatus = alert.resolved === true;
+      else if (filterValues.status === "unresolved") matchesStatus = alert.resolved === false;
+    }
 
-  //       const toDate = filterAndSearchValues.toDate
-  //         ? new DateObject({
-  //             date: filterAndSearchValues.toDate,
-  //             format: "YYYY/MM/DD",
-  //             calendar: persian,
-  //             locale: persian_fa,
-  //           })
-  //         : null;
+    const matchesPlace = 
+      filterValues.places === "all" || 
+      alert.location === filterValues.places;
 
-  //       const matchesDate =
-  //         (!fromDate || userDate.valueOf() >= fromDate.valueOf()) &&
-  //         (!toDate || userDate.valueOf() <= toDate.valueOf());
+    return matchesIntensity && matchesType && matchesStatus && matchesPlace;
+  });
+}, [alertList, filterValues]);
 
-  //       return matchesSearch && matchesStatus && matchesCity && matchesDate;
-  //     });
-  //   }, [filterAndSearchValues]);
   return (
-    <section className=" p-4">
+    <section className="p-4">
       {/* Page Title */}
       <PageTitle title="هشدار ها" description="داشبورد / هشدارها" />
+
       {/* Filter Container */}
       <FilterContainer
         filterValues={filterValues}
         handleInputChange={handleInputChange}
-        className="grid xl:grid-cols-5 gap-4 py-4 grid-cols-2 "
+        className="grid xl:grid-cols-5 gap-4 py-4 grid-cols-2"
         optionsMap={optionsMap}
         isClearFilter
+        onClearFilters={handleClearFilters}
       />
+
       {/* Alert Status Cards */}
       <AlertStats />
-      {/* Recent Reports */}
+
+      {/* Main Content Area */}
       <div className="grid grid-cols-12 pt-4 gap-x-4">
         <div className="col-span-12 xl:col-span-3">
           <RecentReports />
         </div>
         <div className="col-span-12 xl:col-span-9">
-          <AlertList/>
+          <AlertList 
+            data={filteredAlerts} 
+            isLoading={isGettingAlertsList} 
+          />
         </div>
       </div>
     </section>

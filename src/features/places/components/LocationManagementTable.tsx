@@ -118,6 +118,9 @@ export default function LocationManagement() {
     }
   };
 
+  console.log(locations);
+  
+
   return (
     <div className="p-4 border border-gray-100 rounded-lg shadow-sm">
       {/* بخش دکمه افزودن */}

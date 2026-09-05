@@ -13,7 +13,7 @@ interface ChangeHandlerEvent {
 
 interface OptionType {
   id: string;
-  title: string;
+  name: string;
 }
 
 interface SelectInputProps<T> {
@@ -54,13 +54,13 @@ export default function SelectInput<T>({
     const selectedOption = options?.find((opt) => opt.id === currentValue);
 
     // اگر آپشن پیدا شد عنوانش رو برگردون، در غیر این صورت خود مقدار رو نشون بده
-    return selectedOption ? selectedOption.title : currentValue;
+    return selectedOption ? selectedOption.name : currentValue;
   };
 
   const label = getLabel();
 
   return (
-    <div dir="rtl" className="relative flex flex-col w-full" ref={ref}>
+    <div dir="rtl" className="relative w-full! flex flex-col" ref={ref}>
       {/* Label */}
       <label className="text-sm mb-2 mr-1 text-gray-800">
         {title}
@@ -113,7 +113,7 @@ export default function SelectInput<T>({
                 ${(filterValues as any)[name] === item.id ? "bg-gray-100 font-medium" : ""}
               `}
             >
-              {item.title}
+              {item.name}
             </button>
           ))}
         </div>

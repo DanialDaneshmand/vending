@@ -1,92 +1,97 @@
+
+"use client";
+
+import useGetDevice_Detail from "@/shared/hooks/useGetDeviceDetail";
 import { Laptop, Send } from "lucide-react";
-import { useState } from "react";
-
-export interface IDevice {
-  id: string;
-  name: string;
-  deviceId: string;
-  location: string;
-  ip: string;
-  toggleTime: string | number;
-  toggleGap: string | number;
-  toggleCount: string | number;
-  price: string | number;
-}
-
-const initialDevices = [
-  {
-    id: "1",
-    name: "وندینگ ۱۰۱",
-    deviceId: "VM-101",
-    location: "تهران - میدان ونک",
-    ip: "192.168.1.21",
-    toggleTime: "300",
-    toggleGap: "500",
-    toggleCount: "1",
-    price: "120,000",
-  },
-  {
-    id: "2",
-    name: "وندینگ ۲۰۵",
-    deviceId: "VM-205",
-    location: "اصفهان - خیابان آزگانه",
-    ip: "192.168.1.22",
-    toggleTime: "500",
-    toggleGap: "1000",
-    toggleCount: "2",
-    price: "150,000",
-  },
-  {
-    id: "3",
-    name: "وندینگ ۱۱۰",
-    deviceId: "VM-110",
-    location: "مشهد - بلوار وکیل‌آباد",
-    ip: "192.168.1.23",
-    toggleTime: "300",
-    toggleGap: "500",
-    toggleCount: "1",
-    price: "110,000",
-  },
-  {
-    id: "4",
-    name: "وندینگ ۳۰۱",
-    deviceId: "VM-301",
-    location: "شیراز - خیابان زند",
-    ip: "192.168.1.24",
-    toggleTime: "900",
-    toggleGap: "1000",
-    toggleCount: "2",
-    price: "140,000",
-  },
-  {
-    id: "5",
-    name: "وندینگ ۱۰۳",
-    deviceId: "VM-103",
-    location: "تبریز - یک عصر شمالی",
-    ip: "192.168.1.25",
-    toggleTime: "300",
-    toggleGap: "500",
-    toggleCount: "3",
-    price: "130,000",
-  },
-];
+import { useParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useUpdatePrice } from "../hooks/useUpdatePrice";
+import toast from "react-hot-toast";
+import useGetToggle from "../hooks/useGetToggle";
+import { useUpdateToggle } from "../hooks/useUpdateToggle";
 
 export default function DeviceSetting() {
-      const [formData, setFormData] = useState<IDevice>(initialDevices[0]);
-    
-    const handleInputChange = (
-        e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>,
-      ) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-      };
+  const { deviceId } = useParams();
+  const { device, isGettingDevice } = useGetDevice_Detail(deviceId as string);
+  const { isUpdatingPrice, updatePrice } = useUpdatePrice();
+  const { isUpdatingToggle, updateToggle } = useUpdateToggle();
+  const { isGettingToggle, toggle } = useGetToggle();
+  
+
+  const [formData, setFormData] = useState({
+    name: "",
+    price: 0,
+    toggle_interval_s: 0,
+    toggle_duration_s: 0,
+    toggle_count: 0,
+  });
+
+  useEffect(() => {
+    // 1. Populate Basic Device Info
+    if (device) {
+      setFormData((prev) => ({
+        ...prev,
+        name: device.name,
+        price: device.price || 0,
+      }));
+    }
+
+    // 2. Find specific toggle settings for this device from the items list
+    if (toggle?.items && deviceId) {
+      const deviceToggle = toggle.items.find(
+        (item: any) => item.device_id === (deviceId as string)
+      );
+
+      if (deviceToggle) {
+        setFormData((prev) => ({
+          ...prev,
+          toggle_interval_s: deviceToggle.toggle_interval_s || 0,
+          toggle_duration_s: deviceToggle.toggle_duration_s || 0,
+          toggle_count: deviceToggle.toggle_count || 0,
+        }));
+      }
+    }
+  }, [device, toggle, deviceId]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveSettings = async () => {
+    if (!deviceId) return;
+    try {
+      await Promise.all([
+        updatePrice({
+          deviceId: deviceId as string,
+          payload: { price: Number(formData.price) },
+        }),
+        updateToggle({
+          deviceId: deviceId as string,
+          payload: {
+            toggle_interval_s: Number(formData.toggle_interval_s),
+            toggle_duration_s: Number(formData.toggle_duration_s),
+            toggle_count: Number(formData.toggle_count),
+          },
+        }),
+      ]);
+      toast.success("تنظیمات با موفقیت به‌روزرسانی شد!");
+    } catch (error) {
+      toast.error("خطا در به‌روزرسانی تنظیمات.");
+    }
+  };
+
+  if (isGettingDevice) {
+    return <div className="h-full w-full bg-gray-100 animate-pulse rounded-lg" />;
+  }
+
   return (
     <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 h-full flex flex-col">
-      {/* هدر پنل تنظیمات */}
       <div className="flex items-center justify-between mb-8">
         <div className="text-left">
-          
-          <h2 className="text-slate-800 font-bold text-lg">{formData.name}</h2>
+          <h2 className="text-slate-800 font-bold text-lg">
+            {formData.name || "در حال بارگذاری..."}
+          </h2>
         </div>
         <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
           <Laptop size={24} />
@@ -94,64 +99,48 @@ export default function DeviceSetting() {
       </div>
 
       <div className="space-y-6 flex-1">
-        {/* بخش قیمت */}
         <div className="space-y-2">
-          <label className="text-xs text-slate-500 block text-right">
-            قیمت (ریال)
-          </label>
+          <label className="text-xs text-slate-500 block text-right">قیمت (ریال)</label>
           <input
             name="price"
+            type="number"
             value={formData.price}
+
             onChange={handleInputChange}
             className="w-full p-3 bg-slate-50 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500 transition-all text-left"
           />
         </div>
 
-        {/* بخش POS */}
-        <div className="space-y-2">
-          <label className="text-xs text-slate-500 block text-right">
-            IP دستگاه POS
-          </label>
-          <input
-            name="ip"
-            value={formData.ip}
-            onChange={handleInputChange}
-            className="w-full p-3 bg-slate-50 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500 transition-all text-left"
-          />
-        </div>
-
-        {/* بخش تنظیمات تاگل */}
         <div className="space-y-4">
-          <h4 className="text-sm font-bold text-slate-700 border-b pb-2">
-            تنظیمات Toggle
-          </h4>
+          <h4 className="text-sm font-bold text-slate-700 border-b pb-2">تنظیمات Toggle</h4>
 
           <div className="flex items-center justify-between gap-4">
             <input
-              name="toggleTime"
-              value={formData.toggleTime}
+              name="toggle_duration_s"
+              type="number"
+              value={formData.toggle_duration_s}
               onChange={handleInputChange}
               className="w-24 p-2 bg-slate-50 border border-gray-200 rounded-lg text-xs text-center outline-none focus:border-blue-500"
             />
-            <span className="text-xs text-slate-500">زمان toggle (ms)</span>
+            <span className="text-xs text-slate-500">زمان toggle (s)</span>
           </div>
 
           <div className="flex items-center justify-between gap-4">
             <input
-              name="toggleGap"
-              value={formData.toggleGap}
+              name="toggle_interval_s"
+              type="number"
+              value={formData.toggle_interval_s}
               onChange={handleInputChange}
               className="w-24 p-2 bg-slate-50 border border-gray-200 rounded-lg text-xs text-center outline-none focus:border-blue-500"
             />
-            <span className="text-xs text-slate-500">
-              فاصله بین تاگل‌ها (ms)
-            </span>
+            <span className="text-xs text-slate-500">فاصله بین تاگل‌ها (s)</span>
           </div>
 
           <div className="flex items-center justify-between gap-4">
             <input
-              name="toggleCount"
-              value={formData.toggleCount}
+              name="toggle_count"
+              type="number"
+              value={formData.toggle_count}
               onChange={handleInputChange}
               className="w-24 p-2 bg-slate-50 border border-gray-200 rounded-lg text-xs text-center outline-none focus:border-blue-500"
             />
@@ -160,10 +149,19 @@ export default function DeviceSetting() {
         </div>
       </div>
 
-      {/* دکمه ارسال */}
-      <button className="w-full bg-blue-600  text-white font-bold py-3 rounded-lg cursor-pointer transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-200 mt-8">
-        <span>ارسال به دستگاه</span>
-        <Send size={18} />
+      <button
+        onClick={handleSaveSettings}
+        disabled={isUpdatingPrice || isUpdatingToggle}
+        className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg cursor-pointer transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-200 mt-8 disabled:bg-gray-400 disabled:shadow-none"
+      >
+        {isUpdatingPrice || isUpdatingToggle ? (
+          <span className="animate-pulse">در حال ارسال...</span>
+        ) : (
+          <>
+            <span>ارسال به دستگاه</span>
+            <Send size={18} />
+          </>
+        )}
       </button>
     </div>
   );
