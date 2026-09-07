@@ -13,7 +13,7 @@ interface TransactionItem {
   section_id: string;
   device_id: string;
   device_name: string;
-  amount: number;
+  game_count: number;
   total: number;
 }
 
@@ -130,7 +130,7 @@ export default function FinancialReportTable({
                       {row.device_id}
                     </td>
                     <td className="py-4 px-2 border-b border-gray-50">
-                      {row.amount}
+                      {row.game_count||0}
                     </td>
                     <td className="py-4 px-2 border-b border-gray-50 font-bold">
                       {formatNumber(row.total)}

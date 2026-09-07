@@ -8,7 +8,9 @@ import { useCreateRepair } from "@/features/repairs/hooks/useCreateRepair";
 import useGetDeviceRepairs from "@/features/repairs/hooks/useGetDeviceRepairs";
 import { useUpdateRepair } from "@/features/repairs/hooks/useUpdateRepair";
 import { useDeleteRepair } from "@/features/repairs/hooks/useDeleteReapir";
-
+import UseGetProfile from "@/shared/hooks/useGetProfile"; // اضافه شد
+import { hasActionPermission } from "@/shared/permisseions/permissionUtils"; // اضافه شد
+import { formatToPersianDate } from "@/utils/formatToPersianDate";
 
 interface RepairItem {
   id: string;
@@ -26,11 +28,14 @@ const RepairsTab: React.FC = () => {
   const { updateRepair, isUpdaingRepair } = useUpdateRepair();
   const { deleteRepair, isDeletingRepair } = useDeleteRepair();
 
+  // --- Auth & Profile ---
+  const { isgettingprofile, profile } = UseGetProfile(); // اضافه شد
+
   // استیت‌ها برای فرم ثبت جدید
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  // استیت‌ها برای ویرایش (حالا شامل عنوان هم می‌شود)
+  // استیت‌ها برای ویرایش
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
@@ -38,12 +43,16 @@ const RepairsTab: React.FC = () => {
   const repairsList = deviceRepairs?.items || [];
 
   const handleAddRepair = async () => {
+    // ✅ لایه امنیتی: چک دسترسی در لحظه ثبت
+    if (!hasActionPermission(profile?.role, 'canEdit')) {
+      alert("شما دسترسی ثبت تعمیر را ندارید");
+      return;
+    }
+
     if (!title.trim() || !description.trim()) {
       alert("لطفاً عنوان و توضیحات را وارد کنید");
       return;
     }
-
-    
 
     try {
       const payload = {
@@ -67,13 +76,18 @@ const RepairsTab: React.FC = () => {
   };
 
   const handleUpdate = async (id: string) => {
+    // ✅ لایه امنیتی: چک دسترسی در لحظه ویرایش
+    if (!hasActionPermission(profile?.role, 'canEdit')) {
+      alert("شما دسترسی ویرایش را ندارید");
+      return;
+    }
+
     if (!editTitle.trim() || !editDescription.trim()) {
       alert("لطفاً عنوان و توضیحات را وارد کنید");
       return;
     }
 
     try {
-      // طبق فرمت درخواستی شما: { repairId: string, payload: { title, description } }
       await updateRepair({
         repairId: id,
         payload: {
@@ -88,6 +102,13 @@ const RepairsTab: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
+    // ✅ لایه امنیتی: چک دسترسی در لحظه حذف
+
+    if (!hasActionPermission(profile?.role, 'canDelete')) {
+      alert("شما دسترسی حذف این رکورد را ندارید");
+      return;
+    }
+
     if (window.confirm("آیا از حذف این رکورد مطمئن هستید؟")) {
       try {
         await deleteRepair(id);
@@ -98,7 +119,6 @@ const RepairsTab: React.FC = () => {
   };
 
   const SkeletonItem = () => (
-
     <div className="flex flex-col sm:flex-row justify-between p-4 bg-white border border-gray-100 rounded-xl gap-4 animate-pulse">
       <div className="flex-1 space-y-2">
         <div className="h-4 bg-gray-200 rounded w-1/3"></div>
@@ -124,101 +144,120 @@ const RepairsTab: React.FC = () => {
         </div>
 
         {/* Form */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end mb-10">
-          <div className="md:col-span-5">
-            <label className="block text-xs font-medium text-slate-500 mb-2">عنوان تعمیر</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="مثلاً: تعویض باتری"
-              className="w-full px-3 rounded-lg h-11 border border-gray-200 outline-none transition-all text-sm"
-            />
+        {/* ✅ کنترل دسترسی: فرم ثبت جدید فقط برای کاربران مجاز نمایش داده شود */}
+        {hasActionPermission(profile?.role, 'canEdit') && (
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end mb-10">
+            <div className="md:col-span-5">
+              <label className="block text-sm font-medium text-slate-600 mb-1">عنوان تعمیر</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="مثلاً تعویض منبع تغذیه"
+                className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+            {/* باقی‌مانده فرم طبق استایل شما قرار می‌گیرد... */}
+            <div className="md:col-span-5">
+                <label className="block text-sm font-medium text-slate-600 mb-1">توضیحات</label>
+                <input
+                  type="text"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="توضیحات تکمیلی تعمیر"
+                  className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+            </div>
+            <div className="md:col-span-2">
+              <button
+                onClick={handleAddRepair}
+                disabled={isCreatingRepair}
+                className="w-full py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 disabled:bg-gray-300 transition-colors flex items-center justify-center gap-2"
+              >
+                {isCreatingRepair ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
+                ثبت تعمیر
+              </button>
+            </div>
           </div>
-          <div className="md:col-span-5">
-            <label className="block text-xs font-medium text-slate-500 mb-2">توضیحات</label>
-            <input
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="جزئیات بیشتر..."
-              className="w-full px-3 rounded-lg h-11 border border-gray-200 outline-none transition-all text-sm"
-            />
-          </div>
-          <div className="md:col-span-2">
-            <button
-              onClick={handleAddRepair}
-              disabled={isCreatingRepair}
-              className="w-full h-11 flex items-center justify-center bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-all"
-            >
-              {isCreatingRepair ? <Loader2 size={20} className="animate-spin" /> : <Plus size={20} />}
-            </button>
-          </div>
-        </div>
+        )}
 
-        {/* History List */}
+        {/* List Section */}
         <div className="space-y-4">
-          <h2 className="text-sm font-bold text-slate-600 mb-4">سوابق تعمیرات</h2>
+          {isgettingDeviceRepairs || isgettingprofile ? (
+            <>
+              <SkeletonItem />
+              <SkeletonItem />
+              <SkeletonItem />
+            </>
+          ) : repairsList.length > 0 ? (
+            repairsList.map((item: RepairItem) => (
+              <div key={item.id} className="flex flex-col sm:flex-row justify-between p-4 bg-white border border-gray-100 rounded-xl gap-4 transition-all hover:shadow-sm">
+                <div className="flex-1 space-y-2">
 
-          {isgettingDeviceRepairs ? (
-            <div className="space-y-3">
-              {[...Array(3)].map((_, i) => <SkeletonItem key={i} />)}
-            </div>
-          ) : repairsList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-slate-400 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-              <Wrench size={48} className="mb-3 opacity-20" />
-              <p className="text-sm">هیچ تعمیراتی ثبت نشده است.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-3">
-              {repairsList.map((item:any) => (
-                <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white border border-gray-100 rounded-xl hover:border-blue-200 transition-all shadow-sm group gap-4">
                   {editingId === item.id ? (
-                    <div className="flex flex-col sm:flex-row flex-1 gap-3 items-center w-full">
+                    <div className="space-y-2">
                       <input
-                        type="text"
+                        className="w-full p-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
-                        placeholder="عنوان"
-
-                        className="w-full px-2 rounded-lg h-11 border border-gray-200 outline-none text-sm"
                       />
-                      <input
-                        type="text"
+                      <textarea
+                        className="w-full p-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
                         value={editDescription}
                         onChange={(e) => setEditDescription(e.target.value)}
-                        placeholder="توضیحات"
-                        className="w-full px-2 rounded-lg h-11 border border-gray-200 outline-none text-sm"
                       />
-                      <div className="flex gap-1 shrink-0">
-                        <button onClick={() => handleUpdate(item.id)} disabled={isUpdaingRepair} className="p-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-all">
-                          {isUpdaingRepair ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
-                        </button>
-                        <button onClick={() => setEditingId(null)} className="p-2 bg-slate-200 text-slate-600 rounded-lg hover:bg-slate-300 transition-all"><X size={16} /></button>
-                      </div>
                     </div>
                   ) : (
                     <>
-                      <div className="flex flex-col gap-1 flex-1 min-w-0 overflow-hidden">
-                        <div className="text-blue-600 font-semibold text-sm">{item.title}</div>
-                        <div className="text-slate-800 font-medium text-sm wrap-break-word whitespace-normal leading-relaxed">{item.description}</div>
-                        <p className="text-slate-400 text-xs">{item.created_at ? new Date(item.created_at).toLocaleDateString('fa-IR') : ""}</p>
-                      </div>
-                      <div className="flex gap-2 shrink-0 self-end sm:self-center">
-                        <button onClick={() => startEdit(item)} className="p-2 cursor-pointer text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><Edit3 size={18} /></button>
-                        <button 
-                          onClick={() => handleDelete(item.id)} 
-                          disabled={isDeletingRepair}
-                          className="p-2 cursor-pointer text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
-                        >
-                          {isDeletingRepair ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
-                        </button>
-                      </div>
+                      <h3 className="font-bold text-slate-800">{item.title}</h3>
+                      <p className="text-sm text-slate-500">{item.description}</p>
+                      <span className="text-[10px] text-slate-400">{formatToPersianDate(item.created_at)}</span>
                     </>
                   )}
                 </div>
-              ))}
-            </div>
+
+                <div className="flex gap-2  items-center">
+                  {editingId === item.id ? (
+                    <>
+                      <button 
+                        onClick={() => handleUpdate(item.id)}
+                        className="p-2 h-8 bg-emerald-100 text-emerald-600 rounded-lg hover:bg-emerald-200 transition-colors"
+                      >
+                        <Check size={18} />
+                      </button>
+                      <button 
+                        onClick={() => setEditingId(null)}
+                        className="p-2 h-8 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                      >
+                        <X size={18} />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {/* ✅ کنترل دسترسی: دکمه ویرایش و حذف فقط برای کاربران مجاز */}
+                      {hasActionPermission(profile?.role, 'canEdit') && (
+                        <button 
+                          onClick={() => startEdit(item)}
+                          className="p-2  text-slate-600 rounded-lg  transition-colors"
+                        >
+                          <Edit3 size={18} />
+                        </button>
+                      )}
+                      {hasActionPermission(profile?.role, 'canDelete') && (
+                        <button 
+                          onClick={() => handleDelete(item.id)}
+                          className="p-2 text-slate-600 rounded-lg  hover:text-red-600 transition-colors"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-10 text-slate-400">هیچ رکورد تعمیراتی یافت نشد.</div>
           )}
         </div>
       </div>

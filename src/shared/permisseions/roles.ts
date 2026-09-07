@@ -1,3 +1,4 @@
+
 export type Role = 'super_admin' | 'technical_support' | 'location_manager' | 'operator' | 'accounting' | 'central_viewer';
 
 export enum PermissionLevel {
@@ -17,11 +18,12 @@ export const ROLE_PERMISSIONS: Record<Role, { level: PermissionLevel; canEdit: b
   central_viewer: { level: PermissionLevel.LEVEL_5, canEdit: false, canDelete: false, canCreate: false },
 };
 
+// اصلاح ترتیب برای تطبیق با PermissionLevel
 export const ROLE_OPTIONS = [
   { id: "1", label: "مدیر کل", value: "super_admin" },
-  { id: "2", label: "پشتیبانی فنی ", value: "technical_support" },
+  { id: "2", label: "پشتیبانی فنی", value: "technical_support" },
   { id: "3", label: "مدیر مجموعه", value: "location_manager" },
-  { id: "4", label: "پشتیبانی مرکزی", value: "central_viewer" },
-  { id: "5", label: "حسابدار", value: "accounting" },
-  { id: "6", label: "اپراتور", value: "operator" },
+  { id: "4", label: "اپراتور", value: "operator" }, 
+  { id: "5", label: "حسابدار", value: "accounting" }, 
+  { id: "6", label: "پشتیبانی مرکزی", value: "central_viewer" }, 
 ];

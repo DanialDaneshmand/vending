@@ -1,9 +1,9 @@
-
 "use client";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import useGetDashboardInfo from "../hooks/useGetDashboardInfo";
 import React from "react";
+import UseGetDevicesList from "@/shared/hooks/useGetDevicesList";
 
 const DeviceMiniIcon = () => (
   <svg
@@ -26,10 +26,14 @@ const DeviceMiniIcon = () => (
 
 const getStatusText = (status: string) => {
   switch (status) {
-    case "online": return "آنلاین";
-    case "offline": return "آفلاین";
-    case "pending": return "در انتظار";
-    default: return status;
+    case "online":
+      return "آنلاین";
+    case "offline":
+      return "آفلاین";
+    case "pending":
+      return "در انتظار";
+    default:
+      return status;
   }
 };
 
@@ -39,11 +43,12 @@ const getInventoryText = (status: string) => {
 
 export default function DeviceSummary() {
   const { dashboardInfo, isgettingDashboardInfo } = useGetDashboardInfo();
-  console.log(dashboardInfo);
+  const { devicesList, isGettingDevicesList } = UseGetDevicesList();
+
   
 
   // ۱. دریافت دیتای واقعی از بک‌اِند
-  const allDevices = dashboardInfo?.recent_devices || [];
+  const allDevices = devicesList?.items|| [];
 
   // ۲. اعمال منطق فیلتر و مرتب‌سازی (دقیقاً مشابه کد استاتیک شما)
   const filteredAndSortedDevices = React.useMemo(() => {
@@ -60,14 +65,20 @@ export default function DeviceSummary() {
   // نمایش Skeleton در زمان لودینگ
   if (isgettingDashboardInfo) {
     return (
-      <div className="bg-white h-full rounded-lg p-4 shadow-sm border border-gray-100 overflow-hidden animate-pulse" dir="rtl">
+      <div
+        className="bg-white h-full rounded-lg p-4 shadow-sm border border-gray-100 overflow-hidden animate-pulse"
+        dir="rtl"
+      >
         <div className="flex justify-between items-center pb-4">
           <div className="w-32 h-5 bg-gray-200 rounded" />
           <div className="w-20 h-4 bg-gray-200 rounded" />
         </div>
         <div className="flex flex-col gap-3">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50">
+            <div
+              key={i}
+              className="flex items-center justify-between py-3 border-b border-gray-50"
+            >
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-gray-200 rounded" />
                 <div className="w-24 h-3 bg-gray-200 rounded" />
@@ -81,7 +92,10 @@ export default function DeviceSummary() {
   }
 
   return (
-    <div className="bg-white h-full rounded-lg p-4 shadow-sm border border-gray-100 overflow-hidden" dir="rtl">
+    <div
+      className="bg-white h-full rounded-lg p-4 shadow-sm border border-gray-100 overflow-hidden"
+      dir="rtl"
+    >
       {/* Header */}
       <div className="flex justify-between items-center pb-4">
         <h2 className="font-bold text-gray-800">خلاصه دستگاه‌ها</h2>
@@ -102,17 +116,24 @@ export default function DeviceSummary() {
             <thead className="text-gray-400 text-sm font-medium">
               <tr>
                 <th className="px-4 py-2 font-normal text-right">نام دستگاه</th>
-                <th className="px-4 py-2 font-normal text-center">شناسه دستگاه</th>
+                <th className="px-4 py-2 font-normal text-center">
+                  شناسه دستگاه
+                </th>
                 <th className="px-4 py-2 font-normal text-center">مکان</th>
                 <th className="px-4 py-2 font-normal text-center">بخش</th>
-                <th className="px-4 py-2 font-normal text-center">وضعیت دستگاه</th>
+                <th className="px-4 py-2 font-normal text-center">
+                  وضعیت دستگاه
+                </th>
                 <th className="px-4 py-2 font-normal text-center">موجودی</th>
               </tr>
             </thead>
             <tbody>
               {filteredAndSortedDevices.length > 0 ? (
                 filteredAndSortedDevices.map((device: any) => (
-                  <tr key={device.id} className="bg-white hover:bg-slate-50 transition-colors group">
+                  <tr
+                    key={device.id}
+                    className="bg-white hover:bg-slate-50 transition-colors group"
+                  >
                     <td className="px-4 py-3 rounded-r-lg border-y border-r border-gray-100 text-slate-700 text-[14px] font-medium flex items-center">
                       <DeviceMiniIcon /> {device.name || device.device_code}
                     </td>
@@ -126,17 +147,26 @@ export default function DeviceSummary() {
                       {device.section_name || "_"}
                     </td>
                     <td className="px-4 py-3 text-center border-y border-gray-100">
-                      <span className={`px-3 py-1 rounded-md text-[11px] font-bold ${
-                        device.status === "online" ? "bg-green-50 text-green-600" : 
-                        device.status === "offline" ? "bg-red-50 text-red-500" : "bg-blue-50 text-blue-600"
-                      }`}>
+                      <span
+                        className={`px-3 py-1 rounded-md text-[11px] font-bold ${
+                          device.status === "online"
+                            ? "bg-green-50 text-green-600"
+                            : device.status === "offline"
+                              ? "bg-red-50 text-red-500"
+                              : "bg-blue-50 text-blue-600"
+                        }`}
+                      >
                         {getStatusText(device.status)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center border-y border-gray-100">
-                      <span className={`px-3 py-1 rounded-md text-[11px] font-bold ${
-                        device.inventory_status === "ok" ? "bg-green-50 text-green-600" : "bg-orange-50 text-orange-500"
-                      }`}>
+                      <span
+                        className={`px-3 py-1 rounded-md text-[11px] font-bold ${
+                          device.inventory_status === "ok"
+                            ? "bg-green-50 text-green-600"
+                            : "bg-orange-50 text-orange-500"
+                        }`}
+                      >
                         {getInventoryText(device.inventory_status)}
                       </span>
                     </td>
@@ -144,13 +174,16 @@ export default function DeviceSummary() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-10 text-center text-gray-400 text-sm">
+                  <td
+                    colSpan={6}
+                    className="py-10 text-center text-gray-400 text-sm"
+                  >
                     هیچ دستگاهی با وضعیت مورد نظر یافت نشد.
                   </td>
                 </tr>
               )}
             </tbody>
-          </table >
+          </table>
         </div>
       </div>
     </div>

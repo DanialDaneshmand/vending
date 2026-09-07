@@ -94,7 +94,7 @@ function page() {
                   </div> */}
                   <div className=" mt-8">
                     <FormBtn
-                      isLoading={isLoading}
+                      isLoading={isLoging}
                       btnTitle="ورود"
                       Icon={IoIosArrowBack}
                     />

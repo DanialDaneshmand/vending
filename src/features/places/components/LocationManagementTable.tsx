@@ -1,5 +1,4 @@
 
-
 "use client";
 import React, { useState, useEffect } from "react";
 import { MapPin, Trash2 } from "lucide-react";
@@ -13,8 +12,6 @@ import Skeleton from "react-loading-skeleton";
 import clientApi from "@/shared/clientApi/clientApi";
 import UseGetProfile from "@/shared/hooks/useGetProfile";
 import { hasActionPermission } from "@/shared/permisseions/permissionUtils";
-
-
 
 // --- کامپوننت مجزا برای هر ردیف جهت مدیریت درخواست‌های وابسته ---
 const LocationRow = ({ 
@@ -73,30 +70,25 @@ const LocationRow = ({
         {isLoadingStats ? <Skeleton width={20} /> : stats.sections}
       </td>
       <td className="p-4">
-        <div className="flex items-center justify-center gap-x-2">
-          {/* بررسی اینکه آیا کاربر به هر یک از عملیات دسترسی دارد یا خیر */}
-          {(hasActionPermission(profileRole, 'canDelete') || true) ? (
-            <>
-              <Link
-                href={`/places/${loc.id}`}
-                className="text-xs border text-gray-400 border-gray-400 py-1 px-2 hover:border-blue-600 hover:text-blue-600 rounded-sm transition-all"
-              >
-                مشاهده مجموعه
-              </Link>
+        <div className="flex items-center justify-center gap-x-3">
+          {/* دکمه مشاهده: برای همه نقش‌ها در دسترس است */}
+          <Link
+            href={`/places/${loc.id}`}
+            className="text-xs border text-gray-400 border-gray-400 py-1 px-2 hover:border-blue-600 hover:text-blue-600 rounded-sm transition-all"
+          >
+            مشاهده مجموعه
+          </Link>
 
-              {/* دکمه حذف: فقط برای لول ۱ یا کسانی که canDelete دارند */}
-              {hasActionPermission(profileRole, 'canDelete') && (
-                <button
-                  onClick={() => onDeleteId(loc.id)}
-                  className="p-2 cursor-pointer text-gray-400 hover:text-red-500 rounded-lg transition-all"
-                  title="حذف مجموعه"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
-            </>
-          ) : (
-            <span className="text-gray-400">—</span>
+          {/* دکمه حذف: فقط اگر کاربر دسترسی canDelete داشته باشد */}
+          {hasActionPermission(profileRole, 'canDelete') && (
+            <button
+              onClick={() => onDeleteId(loc.id)}
+
+              className="p-2 cursor-pointer text-gray-400 hover:text-red-500 rounded-lg transition-all"
+              title="حذف مجموعه"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
           )}
         </div>
       </td>
@@ -106,20 +98,23 @@ const LocationRow = ({
 
 // --- کامپوننت اصلی ---
 export default function LocationManagement() {
-  const { isgettingprofile, profile } = UseGetProfile();
   const [id, setId] = useState<string | undefined>(undefined);
   const [isCreate, setIsCreate] = useState(false);
   const { isGettingLocations, locations } = UseGetLocations();
   const { deleteLocation } = useDeleteLocation();
+  const { isgettingprofile, profile } = UseGetProfile();
 
   const handleConfirm = (locationId: string | undefined) => {
-    if (locationId) {
+    if (!locationId) return;
+
+    // چک امنیتی مجدد در لحظه تایید حذف
+    if (hasActionPermission(profile?.role, 'canDelete')) {
       deleteLocation(locationId);
+      setId(undefined);
+    } else {
+      console.error("شما دسترسی لازم برای حذف این مورد را ندارید.");
     }
   };
-
-  console.log(locations);
-  
 
   return (
     <div className="p-4 border border-gray-100 rounded-lg shadow-sm">
@@ -134,7 +129,7 @@ export default function LocationManagement() {
           {hasActionPermission(profile?.role, 'canCreate') && (
             <button
               onClick={() => setIsCreate(true)}
-              className="flex cursor-pointer items-center gap-2 bg-[#1D4ED8] text-white px-4 py-2.5 rounded-md transition-all font-medium text-sm"
+              className="flex cursor-pointer items-center gap-2 bg-[#1D4ED8] text-white px-4 py-2.5 rounded-md transition-all font-medium text-sm hover:bg-blue-700"
             >
               <span className="text-xs sm:text-sm">ثبت مجموعه جدید</span>
               <div className="text-xs sm:text-sm">
@@ -187,10 +182,10 @@ export default function LocationManagement() {
           </table>
 
           <ConfirmModal
-
             onClose={() => setId(undefined)}
             open={Boolean(id)}
             title="حذف مجموعه"
+
             handleConfirm={() => handleConfirm(id)}
           />
         </div>

@@ -102,7 +102,7 @@ export default function RecentAlerts() {
       {/* لیست هشدارها */}
       <div className="flex flex-col">
         {recentAlerts.length > 0 ? (
-          recentAlerts.map((alert: any, index:any) => {
+          recentAlerts?.slice(0,3).map((alert: any, index:any) => {
             const style = getAlertStyle(alert.severity);
             return (
               <div

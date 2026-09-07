@@ -1,12 +1,13 @@
 
 "use client";
 
-import { LuSearch, LuTrash2 } from "react-icons/lu"; 
-import { FaSlidersH } from "react-icons/fa"; 
+import React, { useMemo } from "react";
+import { LuSearch } from "react-icons/lu";
+import { FaSlidersH } from "react-icons/fa";
 import ReportsFilterContainer from "./ReportsFilterContainer";
-import { Dispatch, SetStateAction, useMemo } from "react";
-import { DateObject } from "react-multi-date-picker";
+import { Dispatch, SetStateAction } from "react";
 import UseGetAllSection from "@/shared/hooks/useGetAllSections";
+import useGetTransactionsCSVReports from "../hooks/useGetTransactionsCSVReports";
 
 // --- مقادیر اولیه برای پاک‌سازی ---
 const initialFilters: FilterValues = {
@@ -37,12 +38,12 @@ interface ChangeHandlerEvent {
 }
 
 interface FilterValues {
-  fromDate: string;
-  toDate: string;
+  fromDate: string; // تغییر به string چون حالا ISO است
+  toDate: string;   // تغییر به string چون حالا ISO است
   places: string;
   sections: string;
-  startTime: DateObject | "";
-  endTime: DateObject | "";
+  startTime: string; 
+  endTime: string;
   searchQuery: string;
 }
 
@@ -57,11 +58,11 @@ export default function ReportsFilterSection({
   setFilterValues,
   locations,
 }: ReportsFilterSectionProps) {
-  const { sectionsList, isGettingSectionsList } = UseGetAllSection();
+  const { sectionsList } = UseGetAllSection();
+  const { executeGetCsv, isGettingtransactionsCsvReports } = useGetTransactionsCSVReports();
 
   const sectionsArray = useMemo(() => {
-    if (!sectionsList) return [];
-    return Array.isArray(sectionsList) ? sectionsList : sectionsList.items || [];
+    return sectionsList?.items || [];
   }, [sectionsList]);
 
   const optionsMap = useMemo(() => {
@@ -77,7 +78,10 @@ export default function ReportsFilterSection({
         title: "بخش",
         options: [
           { id: "all", name: "همه بخش ها" },
-          ...(sectionsArray.map((sec: any) => ({ id: sec.id, name: sec.name })) || []),
+          ...(sectionsArray.map((sec: any) => ({
+            id: sec.id,
+            name: sec.name,
+          })) || []),
         ],
       },
     };
@@ -94,81 +98,78 @@ export default function ReportsFilterSection({
     setFilterValues(initialFilters);
   };
 
+  // 💡 تابع ارسال به CSV
+  const handleExportCSV = async () => {
+    try {
+      // ۱. آماده‌سازی پارامترها (هماهنگ با نام‌های API)
+      const params = {
+        date_from: filterValues.fromDate || undefined,
+        date_to: filterValues.toDate || undefined,
+        start_time: filterValues.startTime || undefined,
+        end_time: filterValues.endTime || undefined,
+        places: filterValues.places === "all" ? undefined : filterValues.places,
+        sections: filterValues.sections === "all" ? undefined : filterValues.sections,
+        search_query: filterValues.searchQuery || undefined,
+      };
+
+      console.log("🚀 Sending Params to API:", params);
+
+      // ۲. اجرای هوک و دریافت دیتای خام (Blob)
+      const blob = await executeGetCsv(params);
+      
+      if (!blob) {
+        console.error("No data received from server");
+        return;
+      }
+
+      // ۳. تبدیل Blob به فایل قابل دانلود در مرورگر
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // نام فایل را به همراه تاریخ جاری می‌سازیم
+      const fileName = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
+      link.setAttribute('download', fileName);
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      // ۴. پاک‌سازی برای جلوگیری از نشت حافظه
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error("Export Error:", error);
+      // می‌توانید اینجا یک Toast یا Alert برای کاربر نمایش دهید
+    }
+  };
   return (
-    <section className=" p-4 border bg-white border-gray-100 shadow-sm rounded-lg mt-4">
-
-      {/* دکمه پاک‌سازی در بالای کل فیلترها */}
-      <div className="flex justify-start mb-4">
-        <button
-          onClick={handleClearFilters}
-          className="flex bg-white justify-center w-[200px] items-center h-[45px] font-medium cursor-pointer gap-2 px-4 py-2 border border-gray-100 shadow-xs rounded-md text-sm text-gray-800 hover:bg-gray-50 transition-all"
-        >
-          <FaSlidersH className="w-4 h-4" />
-          <span>پاک‌سازی فیلترها</span>
-        </button>
-      </div>
-
-      <div className="">
+    <div className="flex flex-col gap-4 p-4 bg-gray-50 rounded-xl">
+      <div className="grid grid-cols-12 gap-4">
         <ReportsFilterContainer
-          className="grid grid-cols-12 gap-x-4 gap-y-4 py-4"
           filterValues={filterValues}
-          handleInputChange={handleInputChange}
-          optionsMap={optionsMap}
           setFilterValues={setFilterValues}
+          optionsMap={optionsMap}
+          handleInputChange={handleInputChange}
+          className="col-span-12 grid grid-cols-12 gap-4"
         />
       </div>
 
-      <div className=" grid gap-4 grid-cols-12">
-        {/* Search Container */}
-        <div className={` col-span-12 lg:col-span-7 flex items-center`}>
-          <div className="flex flex-col w-full ">
-            <label className="text-sm mb-2 mr-1">جستجو</label>
-
-            <div className=" flex items-center sm-mb-0 w-full relative">
-              <input
-                value={filterValues.searchQuery}
-                onChange={(e) =>
-                  setFilterValues({
-                    ...filterValues,
-                    [e.target.name]: e.target.value,
-                  })
-                }
-                name="searchQuery"
-                type="text"
-                placeholder="جستجو بر اساس کد دستگاه ..."
-                className="w-full outline-0 border border-gray-100 shadow-xs h-[45px] rounded-lg p-3 placeholder:text-sm"
-              />
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                <LuSearch />
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Export Buttons */}
-        <div className="col-span-12 lg:col-span-5 flex items-end h-full justify-center ">
-          <div className="flex items-center gap-x-3 w-full">
-            <button
-              onClick={() => console.log("Export to Excel")}
-              className="flex bg-white justify-center w-full items-center h-[45px] font-medium cursor-pointer gap-2 px-4 py-2 border border-gray-100 shadow-xs rounded-md text-sm text-green-700 hover:bg-gray-50 transition-all"
-            >
-              <span className="text-sm font-bold">Excel</span>
-              <ExcelIcon />
-            </button>
-
-            <button
-              onClick={() => console.log("Export to CSV")}
-              className="flex bg-white justify-center w-full items-center h-[45px] font-medium cursor-pointer gap-2 px-4 py-2 border border-gray-100 shadow-xs rounded-md text-sm text-[#334155] hover:bg-gray-50 transition-all"
-            >
-              <span className="text-sm font-bold">CSV</span>
-              <CsvIcon />
-            </button>
-          </div>
-        </div>
+      <div className="flex justify-end gap-2 mt-4">
+        <button 
+          onClick={handleClearFilters}
+          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+        >
+          پاکسازی فیلترها
+        </button>
+        <button 
+          onClick={handleExportCSV} 
+          disabled={isGettingtransactionsCsvReports}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:bg-gray-400 transition-all flex items-center gap-2"
+        >
+          {isGettingtransactionsCsvReports ? "در حال دریافت..." : "خروجی CSV"}
+        </button>
       </div>
-    </section>
+    </div>
   );
 }
-
-function ExcelIcon() { return <span className="text-green-600">📊</span>; }
-function CsvIcon() { return <span className="text-blue-600">📄</span>; }

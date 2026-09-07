@@ -104,7 +104,7 @@ const RecentActivitiesTable = ({
                     </span>
                   </td>
                   <td className="px-6 py-4 text-[#475569] text-sm font-medium text-center">
-                    {item.amount || 1}
+                    {item.game_count || 0}
                   </td>
                 </tr>
               ))

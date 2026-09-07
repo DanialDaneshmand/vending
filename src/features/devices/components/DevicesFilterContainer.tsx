@@ -6,6 +6,8 @@ import UseGetLocations from "@/shared/hooks/useGetLocations";
 import { Download } from "lucide-react";
 import { FaSlidersH } from "react-icons/fa";
 import { LuFilter, LuSearch } from "react-icons/lu";
+import useGetTransactionsCSVReports from "@/features/fainancial-report/hooks/useGetTransactionsCSVReports";
+import { useParams } from "next/navigation";
 
 interface FilterContainerProps<T> {
   filterValues: T;
@@ -23,6 +25,50 @@ export default function DevicesFilterContainer<T>({
   const [isFilter, setIsFilter] = useState(false);
   const { locations } = UseGetLocations();
   const { sectionsList } = UseGetAllSection();
+  const { executeGetCsv, isGettingtransactionsCsvReports } =
+    useGetTransactionsCSVReports();
+
+  // تابع برای مدیریت خروجی CSV و تغییر نام فیلدها
+  const handleExportCSV = async () => {
+    const filters=filterValues as any
+    try {
+      // ۱. آماده‌سازی پارامترها (هماهنگ با نام‌های API)
+      const params = {
+        
+        places: filters.places === "همه مجموعه ها" ? undefined : filters.places,
+        sections: filters.sections === "همه بخش ها" ? undefined : filters.sections,
+      };
+
+
+      // ۲. اجرای هوک و دریافت دیتای خام (Blob)
+      const blob = await executeGetCsv(params);
+      
+      if (!blob) {
+        console.error("No data received from server");
+        return;
+      }
+
+      // ۳. تبدیل Blob به فایل قابل دانلود در مرورگر
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // نام فایل را به همراه تاریخ جاری می‌سازیم
+      const fileName = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
+      link.setAttribute('download', fileName);
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      // ۴. پاک‌سازی برای جلوگیری از نشت حافظه
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error("Export Error:", error);
+      // می‌توانید اینجا یک Toast یا Alert برای کاربر نمایش دهید
+    }
+  };
 
   return (
     <div className="w-full">
@@ -39,12 +85,12 @@ export default function DevicesFilterContainer<T>({
 
       <div
         className={`${className} ${
-          isFilter 
-            ? "transition-all duration-100 h-auto border border-gray-100 shadow-sm p-4 rounded-lg" 
+          isFilter
+            ? "transition-all duration-100 h-auto border border-gray-100 shadow-sm p-4 rounded-lg"
             : "h-0 sm:h-auto transition-all duration-100"
         } overflow-hidden sm:overflow-visible`}
       >
-          {/* Search Container */}
+        {/* Search Container */}
         <div
           className={` col-span-12 lg:col-span-6 order-2 lg:order-1 flex items-center`}
         >
@@ -66,17 +112,25 @@ export default function DevicesFilterContainer<T>({
               />
               <span className="-mr-8">
                 <LuSearch />
+
               </span>
             </div>
           </div>
         </div>
-        {/*Exel Btn */}
+        {/* CSV Btn */}
         <div className="order-1 lg:order-2 flex flex-col items-end  sm:flex-row justify-between gap-4 sm:gap-4 col-span-12 lg:col-span-6">
-          <button className="flex justify-center w-full items-center h-[45] font-medium cursor-pointer gap-2 px-4 py-2 border border-gray-100 shadow-xs rounded-md text-sm text-gray-800 hover:bg-gray-50 transition-all">
+          <button 
+            onClick={handleExportCSV}
+            disabled={isGettingtransactionsCsvReports}
+            className="flex justify-center w-full items-center h-[45] font-medium cursor-pointer gap-2 px-4 py-2 border border-gray-100 shadow-xs rounded-md text-sm text-gray-800 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Download className="w-4 h-4" />
-            خروجی اکسل
+            خروجی CSV
           </button>
-          <button className=" flex shadow-xs h-[45] items-center justify-center gap-x-3 border border-gray-100 rounded-lg px-3 w-full py-3  cursor-pointer text-sm">
+          <button 
+            onClick={onReset}
+            className=" flex shadow-xs h-[45] items-center justify-center gap-x-3 border border-gray-100 rounded-lg px-3 w-full py-3  cursor-pointer text-sm"
+          >
             <span>
               <LuFilter size={18} />
             </span>
@@ -93,7 +147,10 @@ export default function DevicesFilterContainer<T>({
                 title="مجموعه ها"
                 options={[
                   { id: "all", title: "همه مجموعه ها" },
-                  ...(locations?.items?.map((item: any) => ({ id: item.id, name: item.name })) || [])
+                  ...(locations?.items?.map((item: any) => ({
+                    id: item.id,
+                    name: item.name,
+                  })) || []),
                 ]}
                 filterValues={filterValues as any}
                 handleChange={handleInputChange}
@@ -109,7 +166,10 @@ export default function DevicesFilterContainer<T>({
                 title="بخش ها"
                 options={[
                   { id: "all", title: "همه بخش ها" },
-                  ...(sectionsList?.items?.map((item: any) => ({ id: item.id, name: item.name })) || [])
+                  ...(sectionsList?.items?.map((item: any) => ({
+                    id: item.id,
+                    name: item.name,
+                  })) || []),
                 ]}
                 filterValues={filterValues as any}
                 handleChange={handleInputChange}
@@ -154,6 +214,7 @@ export default function DevicesFilterContainer<T>({
             </div>
           </div>
 
+
           {/* وضعیت موجودی */}
           <div className="col-span-12 sm:col-span-5 lg:col-span-2 flex items-center">
             <div className="w-full">
@@ -163,7 +224,7 @@ export default function DevicesFilterContainer<T>({
                 options={[
                   { id: "all_inventory", name: "همه وضعیت ها" },
                   { id: "ok", name: "مناسب" },
-                  { id: "low", name: "کم" },
+                  { id: "critical", name: "کم" },
                 ]}
                 filterValues={filterValues as any}
                 handleChange={handleInputChange}

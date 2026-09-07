@@ -3,17 +3,7 @@ import { Bell, Check } from "lucide-react";
 
 // مدل داده‌ها منطبق بر مقادیر دقیق داخل تصویر
 const reportItems = [
-  {
-    id: 1,
-    title: "پیامک",
-    sentCount: "۳۶",
-    successCount: "۳۲",
-    successPercent: "۸۹٪",
-    failedCount: "۴",
-    failedPercent: "۱۱٪",
-    time: "امروز، ۱۰:۳۰",
-    iconType: "sms",
-  },
+ 
   {
     id: 2,
     title: "بله",
@@ -25,17 +15,7 @@ const reportItems = [
     time: "امروز، ۱۰:۳۰",
     iconType: "bale",
   },
-  {
-    id: 3,
-    title: "درون‌برنامه (App)",
-    sentCount: "۵۰",
-    successCount: "۴۵",
-    successPercent: "۹۰٪",
-    failedCount: "۵",
-    failedPercent: "۱۰٪",
-    time: "امروز، ۱۰:۳۰",
-    iconType: "app",
-  },
+  
 ];
 
 export default function RecentReports() {

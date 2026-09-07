@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Package,
   Database,
@@ -9,22 +9,18 @@ import {
   Bell,
   Save,
 } from "lucide-react";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+
 import InventoryTable from "./InventoryTable";
 import SelectInput from "@/components/form/SelectInput";
-import useGetDeviceTransactions from "../hooks/useGetDeviceTransactions";
 import { useParams } from "next/navigation";
 import { useAddManualInventory } from "../hooks/useAddManualInventory";
 import useGetDeviceDetail from "@/shared/hooks/useGetDeviceDetail";
 import toast from "react-hot-toast";
+import InventoryTabChart from "./InventoryTabChart";
+import { hasActionPermission } from "@/shared/permisseions/permissionUtils";
+import UseGetProfile from "@/shared/hooks/useGetProfile";
+import { useEditDevice } from "../hooks/useEditDevice";
+import { string } from "yup";
 
 interface HandleChangeArg {
   target: {
@@ -32,16 +28,6 @@ interface HandleChangeArg {
     name: string;
   };
 }
-
-const chartData = [
-  { day: "شنبه", count: 120 },
-  { day: "یکشنبه", count: 150 },
-  { day: "دوشنبه", count: 110 },
-  { day: "سه‌شنبه", count: 180 },
-  { day: "چهارشنبه", count: 140 },
-  { day: "پنجشنبه", count: 210 },
-  { day: "جمعه", count: 250 },
-];
 
 const InventoryTab = () => {
   // استفاده از یک استیت واحد برای مدیریت پنل‌های فعال
@@ -56,16 +42,26 @@ const InventoryTab = () => {
   });
 
   const [alertValues, setAlertValues] = useState({
-    yellowThreshold: "",
-    redThreshold: "",
+    inventory_yellow_threshold: "",
+    inventory_red_threshold: "",
   });
 
   const { deviceId } = useParams();
-  const { device, isGettingDevice } = useGetDeviceDetail(deviceId as string);
-  const { deviceTransactions, isGettingDeviceTransactions } =
-    useGetDeviceTransactions(deviceId as string);
   const { addManualInventory, isAddingManualInventory } =
     useAddManualInventory();
+  const { editDevice, isEditingDevice } = useEditDevice();
+  const { device, isGettingDevice } = useGetDeviceDetail(deviceId as string);
+  const { profile } = UseGetProfile();
+  console.log(device);
+
+  useEffect(() => {
+    if (!isGettingDevice) {
+      setAlertValues({
+        inventory_yellow_threshold: device.inventory_yellow_threshold,
+        inventory_red_threshold: device.inventory_red_threshold,
+      });
+    }
+  }, []);
 
   const handleChange = (e: HandleChangeArg) => {
     setChangeValue({ ...changeValue, [e.target.name]: e.target.value });
@@ -75,7 +71,8 @@ const InventoryTab = () => {
     setAlertValues({ ...alertValues, [e.target.name]: e.target.value });
   };
 
-  const handleAddInventory = () => {
+  
+const handleAddInventory = () => {
     const numericValue = +changeValue.count;
     const currentInventory = device?.inventory_level || 0;
 
@@ -88,47 +85,59 @@ const InventoryTab = () => {
       changeValue.operator === "decrease" &&
       numericValue > currentInventory
     ) {
-      toast.error(
-        `مقدار وارد شده بیشتر از موجودی فعلی (${currentInventory}) است`,
-      );
+      toast.error(`مقدار وارد شده بیشتر از موجودی فعلی (${currentInventory}) است`);
       return;
     }
 
-    const reasonText =
-      changeValue.operator === "increase" ? "افزودن" : "کم کردن";
     const finalDelta =
       changeValue.operator === "decrease"
         ? -Math.abs(numericValue)
         : Math.abs(numericValue);
 
-    // addManualInventory(
-    //   {
-    //     deviceId: deviceId as string,
-
-    //     payload: { delta: finalDelta, reason: reasonText, note: changeValue.note },
-    //   },
-    //   {
-    //     onSuccess: () => {
-    //       setActivePanel('none'); // بستن پنل بعد از موفقیت
-    //       setChangeValue({ count: 0, operator: "increase", note: "" });
-    //       toast.success("موجودی با موفقیت به‌روز شد");
-    //     },
-    //     onError: () => {
-    //       toast.error("خطایی در ثبت تغییرات رخ داد");
-    //     },
-    //   }
-    // );
-  };
+    addManualInventory(
+      {
+        deviceId: deviceId as string,
+        payload: {
+          delta: finalDelta,
+          reason: changeValue.note || changeValue.operator,
+        },
+      },
+      {
+        onSuccess: () => {
+          setActivePanel("none"); 
+          setChangeValue({ count: 0, operator: "increase", note: "" });
+          toast.success("موجودی با موفقیت به‌روز شد");
+        },
+        onError: () => {
+          toast.error("خطایی در ثبت تغییرات رخ داد");
+        },
+      },
+    );
+};
 
   const handleSaveAlerts = async () => {
-    if (!alertValues.yellowThreshold || !alertValues.redThreshold) {
+    if (
+      !alertValues.inventory_yellow_threshold ||
+      !alertValues.inventory_red_threshold
+    ) {
       toast.error("لطفاً هر دو مقدار هشدار را وارد کنید");
       return;
     }
     try {
-      console.log("Saving Alerts to Backend:", alertValues);
-      toast.success("تنظیمات هشدار با موفقیت ذخیره شد");
-      setActivePanel("none"); // بستن پنل بعد از ذخیره
+      editDevice(
+        {
+          deviceId: deviceId as string,
+          payload: {
+            inventory_yellow_threshold: +alertValues.inventory_yellow_threshold,
+            inventory_red_threshold: +alertValues.inventory_red_threshold,
+          },
+        },
+        {
+          onSuccess: () => {
+            setActivePanel("none");
+          },
+        },
+      );
     } catch (error) {
       toast.error("خطایی در ذخیره تنظیمات رخ داد");
     }
@@ -147,35 +156,40 @@ const InventoryTab = () => {
                 <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
                   <Package size={28} />
                 </div>
-                <div className="flex gap-2">
-                  {/* دکمه تنظیمات هشدار */}
-                  <button
-                    onClick={() =>
-                      setActivePanel(activePanel === "alert" ? "none" : "alert")
-                    }
-                    className={`p-2 rounded-lg transition-all ${activePanel === "alert" ? "bg-amber-100 text-amber-600" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}
-                    title="تنظیمات هشدار موجودی"
-                  >
-                    <Bell size={20} />
-                  </button>
 
-                  {/* دکمه تغییر موجودی */}
-                  <button
-                    onClick={() =>
-                      setActivePanel(activePanel === "edit" ? "none" : "edit")
-                    }
-                    className={`py-2 px-4 rounded-lg text-white transition-all font-semibold text-sm flex items-center gap-2 ${activePanel === "edit" ? "bg-gray-400 hover:bg-gray-500" : "bg-emerald-600 hover:bg-emerald-700"}`}
-                  >
-                    {activePanel === "edit" ? (
-                      <>
-                        <X size={16} /> لغو
-                      </>
-                    ) : (
-                      <>
-                        <Plus size={16} /> تغییر موجودی
-                      </>
-                    )}
-                  </button>
+                <div className="flex gap-2">
+                  {hasActionPermission(profile?.role, "canEdit") && (
+                    <button
+                      onClick={() =>
+                        setActivePanel(
+                          activePanel === "alert" ? "none" : "alert",
+                        )
+                      }
+                      className={`p-2 rounded-lg transition-all ${activePanel === "alert" ? "bg-amber-100 text-amber-600" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}
+                      title="تنظیمات هشدار موجودی"
+                    >
+                      <Bell size={20} />
+                    </button>
+                  )}
+
+                  {hasActionPermission(profile?.role, "canCreate") && (
+                    <button
+                      onClick={() =>
+                        setActivePanel(activePanel === "edit" ? "none" : "edit")
+                      }
+                      className={`py-2 px-4 rounded-lg text-white transition-all font-semibold text-sm flex items-center gap-2 ${activePanel === "edit" ? "bg-gray-400 hover:bg-gray-500" : "bg-emerald-600 hover:bg-emerald-700"}`}
+                    >
+                      {activePanel === "edit" ? (
+                        <>
+                          <X size={16} /> لغو
+                        </>
+                      ) : (
+                        <>
+                          <Plus size={16} /> تغییر موجودی
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -194,23 +208,23 @@ const InventoryTab = () => {
                   <div className=" gap-3">
                     <div className=" flex items-center w-full  gap-2">
                       <SelectInput
-                      filterValues={changeValue}
-                      handleChange={handleChange}
-                      name="operator"
-                      options={[
-                        { id: "increase", name: "افزودن" },
-                        { id: "decrease", name: "کم کردن" },
-                      ]}
-                    />
+                        filterValues={changeValue}
+                        handleChange={handleChange}
+                        name="operator"
+                        options={[
+                          { id: "increase", name: "افزودن" },
+                          { id: "decrease", name: "کم کردن" },
+                        ]}
+                      />
 
-                    <input
-                      type="number"
-                      name="count"
-                      value={changeValue.count}
-                      onChange={(e) => handleChange({ target: e.target })}
-                      placeholder="مقدار"
-                      className={`p-2 h-11.5 w-full mt-1.5 text-sm border border-gray-100 shadow-xs bg-white rounded-lg outline-none focus:ring-2 ${changeValue.operator==="increase"?"ring-emerald-500":"ring-red-600"} `}
-                    />
+                      <input
+                        type="number"
+                        name="count"
+                        value={changeValue.count}
+                        onChange={(e) => handleChange({ target: e.target })}
+                        placeholder="مقدار"
+                        className={`p-2 h-11.5 w-full mt-1.5 text-sm border border-gray-100 shadow-xs bg-white rounded-lg outline-none focus:ring-2 ${changeValue.operator === "increase" ? "ring-emerald-500" : "ring-red-600"} `}
+                      />
                     </div>
                   </div>
                   <div className="flex flex-col gap-2">
@@ -256,8 +270,8 @@ const InventoryTab = () => {
                       </label>
                       <input
                         type="number"
-                        name="yellowThreshold"
-                        value={alertValues.yellowThreshold}
+                        name="inventory_yellow_threshold"
+                        value={alertValues.inventory_yellow_threshold}
                         onChange={handleAlertChange}
                         placeholder="عدد"
                         className="p-2 text-sm border rounded-lg outline-none focus:ring-2 ring-amber-500"
@@ -269,8 +283,8 @@ const InventoryTab = () => {
                       </label>
                       <input
                         type="number"
-                        name="redThreshold"
-                        value={alertValues.redThreshold}
+                        name="inventory_red_threshold"
+                        value={alertValues.inventory_red_threshold}
                         onChange={handleAlertChange}
                         placeholder="عدد"
                         className="p-2 text-sm border rounded-lg outline-none focus:ring-2 ring-amber-500"
@@ -281,7 +295,13 @@ const InventoryTab = () => {
                     onClick={handleSaveAlerts}
                     className="w-full py-2 bg-amber-500 text-white rounded-lg font-bold text-sm hover:bg-amber-600 transition-colors flex items-center justify-center gap-2"
                   >
-                    <Save size={16} /> ذخیره هشدارها
+                    {isEditingDevice ? (
+                      "  در حال ذخیره ..."
+                    ) : (
+                      <span>
+                        <Save size={16} /> ذخیره هشدارها
+                      </span>
+                    )}
                   </button>
                 </div>
               )}
@@ -290,67 +310,7 @@ const InventoryTab = () => {
         </div>
 
         {/* بخش نمودار */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 h-full">
-            <div className="flex items-center gap-2 mb-6">
-              <Database size={20} className="text-slate-400" />
-              <h3 className="text-slate-700 font-bold text-base">
-                روند تغییرات موجودی
-              </h3>
-            </div>
-            <div className="h-[250px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient
-                      id="colorInventory"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke="#f1f5f9"
-                  />
-                  <XAxis
-                    dataKey="day"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#94a3b8", fontSize: 12 }}
-                    dy={10}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#94a3b8", fontSize: 12 }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: "12px",
-                      border: "none",
-                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                      direction: "rtl",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="count"
-                    stroke="#10b981"
-                    strokeWidth={3}
-                    fillOpacity={1}
-                    fill="url(#colorInventory)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
+        <InventoryTabChart />
       </div>
 
       <div className="col-span-1 lg:col-span-3">

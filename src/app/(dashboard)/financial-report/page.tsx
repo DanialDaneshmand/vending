@@ -1,3 +1,4 @@
+
 "use client";
 
 import PageTitle from "@/components/shared/PageTitle";
@@ -10,18 +11,17 @@ import { prepareChartData } from "@/features/fainancial-report/utils/prepareChar
 import { prepareTrendData } from "@/features/fainancial-report/utils/prepareTrendData";
 import UseGetAllSection from "@/shared/hooks/useGetAllSections";
 import UseGetLocations from "@/shared/hooks/useGetLocations";
-import UseGetSections from "@/shared/hooks/useGetSections";
 import useGetTransactions from "@/shared/hooks/useGetTransactions";
 import { useState, useMemo } from "react";
-import { DateObject } from "react-multi-date-picker";
 
+// --- اصلاح تایپ FilterValues: همه چیز string است ---
 interface FilterValues {
   fromDate: string;
   toDate: string;
   places: string;
   sections: string;
-  startTime: DateObject | "";
-  endTime: DateObject | "";
+  startTime: string;
+  endTime: string;
   searchQuery: string;
 }
 
@@ -29,41 +29,38 @@ export default function Page() {
   const [filterValues, setFilterValues] = useState<FilterValues>({
     fromDate: "",
     toDate: "",
-    places: "all", // <--- تغییر از "همه مجموعه ها" به "all"
-    sections: "all", // <--- تغییر از "بخش ها" به "all"
+    places: "all", 
+    sections: "all", 
     startTime: "",
     endTime: "",
     searchQuery: "",
   });
 
-  // دریافت تراکنش‌ها و مکان‌ها از API
   const { isgettingTransactions, transactions } = useGetTransactions();
   const { isGettingLocations, locations } = UseGetLocations();
 
-  console.log(filterValues, "filter values");
-  console.log(transactions, "transactions");
-
-  // فرمت کردن زمان برای ارسال به هوک فیلتر
-  const formattedFilters = useMemo(
-    () => ({
+  // --- اصلاح منطق فرمت کردن برای فیلتر داخلی ---
+  const formattedFilters = useMemo(() => {
+    return {
       ...filterValues,
-      startTime: filterValues.startTime
-        ? filterValues.startTime.format("HH:mm")
-        : "",
-      endTime: filterValues.endTime ? filterValues.endTime.format("HH:mm") : "",
-    }),
-    [filterValues],
-  );
+      // چون مقادیر در استیت- الّرا- به صورت رشته ذخیره شده‌اند، 
+      // دیگر نیازی به چک کردن instanceof DateObject نیست.
+      // فقط اگر نیاز است فرمت خاصی برای useFilteredData ارسال شود، اینجا تغییر دهید.
+      fromDate: filterValues.fromDate,
+      toDate: filterValues.toDate,
+      startTime: filterValues.startTime,
+      endTime: filterValues.endTime,
+    };
+  }, [filterValues]);
 
-  // ۱. فیلتر کردن داده‌ها (بر اساس دیتای دریافتی از API)
+  // ۱. فیلتر کردن داده‌ها (بر اساس مقادیر رشته‌ای)
   const filteredData = useFilteredData(
     transactions?.items || [],
-    formattedFilters,
+    formattedFilters as any, 
   );
 
-  // ۲. آماده‌سازی دیتای نمودارها (با استفاده از useMemo برای بهینه‌سازی سرعت)
+  // ۲. آماده‌سازی دیتای نمودارها
   const incomeLocationData = useMemo(() => {
-    // پاس دادن لیست مکان‌ها از API به تابع (مطابق با تغییری که در prepareChartData دادیم)
     return prepareChartData(filteredData, locations?.items || []);
   }, [filteredData, locations]);
 
@@ -71,7 +68,6 @@ export default function Page() {
     return prepareTrendData(filteredData);
   }, [filteredData]);
 
-  // مدیریت لودینگ: اگر هر دو در حال لود هستند یا دیتا هنوز نرسیده
   if (isgettingTransactions || isGettingLocations) {
     return (
       <div className="flex flex-col items-center justify-center h-[80vh] gap-4">
@@ -84,28 +80,23 @@ export default function Page() {
   }
 
   return (
-    <section className="p-4">
-      {/* Page Title */}
 
+    <section className="p-4">
       <PageTitle title="گزارش مالی" description="داشبورد / گزارش مالی" />
 
-      {/* Reports Filter Section */}
       <ReportsFilterSection
         filterValues={filterValues}
         setFilterValues={setFilterValues}
-        locations={locations.items}
+        locations={locations?.items || []} 
       />
 
-      {/* Reports Cards Section - پیشنهاد: filteredData را به آن پاس دهید تا اعداد داینامیک شوند */}
       <ReportsCardsSection filteredData={filteredData} />
 
-      {/* Reports Chart Section */}
       <ReportsChartSection
         incomeLocationData={incomeLocationData}
         incomeTrendData={trendIncomeData}
       />
 
-      {/* Financial Report Table */}
       <div className="mt-6">
         <FinancialReportTable filteredData={filteredData} />
       </div>

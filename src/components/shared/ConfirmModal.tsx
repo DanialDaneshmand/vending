@@ -21,7 +21,7 @@ export default function ConfirmModal({
   return (
     <Modal onClose={onClose} open={open} title={title}>
       <div className=" mt-12 mb-8">
-        <span className=" text-sm sm:text-xl text-gray-500">
+        <span className=" text-sm sm:text-[16] text-gray-500">
           آیا از تصمیم خود اطمینان دارید ؟
         </span>
       </div>

@@ -9,8 +9,6 @@ import GameTab from "./GameTab";
 import InventoryTab from "./InventoryTab";
 import RepairsTab from "./RepairsTab";
 import ControlSchedulingTab from "./ControlSchedulingTab";
-import { useParams } from "next/navigation";
-import useGetDeviceDetail from "@/shared/hooks/useGetDeviceDetail";
 
 interface OverviewSectionProps {
   activeTab: TabsType;
@@ -21,7 +19,6 @@ export default function OverviewSection({
   activeTab,
   setActiveTab,
 }: OverviewSectionProps) {
-  const { deviceId } = useParams();
 
   const renderTabs = () => {
     switch (activeTab) {

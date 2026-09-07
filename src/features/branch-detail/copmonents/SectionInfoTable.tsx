@@ -16,34 +16,30 @@ import clientApi from "@/shared/clientApi/clientApi";
 import { hasActionPermission } from "@/shared/permisseions/permissionUtils";
 import UseGetProfile from "@/shared/hooks/useGetProfile";
 
-
 // --- کامپوننت ردیف ---
 const SectionRow = ({ 
   item, 
   locationId, 
   onDeleteId, 
   onViewDetails,
-  profileRole // اضافه شد برای دسترسی‌ها
+  profileRole 
 }: { 
   item: any, 
   locationId: string, 
   onDeleteId: (id: string) => void, 
   onViewDetails: (id: string) => void,
-  profileRole: string | undefined // اضافه شد
+  profileRole: string | undefined 
 }) => {
   const [deviceCount, setDeviceCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
-
     const fetchDeviceCount = async () => {
       try {
         const response = await clientApi.get(`/devices/?location_id=${locationId}&section_id=${item.id}`);
         const items = response?.data?.items || [];
-        if (isMounted) {
-          setDeviceCount(items.length);
-        }
+        if (isMounted) setDeviceCount(items.length);
       } catch (error) {
         console.error(`Error fetching devices for section ${item.id}:`, error);
         if (isMounted) setDeviceCount(0);
@@ -51,7 +47,6 @@ const SectionRow = ({
         if (isMounted) setIsLoading(false);
       }
     };
-
     fetchDeviceCount();
     return () => { isMounted = false; };
   }, [item.id, locationId]);
@@ -62,9 +57,7 @@ const SectionRow = ({
         {item.name}
       </td>
       <td className="bg-white py-4 px-6 border-y border-gray-100/80 text-center">
-        {isLoading ? (
-          <Skeleton width={20} height={15} /> 
-        ) : (
+        {isLoading ? <Skeleton width={20} height={15} /> : (
           <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">
             {deviceCount} دستگاه
           </span>
@@ -72,28 +65,24 @@ const SectionRow = ({
       </td>
       <td className="bg-white py-2 px-6 rounded-l-xl border-y border-l border-gray-100/80 text-center">
         <div className="flex justify-center items-center gap-x-3">
-          {/* اعمال شرط نمایش دکمه‌ها یا خط تیره */}
-          {(hasActionPermission(profileRole, 'canDelete') || true) ? (
-            <>
-              <button
-                onClick={() => onViewDetails(item.id)}
-                className="text-xs h-6 border text-gray-400 border-gray-400 px-2 hover:border-blue-600 hover:text-blue-600 rounded-sm transition-all"
-              >
-                جزئیات
-              </button>
-              {/* دکمه حذف فقط برای کسانی که canDelete دارند */}
-              {hasActionPermission(profileRole, 'canDelete') && (
-                <button
-                  onClick={() => onDeleteId(item.id)}
-                  className="p-2 text-gray-400 hover:text-red-500 rounded-lg transition-all"
-                  title="حذف بخش"
-                >
-                  <Trash2 size={18} />
-                </button>
-              )}
-            </>
-          ) : (
-            <span className="text-gray-400">—</span>
+          {/* دکمه جزئیات: برای همه نمایش داده شود */}
+          <button
+            onClick={() => onViewDetails(item.id)}
+            className="text-xs h-6 border text-gray-400 border-gray-400 px-2 hover:border-blue-600 hover:text-blue-600 rounded-sm transition-all"
+          >
+            جزئیات
+          </button>
+
+          {/* دکمه حذف: فقط برای کسانی که canDelete دارند */}
+          {hasActionPermission(profileRole, 'canDelete') && (
+            <button
+              onClick={() => onDeleteId(item.id)}
+
+              className="p-2 text-gray-400 hover:text-red-500 rounded-lg transition-all"
+              title="حذف بخش"
+            >
+              <Trash2 size={18} />
+            </button>
           )}
         </div>
       </td>
@@ -105,21 +94,23 @@ interface SectionInfoTableProps {
   setSectionId: Dispatch<SetStateAction<string | null>>;
 }
 
-
 export default function SectionInfoTable({ setSectionId }: SectionInfoTableProps) {
-  const { isgettingprofile, profile } = UseGetProfile(); // اضافه شد
+  const { isgettingprofile, profile } = UseGetProfile();
+  const params = useParams<{ branchId: string }>();
+  const locationId = params.branchId;
+
   const [isCreateSection, setIsCreateSection] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
   const [id, setId] = useState<string | null>(null);
 
-  const params = useParams<{ branchId: string }>();
-  const locationId = params.branchId;
-
   const { isGettingSections, sections } = UseGetSections(locationId);
   const { deleteSection } = useDeleteSection();
 
+  // ✅ اصلاح تابع حذف با چک امنیتی
   const handleDelete = async (sectionId: string | null) => {
-    if (sectionId) {
+    if (!sectionId) return;
+
+    if (hasActionPermission(profile?.role, 'canDelete')) {
       try {
         await deleteSection(sectionId);
       } catch (e) {
@@ -128,6 +119,10 @@ export default function SectionInfoTable({ setSectionId }: SectionInfoTableProps
         setIsDelete(false);
         setId(null);
       }
+    } else {
+      console.error("شما دسترسی حذف ندارید");
+      setIsDelete(false);
+      setId(null);
     }
   };
 
@@ -189,20 +184,20 @@ export default function SectionInfoTable({ setSectionId }: SectionInfoTableProps
         <div className="overflow-x-auto">
           <table className="w-full border-separate border-spacing-y-3 min-w-lg sm:min-w-md">
             <thead className="text-gray-400 text-sm font-medium">
+
               <tr>
                 <th className="px-6 pb-2 font-normal text-center">نام بخش</th>
                 <th className="px-6 pb-2 text-center font-normal">تعداد دستگاه‌ها</th>
                 <th className="px-6 pb-2 text-center font-normal">عملیات</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-50">
               {sections?.items?.map((item: any) => (
                 <SectionRow 
                   key={item.id} 
                   item={item} 
                   locationId={locationId || ""} 
-
-                  profileRole={profile?.role} // پاس دادن نقش کاربر
+                  profileRole={profile?.role} 
                   onDeleteId={(sId) => handleDeleteBtnClick(sId)} 
                   onViewDetails={(sId) => setSectionId(sId)} 
                 />

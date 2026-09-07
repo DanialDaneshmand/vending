@@ -8,8 +8,10 @@ import UseGetDevicesList from "@/shared/hooks/useGetDevicesList";
 import ConfirmModal from "@/components/shared/ConfirmModal";
 import { useDeleteDevice } from "../hooks/useDeleteDevice";
 import Skeleton from "react-loading-skeleton";
+import { FaSlidersH } from "react-icons/fa";
+import UseGetProfile from "@/shared/hooks/useGetProfile";
+import { hasActionPermission } from "@/shared/permisseions/permissionUtils";
 
-// ... (DeviceMiniIcon همان قبلی)
 const DeviceMiniIcon = () => (
   <svg
     className="w-4 h-4 text-blue-500 shrink-0 ml-1"
@@ -32,27 +34,31 @@ const DeviceMiniIcon = () => (
 export default function DeviceManagementTable({ filters }: { filters: any }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
-  const { devicesList, isGettingDevicesList } = UseGetDevicesList(); // بدون پاس دادن فیلتر
+  const { devicesList, isGettingDevicesList } = UseGetDevicesList();
   const [isShowConfirmModal, setIsShowConfirmModal] = useState(false);
   const [deviceId, setDeviceId] = useState<null | string>(null);
   const { deleteDevice } = useDeleteDevice();
 
- 
+  const { isgettingprofile, profile } = UseGetProfile();
 
   const handleDeleteBtnClick = (id: string) => {
     setIsShowConfirmModal(true);
     setDeviceId(id);
   };
 
-  const handleDeleleteDevice = () => {
-    if (deviceId) deleteDevice(deviceId);
+  const handleDeleleteDevice = async () => {
+    if (deviceId) {
+      if (hasActionPermission(profile?.role, "canDelete")) {
+        await deleteDevice(deviceId);
+      } else {
+        console.error("شما دسترسی حذف دستگاه را ندارید");
+      }
+    }
   };
 
   const filteredData = useMemo(() => {
     if (!devicesList?.items) return [];
-
     return devicesList.items.filter((device: any) => {
-      // 1. فیلتر جستجو
       const searchMatch =
         !filters.search ||
         filters.search === "" ||
@@ -61,21 +67,18 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
           ?.toLowerCase()
           .includes(filters.search.toLowerCase());
 
-      // 2. فیلتر مجموعه ها (اصلاح شده برای ID)
       const locationMatch =
         filters.places === "all" ||
         filters.places === "all_places" ||
         filters.places === "همه مجموعه ها" ||
-        device.location_id === filters.places; // ✅ حتماً از location_id استفاده کنید
+        device.location_id === filters.places;
 
-      // 3. فیلتر بخش ها (اصلاح شده برای ID)
       const sectionMatch =
         filters.sections === "all" ||
         filters.sections === "all_sections" ||
         filters.sections === "همه بخش ها" ||
-        device.section_id === filters.sections; // ✅ حتماً از section_id استفاده کنید
+        device.section_id === filters.sections;
 
-      // 4. فیلتر وضعیت دستگاه
       const statusMatch =
         !filters.status ||
         filters.status === "all" ||
@@ -83,14 +86,12 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
         filters.status === "همه وضعیت ها" ||
         device.status === filters.status;
 
-      // 5. فیلتر وضعیت اتصال (Power On)
       const connectionMatch =
         !filters.alertType ||
         filters.alertType === "all_power" ||
         filters.alertType === "وضعیت اتصال " ||
         String(device.power_on) === filters.alertType;
 
-      // 6. فیلتر وضعیت موجودی
       const inventoryMatch =
         !filters.inventory ||
         filters.inventory === "all" ||
@@ -108,8 +109,7 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
       );
     });
   }, [devicesList, filters]);
-  
-  // --- صفحه‌بندی روی داده‌های فیلتر شده ---
+
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
     return filteredData.slice(startIndex, startIndex + pageSize);
@@ -117,16 +117,33 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
 
   const totalPages = Math.ceil((filteredData.length || 0) / pageSize);
 
+  if (isGettingDevicesList || isgettingprofile) {
+    return (
+      <div className="p-4">
+        <Skeleton className="h-64" />
+      </div>
+    );
+  }
+
   return (
     <div
       className="w-full p-4 bg-white border border-gray-100 shadow-sm rounded-lg mt-4"
       dir="rtl"
     >
-      <p className="text-xl text-gray-600 mb-4">لیست دستگاه ها</p>
+      <div className="flex items-center justify-between w-full mb-4">
+        <h2 className="text-lg font-bold text-gray-800">لیست دستگاه‌ها</h2>
+        {hasActionPermission(profile?.role, "canCreate") && (
+          <Link
+            href="/devices/bulk-device-operations"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm"
+          >
+            <FaSlidersH className="w-4 h-4" />
+            <span>زمان بندی دستگاه‌ها</span>
+          </Link>
+        )}
+      </div>
 
-      {isGettingDevicesList ? (
-        <Skeleton className="h-64" />
-      ) : paginatedData.length === 0 ? (
+      {paginatedData.length === 0 ? (
         <div className="flex justify-center py-6">
           <div className="border border-gray-200 border-dashed rounded-lg w-full h-32 flex items-center justify-center">
             <p>هیچ دستگاهی با این مشخصات یافت نشد</p>
@@ -196,31 +213,35 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
                       {device.inventory_level}
                     </span>
                   </td>
-                  <td className="px-4 py-3 rounded-l-lg border-y border-l border-gray-100 align-middle">
-                    <div className="flex items-center justify-center gap-2">
-                      <Link href={`/devices/${device.id}`}>
-                        <button className="flex items-center gap-1 px-2 h-8 text-blue-600 border border-gray-200 cursor-pointer rounded-md text-[12px] font-medium transition-colors">
-                          <Eye className="w-3.5 h-3.5" /> مشاهده
-                        </button>
-                      </Link>
-                      <button
-                        onClick={() => handleDeleteBtnClick(device.id)}
-                        className="flex items-center gap-1 px-2 h-8 text-slate-600 border border-gray-200 cursor-pointer rounded-md text-[12px] font-medium transition-colors"
+                  <td className="px-4 py-3 text-center border-y border-gray-100 align-middle">
+                    <div className="flex justify-center gap-2">
+                      <Link
+                        href={`/devices/${device.id}`}
+                        className="p-2 text-gray-400 hover:text-blue-600 transition-all border border-gray-200 rounded-md"
                       >
-                        <LuTrash2 className="w-3.5 h-3.5 text-red-600" />
-                      </button>
+                        <Eye size={16} />
+                      </Link>
+
+                      {/* ✅ کنترل دسترسی: دکمه حذف فقط برای کسانی که canDelete دارند */}
+                      {hasActionPermission(profile?.role, "canDelete") && (
+                        <button
+                          onClick={() => handleDeleteBtnClick(device.id)}
+                          className="p-2 text-gray-400 hover:text-red-500 transition-all border border-gray-200 rounded-md"
+                        >
+                          <LuTrash2 size={16} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <ConfirmModal
-            handleConfirm={handleDeleleteDevice}
-            onClose={() => setIsShowConfirmModal(false)}
-            open={isShowConfirmModal}
-            title="حذف دستگاه"
-          />
+        </div>
+      )}
+
+      {filteredData.length > pageSize && (
+        <div className="mt-4 flex justify-center">
           <StyledPagination
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
@@ -230,6 +251,16 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
           />
         </div>
       )}
+
+      <ConfirmModal
+        handleConfirm={handleDeleleteDevice}
+        onClose={() => {
+          setIsShowConfirmModal(false);
+          setDeviceId(null);
+        }}
+        open={isShowConfirmModal}
+        title="حذف دستگاه"
+      />
     </div>
   );
 }

@@ -1,4 +1,3 @@
-
 import React, { useMemo } from "react";
 import { Wifi, CloudOff, AlertTriangle } from "lucide-react";
 import UseGetDevicesList from "@/shared/hooks/useGetDevicesList";
@@ -27,7 +26,10 @@ const DeviceIcon = ({ className }: { className?: string }) => (
 const StatsSkeleton = () => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
     {[...Array(4)].map((_, i) => (
-      <div key={i} className="bg-white px-5 py-6 rounded-lg border border-gray-100 shadow-sm flex items-center justify-between animate-pulse">
+      <div
+        key={i}
+        className="bg-white px-5 py-6 rounded-lg border border-gray-100 shadow-sm flex items-center justify-between animate-pulse"
+      >
         <div className="w-14 h-14 rounded-full bg-gray-200 shrink-0" />
         <div className="flex flex-col items-center justify-center flex-1 text-center pr-2 gap-2">
           <div className="h-3 w-20 bg-gray-200 rounded-full" />
@@ -47,7 +49,9 @@ export default function DashboardStats() {
     const total = items.length;
     const online = items.filter((d: any) => d.power_on === true).length;
     const offline = items.filter((d: any) => d.power_on === false).length;
-    const lowInventory = items.filter((d: any) => d.inventory_status === "low").length;
+    const lowInventory = items.filter(
+      (d: any) => d.inventory_status === "critical",
+    ).length;
 
     return [
       {
@@ -106,8 +110,9 @@ export default function DashboardStats() {
             className="bg-white px-5 py-6 rounded-lg border border-gray-100 shadow-sm flex items-center justify-between transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
           >
             <div className="h-full">
-
-              <div className={`w-14 h-14 rounded-full ${stat.iconBg} flex items-center justify-center shrink-0 shadow-inner`}>
+              <div
+                className={`w-14 h-14 rounded-full ${stat.iconBg} flex items-center justify-center shrink-0 shadow-inner`}
+              >
                 <Icon className={`w-7 h-7 ${stat.iconColor}`} />
               </div>
             </div>
@@ -123,9 +128,11 @@ export default function DashboardStats() {
                   {stat.unit}
                 </span>
                 {stat.subText && (
-                  <span className={`text-xs font-bold mt-1 ${
-                    stat.id === 4 ? "text-[#C2410C]" : "text-gray-500"
-                  }`}>
+                  <span
+                    className={`text-xs font-bold mt-1 ${
+                      stat.id === 4 ? "text-[#C2410C]" : "text-gray-500"
+                    }`}
+                  >
                     {stat.subText}
                   </span>
                 )}

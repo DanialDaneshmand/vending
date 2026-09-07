@@ -33,6 +33,8 @@ const KeyMetrics = () => {
   const { deviceId } = useParams();
   const { device, isGettingDevice } = useGetDeviceDetail(deviceId as string);
 
+  
+
   // تابع فرمت اعداد به فارسی (مثلاً 1250000 -> ۱,۲۵۰,۰۰۰)
   const formatNumber = (num: any) => {
     if (num === undefined || num === null) return "۰";

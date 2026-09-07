@@ -44,7 +44,7 @@ export default function ReportsCardsSection({ filteredData = [] }: { filteredDat
     const totalIncome = filteredData.reduce((sum, item) => sum + (item.total || 0), 0);
 
     // ۲. محاسبه مجموع بازی‌ها (جمع فیلد amount از تمام تراکنش‌ها)
-    const totalGames = filteredData.reduce((sum, item) => sum + (item.amount || 0), 0);
+    const totalGames = filteredData.reduce((sum, item) => sum + (item.game_count || 0), 0);
 
     // ۳. تعداد کل تراکنش‌ها (تعداد آیتم‌های آرایه)
     const totalTransactions = filteredData.length;

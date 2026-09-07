@@ -1,4 +1,6 @@
 
+"use client";
+
 import React, { useMemo, useState } from "react";
 import {
   Download,
@@ -8,10 +10,13 @@ import {
   CreditCard,
   Info,
   Check,
+  Loader2
 } from "lucide-react";
 import StyledPagination from "@/components/ui/Pagination";
-import { useResolveAlert } from "@/shared/hooks/useResolveAlert"; // فرض بر این است که مسیر درست است
+import { useResolveAlert } from "@/shared/hooks/useResolveAlert"; 
 import toast from "react-hot-toast";
+import UseGetProfile from "@/shared/hooks/useGetProfile"; 
+import { hasActionPermission } from "@/shared/permisseions/permissionUtils";
 
 interface AlertItem {
   id: string;
@@ -34,7 +39,7 @@ export default function AlertList({ data = [], isLoading }: AlertListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
 
-  // استفاده از هوک Resolve
+  const { isgettingprofile, profile } = UseGetProfile(); 
   const { isResolvingAlert, resolveAlert } = useResolveAlert();
 
   const getSeverityDetails = (severity: string) => {
@@ -72,10 +77,15 @@ export default function AlertList({ data = [], isLoading }: AlertListProps) {
     return new Date(isoDate).toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" });
   };
 
-  // تابع هندل کردن Resolve
   const handleResolve = async (id: string) => {
+    // ✅ لایه امنیتی: چک دسترسی در لحظه کلیک
+    if (!hasActionPermission(profile?.role, 'canCreate')) {
+      toast.error("شما دسترسی برای حل این هشدار را ندارید");
+      return;
+    }
+
     try {
-      await resolveAlert(  id );
+      await resolveAlert(id);
       toast.success("هشدار با موفقیت حل شد");
     } catch (error) {
       toast.error("خطا در حل هشدار");
@@ -87,9 +97,10 @@ export default function AlertList({ data = [], isLoading }: AlertListProps) {
     return data.slice(startIndex, startIndex + pageSize);
   }, [currentPage, pageSize, data]);
 
-  const totalPages = Math.ceil(  data.length / pageSize);
+  const totalPages = Math.ceil(data.length / pageSize);
 
-  if (isLoading) {
+  if (isLoading || isgettingprofile) {
+
     return <div className="h-64 w-full bg-gray-50 animate-pulse rounded-xl border border-gray-100" />;
   }
 
@@ -97,7 +108,6 @@ export default function AlertList({ data = [], isLoading }: AlertListProps) {
     <div className="py-4 mx-auto bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="flex px-4 justify-between items-center mb-4">
         <h1 className="text-xl font-bold text-gray-800">لیست هشدارها</h1>
-
         <button className="flex items-center font-medium cursor-pointer gap-2 px-4 py-2 border border-gray-100 shadow-sm rounded-md text-sm text-gray-800 hover:bg-gray-50 transition-all">
           <Download className="w-4 h-4" />
           خروجی اکسل
@@ -106,11 +116,11 @@ export default function AlertList({ data = [], isLoading }: AlertListProps) {
 
       <div className="overflow-x-auto">
         <table className="w-full text-right min-w-3xl">
-          <thead>
-            <tr className="bg-white border-b border-gray-100 text-gray-500 text-xs font-medium">
-              <th className="py-4 px-2">نوع هشدار</th>
-              <th className="py-4 px-2 text-center">دستگاه</th>
-              <th className="py-4 px-2 text-center">مکان</th>
+          <thead className="bg-white border-b border-gray-100 text-gray-500 text-xs font-medium">
+            <tr className="py-2">
+              <th className="py-2 px-2">نوع هشدار</th>
+              <th className="py-2 px-2 text-center">دستگاه</th>
+              <th className="py-2 px-2 text-center">مکان</th>
               <th className="py-2 px-2 text-center">وضعیت</th>
               <th className="py-2 px-2 text-center">شدت</th>
               <th className="py-2 px-2 text-center">زمان</th>
@@ -150,18 +160,21 @@ export default function AlertList({ data = [], isLoading }: AlertListProps) {
                         <span>{formatClock(item.created_at)}</span>
                       </div>
                     </td>
-                    {/* ستون عملیات - دکمه Resolve */}
                     <td className="py-2 px-2 text-center">
-                      {!item.resolved && (
-                        <button
-                          onClick={() => handleResolve(item.id)}
-                          disabled={isResolvingAlert}
-                          className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded-md text-[10px] font-bold cursor-pointer hover:bg-blue-100 transition-colors disabled:bg-gray-100 disabled:text-gray-400"
-                        >
-                          {isResolvingAlert ? "..." : "حل شده"}
-                          <Check size={12} />
-                        </button>
-                      )}
+                      <div className="flex justify-center">
+                        {/* ✅ کنترل دسترسی: دکمه Resolve فقط برای کسانی که canResolve دارند و هشدار حل نشده است */}
+                        {!item.resolved && hasActionPermission(profile?.role, 'canCreate') && (
+                          <button
+                            onClick={() => handleResolve(item.id)}
+                            disabled={isResolvingAlert}
+                            className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded-md text-[10px] font-bold cursor-pointer hover:bg-blue-100 transition-colors disabled:bg-gray-100 disabled:text-gray-400"
+
+                          >
+                            {isResolvingAlert ? "..." : "حل شده"}
+                            <Check size={12} />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -177,7 +190,6 @@ export default function AlertList({ data = [], isLoading }: AlertListProps) {
         </table>
 
         {data.length > pageSize && (
-
           <div className="py-4">
             <StyledPagination
               currentPage={currentPage}
