@@ -10,13 +10,23 @@ import UseGetUserList from "../hooks/useGetUserList";
 const UserCards = () => {
   const { userList, isgettigUserList } = UseGetUserList();
 
-  // ۱. محاسبه مقادیر واقعی بر اساس دیتای بک-اند
+  // ۱. محاسبه مقادیر واقعی بر اساس دیتای بک-اند (با شرط فعال بودن کاربر)
   const stats = useMemo(() => {
     const items = userList?.items || [];
 
     return {
-      operators: items.filter((u: any) => u.role === "operator").length,
-      managers: items.filter((u: any) => u.role === "location_manager" || u.role === "super_admin").length,
+      // فقط اپراتورهایی که is_active آنها true باشد
+      operators: items.filter(
+        (u: any) => u.is_active && u.role === "operator"
+      ).length,
+      
+      // فقط مدیرانی که is_active آنها true باشد
+      managers: items.filter(
+        (u: any) =>
+          u.is_active &&
+          (u.role === "location_manager" || u.role === "super_admin")
+      ).length,
+      
       activeUsers: items.filter((u: any) => u.is_active === true).length,
       totalUsers: items.length,
     };
@@ -82,7 +92,6 @@ const UserCards = () => {
             <span className="text-xl font-bold text-[#0F172A] leading-none mb-2">
               {item.value}
             </span>
-            {/* بخش change و changeText چون دیتای مقایسه‌ای با دیروز از بک‌اند نمی‌آید، فعلاً به صورت ساده گذاشتم یا می‌توانی حذف کنی */}
             <div className="flex items-center gap-1 text-[11px] font-semibold">
               <span className="text-[#94A3B8]">بروزرسانی لحظه‌ای</span>
             </div>
@@ -97,7 +106,6 @@ const renderIcon = (type: string) => {
   switch (type) {
     case "user": return <FiUser className="text-2xl" />;
     case "user-check": return <LiaUserCheckSolid className="text-2xl" />;
-
     case "shield": return <GoShieldCheck className="text-2xl" />;
     case "support": return <LuHeadphones className="text-2xl" />;
     default: return null;

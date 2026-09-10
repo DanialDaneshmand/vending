@@ -39,6 +39,8 @@ const UserTable = () => {
   const [statusFilter, setStatusFilter] = useState("active");
 
   const { userList, isgettigUserList } = UseGetUserList();
+  console.log(userList);
+  
   const { deleteUser } = useDeleteUser();
 
   const filteredUsers = useMemo(() => {
@@ -47,11 +49,14 @@ const UserTable = () => {
       const matchesSearch =
         user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.phone?.includes(searchTerm) ||
-        getRoleLabel(user.role).toLowerCase().includes(searchTerm.toLowerCase());
+        getRoleLabel(user.role)
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
       const matchesRole = roleFilter === "" || user.role === roleFilter;
       let matchesStatus = true;
       if (statusFilter === "active") matchesStatus = user.is_active === true;
-      else if (statusFilter === "unactive") matchesStatus = user.is_active === false;
+      else if (statusFilter === "unactive")
+        matchesStatus = user.is_active === false;
       return matchesSearch && matchesRole && matchesStatus;
     });
   }, [userList?.items, searchTerm, roleFilter, statusFilter]);
@@ -70,14 +75,12 @@ const UserTable = () => {
 
   const handleDeleteModal = async () => {
     if (deleteId) {
-      // چک امنیتی سطح دسترسی در لحظه حذف
       if (hasActionPermission(profile?.role, "canDelete")) {
         await deleteUser(deleteId, {
           onSuccess: () => {
             setIsDelete(false);
             setDeleteId(null);
           },
-
         });
       } else {
         setIsDelete(false);
@@ -88,16 +91,20 @@ const UserTable = () => {
 
   return (
     <div className="bg-white rounded-lg mt-4 border border-gray-100 shadow-sm p-4">
+
       <div className="flex items-center justify-center sm:justify-start gap-4 mb-4 ">
-        {/* دکمه افزودن کاربر با چک دسترسی */}
-        {hasActionPermission(profile?.role, "canCreate") && (
-          <button
-            onClick={() => setIsCreateUser(true)}
-            className="flex items-center justify-center gap-2 bg-[#2563EB] text-white px-5 py-2 rounded-sm text-sm font-medium cursor-pointer shadow-sm transition-all"
-          >
-            <FaPlus />
-            <span>افزودن کاربر</span>
-          </button>
+        {isgettigUserList ? (
+          <Skeleton className=" h-11 " width={110} />
+        ) : (
+          hasActionPermission(profile?.role, "canCreate") && (
+            <button
+              onClick={() => setIsCreateUser(true)}
+              className="flex items-center justify-center gap-2 bg-[#2563EB] text-white px-5 py-2 rounded-sm text-sm font-medium cursor-pointer shadow-sm transition-all"
+            >
+              <FaPlus />
+              <span>افزودن کاربر</span>
+            </button>
+          )
         )}
       </div>
 
@@ -170,14 +177,14 @@ const UserTable = () => {
             <tbody>
               {paginatedData.length > 0 ? (
                 paginatedData.map((user: any) => {
-                  const isSelf = user.id === profile?.id; // جلوگیری از ویرایش خود کاربر
+                  const isSelf = user.id === profile?.id;
                   return (
                     <tr key={user.id} className="hover:bg-gray-50 border-b border-gray-100">
                       <td className="py-4 flex items-center gap-x-1 pr-2 w-40">
-
                         <div className="border p-2 rounded-full border-gray-300 ml-2">
                           <LuUser className="text-3xl text-gray-500" />
                         </div>
+
                         <span className="text-sm font-bold text-gray-800">{user.full_name}</span>
                       </td>
                       <td className="py-4 text-center ml-4">
@@ -185,23 +192,30 @@ const UserTable = () => {
                           {getRoleLabel(user.role)}
                         </span>
                       </td>
-                      <td className="py-4 text-sm text-center text-gray-600 font-mono">{user.phone}</td>
-                      <td className="py-4 text-center text-gray-400">{formatToPersianDate(user?.last_login_at)||"_"}</td>
+                      <td className="py-4 text-center text-gray-600 font-mono">{user.phone}</td>
+                      <td className="py-4 text-center text-gray-400 text-sm">
+                        {formatToPersianDate(user?.last_login_at) || " وارد نشده"}
+                      </td>
                       <td className="py-4 text-center">
                         <div className="flex justify-center gap-x-1 items-center">
-                          {(hasMinLevel(profile?.role, PermissionLevel.LEVEL_1) ||
+                          {hasMinLevel(profile?.role, PermissionLevel.LEVEL_1) ||
                             hasActionPermission(profile?.role, "canEdit") ||
-                            hasActionPermission(profile?.role, "canDelete")) ? (
+                            hasActionPermission(profile?.role, "canDelete") ? (
                             <>
-                              {hasMinLevel(profile?.role, PermissionLevel.LEVEL_1) && !isSelf && (
-                                <Link
-                                
-                                  href={`/roles-users/${user.id}`}
-                                  className="cursor-pointer border py-1 hover:text-blue-600 border-gray-400 hover:border-blue-600 px-2 rounded-sm text-xs font-medium transition-all"
-                                >
-                                  <span>تعریف دسترسی</span>
-                                </Link>
-                              )}
+                              {/* ✅ تغییر در این بخش: بررسی نقش و وضعیت کاربر هدف */}
+                              {hasMinLevel(profile?.role, PermissionLevel.LEVEL_1) &&
+                                !isSelf && 
+                                (user.role === 'location_manager' || user.role === 'operator') && 
+                                user.is_active === true && (
+                                  <button>
+                                    <Link
+                                      href={`/roles-users/${user.id}`}
+                                      className="cursor-pointer border py-0.5 hover:text-blue-600 border-gray-400 hover:border-blue-600 px-2 rounded-sm text-xs font-medium transition-all"
+                                    >
+                                      <span>تعریف دسترسی</span>
+                                    </Link>
+                                  </button>
+                                )}
 
                               {hasActionPermission(profile?.role, "canEdit") && !isSelf && (
                                 <button
@@ -253,6 +267,7 @@ const UserTable = () => {
 
       <ConfirmModal
         handleConfirm={handleDeleteModal}
+
         onClose={() => setIsDelete(false)}
         open={isDelete}
         title="حذف کاربر"

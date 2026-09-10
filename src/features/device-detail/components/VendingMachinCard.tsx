@@ -10,6 +10,8 @@ const VendingMachineCard = () => {
   const { deviceId } = useParams();
   const { device, isGettingDevice } = useGetDeviceDetail(deviceId as string);
 
+  
+
   // تابع کمکی برای فرمت اعداد
   const formatNumber = (num: number) => num?.toLocaleString("fa-IR") || "۰";
 

@@ -77,7 +77,7 @@ const InventoryTable = () => {
                   const timePart = item.created_at?.split("T")[1]?.substring(0, 5);
 
                   return (
-                    <tr key={item.id || index} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={`${item.id}-${index}`} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-6 py-4 text-[#475569] text-sm font-medium whitespace-nowrap">
                         <div className="flex flex-col">
                           <span>{formatToPersianDate(datePart) || "---"}</span>

@@ -9,7 +9,8 @@ export function useCreateRepair() {
     {
       mutationFn: createRepairsApi,
       onSuccess: (data) => {
-        queryClient.invalidateQueries({queryKey:["repairs-list"]})
+        queryClient.invalidateQueries({queryKey:["repairs-list"]});
+        queryClient.invalidateQueries({queryKey:["all-repairs-list"]});
         toast.success("تعمیرات  با موفقیت ثبت شد");
       },
       onError: (err) => {

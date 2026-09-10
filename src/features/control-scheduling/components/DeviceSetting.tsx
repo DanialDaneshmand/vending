@@ -1,7 +1,8 @@
 
 "use client";
 
-import useGetDevice_Detail from "@/shared/hooks/useGetDeviceDetail";
+import { useQueryClient } from "@tanstack/react-query";
+import useGetDeviceDetail from "@/shared/hooks/useGetDeviceDetail";
 import { Laptop, Send, Loader2 } from "lucide-react"; 
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -14,18 +15,19 @@ import { hasActionPermission } from "@/shared/permisseions/permissionUtils";
 import useGetDeviceSetting from "@/features/device-detail/hooks/useGetDeviceSetting";
 
 export default function DeviceSetting() {
+  const queryClient = useQueryClient();
   const { deviceId } = useParams();
-  const { device, isGettingDevice } = useGetDevice_Detail(deviceId as string);
+
+  // Hooks for data fetching
+  const { device, isGettingDevice } = useGetDeviceDetail(deviceId as string);
+  const { deviceSetting, isGettingDeviceSetting } = useGetDeviceSetting(deviceId as string);
+  const { toggle } = useGetToggle();
+  const { isgettingprofile, profile } = UseGetProfile();
+
+  // Hooks for updates
   const { isUpdatingPrice, updatePrice } = useUpdatePrice();
   const { isUpdatingToggle, updateToggle } = useUpdateToggle();
-  const { isGettingToggle, toggle } = useGetToggle();
-  const {deviceSetting,isGettingDeviceSetting}=useGetDeviceSetting(deviceId as string);
 
-  console.log(deviceSetting,"device");
-  
-
-  // --- Auth & Profile ---
-  const { isgettingprofile, profile } = UseGetProfile();
   const canEdit = hasActionPermission(profile?.role, 'canEdit');
 
   const [formData, setFormData] = useState({
@@ -34,30 +36,47 @@ export default function DeviceSetting() {
     toggle_interval_s: 0,
     toggle_duration_s: 0,
     toggle_count: 0,
-    pos_ip: "", // 🆕 اضافه شد
+    pos_ip: "", 
   });
 
+  
+
+  // مقداردهی اولیه و مدیریت مقادیر Null
   useEffect(() => {
+    // 1. مقداردهی از دیتای کلی دستگاه
     if (device) {
       setFormData((prev) => ({ 
         ...prev, 
-        name: device.name, 
-        price: device.price || 0,
-        pos_ip: device.pos_ip || "" // 🆕 مقداردهی اولیه از دیتای دستگاه
+        name: device.name || "بدون نام", 
+        price: device.price ?? 0,
+        pos_ip: device.pos_ip ?? "" 
       }));
     }
-    if (toggle?.items && deviceId) {
+
+    // 2. مقداردهی از دیتای تنظیمات (اولویت با این بخش است)
+    if (deviceSetting) {
+      setFormData((prev) => ({
+        ...prev,
+        price: deviceSetting.price ?? (device?.price ?? 0),
+        pos_ip: deviceSetting.pos_ip ?? (device?.pos_ip ?? ""),
+        toggle_interval_s: deviceSetting.toggle_interval_s ?? 0,
+        toggle_duration_s: deviceSetting.toggle_duration_s ?? 0,
+        toggle_count: deviceSetting.toggle_count ?? 0,
+      }));
+    } 
+    // 3. Fallback به دیتای Toggle در صورت نبود deviceSetting
+    else if (toggle?.items && deviceId) {
       const deviceToggle = toggle.items.find((item: any) => item.device_id === (deviceId as string));
       if (deviceToggle) {
         setFormData((prev) => ({
           ...prev,
-          toggle_interval_s: deviceToggle.toggle_interval_s || 0,
-          toggle_duration_s: deviceToggle.toggle_duration_s || 0,
-          toggle_count: deviceToggle.toggle_count || 0,
+          toggle_interval_s: deviceToggle.toggle_interval_s ?? 0,
+          toggle_duration_s: deviceToggle.toggle_duration_s ?? 0,
+          toggle_count: deviceToggle.toggle_count ?? 0,
         }));
       }
     }
-  }, [device, toggle, deviceId]);
+  }, [device, deviceSetting, toggle, deviceId]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!canEdit) return; 
@@ -70,6 +89,7 @@ export default function DeviceSetting() {
     if (!canEdit) return;
 
     try {
+      // ارسال همزمان هر دو درخواست
       await Promise.all([
         updatePrice({ deviceId: deviceId as string, payload: { price: Number(formData.price) } }),
         updateToggle({
@@ -78,16 +98,25 @@ export default function DeviceSetting() {
             toggle_interval_s: Number(formData.toggle_interval_s),
             toggle_duration_s: Number(formData.toggle_duration_s),
             toggle_count: Number(formData.toggle_count),
-            pos_ip: formData.pos_ip, // 🆕 ارسال به همراه تنظیمات تاگل
+            pos_ip: formData.pos_ip,
           },
+
         }),
       ]);
+
+      // به‌روزرسانی کش React Query برای رفرش شدن خودکار مقادیر
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["device-settings", deviceId] }),
+        queryClient.invalidateQueries({ queryKey: ["device", deviceId] }),
+      ]);
+
     } catch (error) {
       toast.error("خطا در به‌روزرسانی تنظیمات.");
     }
   };
 
-  if (isGettingDevice || isgettingprofile) {
+  // نمایش لودینگ در صورتی که هر کدام از دیتای ضروری هنوز در حال دریافت باشند
+  if (isGettingDevice || isgettingprofile || isGettingDeviceSetting) {
     return <div className="h-full w-full bg-gray-100 animate-pulse rounded-lg" />;
   }
 
@@ -95,10 +124,8 @@ export default function DeviceSetting() {
     <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 h-full flex flex-col" dir="rtl">
       <div className="flex items-center justify-between mb-8">
         <div className="text-right">
-
           <h2 className="text-slate-800 font-bold text-lg">{formData.name || "در حال بارگذاری..."}</h2>
         </div>
-
         <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
           <Laptop size={24} />
         </div>
@@ -120,7 +147,6 @@ export default function DeviceSetting() {
         <div className="space-y-4">
           <h4 className="text-sm font-bold text-slate-700 border-b pb-2">تنظیمات Toggle</h4>
 
-          {/* 🆕 اینپوت جدید برای POS IP */}
           <div className="flex items-center justify-between gap-4">
             <input
               name="pos_ip"
@@ -164,6 +190,7 @@ export default function DeviceSetting() {
               type="number"
               value={formData.toggle_count}
               onChange={handleInputChange}
+
               readOnly={!canEdit}
               className={`w-24 p-2 bg-slate-50 border border-gray-200 rounded-lg text-xs text-center outline-none focus:border-blue-500 ${!canEdit ? "opacity-70 cursor-not-allowed" : ""}`}
             />
@@ -189,6 +216,5 @@ export default function DeviceSetting() {
         </button>
       )}
     </div>
-
   );
 }

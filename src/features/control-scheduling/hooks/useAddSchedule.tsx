@@ -10,10 +10,10 @@ export function useAddSchedule() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["device-schedules"] });
 
-      toast.success("زمان بندی دستگاه با موفقیت اضافه شد");
+      // toast.success("زمان بندی دستگاه با موفقیت اضافه شد");
     },
     onError: (err) => {
-      toast.error("افزودن زمانبندی دستگاه با مشکل مواجه شد");
+      // toast.error("افزودن زمانبندی دستگاه با مشکل مواجه شد");
     },
   });
 

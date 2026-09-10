@@ -11,8 +11,12 @@ export function useCreateUser() {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       toast.success("کاربر جدید با موفقیت ثبت شد");
     },
-    onError: (err) => {
-      toast.error("مشکلی در ایجاد کاربر جدید پیش امده است");
+    onError: (err: any) => {
+       if (err.response?.status === 409) {
+        toast.error("این کاربر از قبل وجود دارد");
+      } else {
+        toast.error("مشکلی در ایجاد کاربر جدید پیش امده است");
+      }
     },
   });
   return { isCreatingUser, createUser };

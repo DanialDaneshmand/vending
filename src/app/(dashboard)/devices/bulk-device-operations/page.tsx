@@ -9,6 +9,7 @@ import { toast } from "react-hot-toast";
 import { LucideCheckCircle } from "lucide-react";
 import UseGetDevicesList from "@/shared/hooks/useGetDevicesList";
 import { useAddSchedule } from "@/features/control-scheduling/hooks/useAddSchedule";
+import { useDeleteDeviceWeeklySchedules } from "@/shared/hooks/usedeleteDeviceWeeklyScheduleApi";
 
 const DISPLAY_DAYS = [
   "شنبه",
@@ -77,6 +78,7 @@ export default function BulkSchedulingPage() {
 
   const { devicesList, isGettingDevicesList } = UseGetDevicesList();
   const { addSchedule, isAddingschedule } = useAddSchedule();
+  const {deleteDeviceSchedule,isDeletingDeviceScedule}=useDeleteDeviceWeeklySchedules()
   
 
   // --- فیلترینگ داده‌ها ---
@@ -196,7 +198,7 @@ export default function BulkSchedulingPage() {
     );
   };
 
-  // --- تابع نهایی ارسال به API ---
+  
   const handleBulkUpdate = async () => {
     if (selectedIds.size === 0) {
       toast.error("لطفاً حداقل یک دستگاه را انتخاب کنید");
@@ -221,28 +223,44 @@ export default function BulkSchedulingPage() {
     }
 
     try {
-      // ارسال تکی برای هر دستگاه و هر اسلات (Sequential)
-      for (const deviceId of deviceIds) {
-        for (const slot of activeSchedules) {
-          const [hour, minute] = slot.time.split(":").map(Number);
-          await addSchedule({
-            deviceId: deviceId,
-            payload: {
-              day_of_week: slot.day_of_week,
-              action: slot.action,
-              hour: isNaN(hour) ? 0 : hour,
-              minute: isNaN(minute) ? 0 : minute,
-            },
+      // ایجاد یک آرایه از تمام عملیات‌ها برای هر دستگاه
+      const tasks = deviceIds.map(async (deviceId) => {
+        try {
+          // ۱. ابتدا پاک‌سازی کل زمان‌بندی‌های هفتگی این دستگاه
+          await deleteDeviceSchedule(deviceId);
+
+          // ۲. سپس ارسال تمام اسلات‌های جدید برای این دستگاه به صورت موازی
+          const schedulePromises = activeSchedules.map((slot) => {
+            const [hour, minute] = slot.time.split(":").map(Number);
+            return addSchedule({
+              deviceId: deviceId,
+              payload: {
+                day_of_week: slot.day_of_week,
+                action: slot.action,
+                hour: isNaN(hour) ? 0 : hour,
+                minute: isNaN(minute) ? 0 : minute,
+              },
+            });
           });
+
+          // اجرای تمام addScheduleها برای این دستگاه به صورت همزمان
+          await Promise.all(schedulePromises);
+        } catch (error) {
+          console.error(`Error updating device ${deviceId}:`, error);
+          throw error; // خطا را به لایه بالاتر می‌فرستیم تا در catch کلی گرفته شود
         }
-      }
+      });
+
+      // اجرای تمام عملیات‌های مربوط به تمام دستگاه‌ها به صورت موازی
+      await Promise.all(tasks);
+
       toast.success(
-        `تنظیمات با موفقیت برای ${deviceIds.length} دستگاه اعمال شد`,
+        `زمان‌بندی‌های قبلی پاک و تنظیمات جدید برای ${deviceIds.length} دستگاه اعمال شد`,
       );
       setSelectedIds(new Set());
     } catch (error) {
       console.error("Bulk Update Error:", error);
-      toast.error("خطا در ارسال برخی از زمان‌بندی‌ها");
+      toast.error("خطایی در هنگام به‌روزرسانی برخی از دستگاه‌ها رخ داد");
     }
   };
 

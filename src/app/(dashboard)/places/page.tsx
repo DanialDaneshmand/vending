@@ -11,8 +11,7 @@ export default function page() {
         <div className="col-span-12 lg:col-span-8">
           
           <LocationManagement/>
-        </div>
-        
+        </div>       
       </div>
     </section>
   );

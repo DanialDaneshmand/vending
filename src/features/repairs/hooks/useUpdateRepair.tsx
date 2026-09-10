@@ -9,7 +9,8 @@ export function useUpdateRepair() {
     {
       mutationFn: updateDeviceRepairApi,
       onSuccess: (data) => {
-        queryClient.invalidateQueries({queryKey:["repairs-list"]})
+        queryClient.invalidateQueries({queryKey:["repairs-list"]});
+        queryClient.invalidateQueries({queryKey:["all-repairs-list"]});
         toast.success("تعمیرات  با موفقیت آپدیت شد");
       },
       onError: (err) => {

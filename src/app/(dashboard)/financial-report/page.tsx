@@ -38,6 +38,7 @@ export default function Page() {
 
   const { isgettingTransactions, transactions } = useGetTransactions();
   const { isGettingLocations, locations } = UseGetLocations();
+console.log(transactions);
 
   // --- اصلاح منطق فرمت کردن برای فیلتر داخلی ---
   const formattedFilters = useMemo(() => {

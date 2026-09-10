@@ -11,6 +11,7 @@ export function useResolveAlert() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["device-alerts"] });
       queryClient.invalidateQueries({ queryKey: ["alerts"] });
+      queryClient.invalidateQueries({ queryKey: ["alert-stats"] });
       toast.success("هشدار به حل شده ها منتقل شد");
     },
     onError: (err) => {

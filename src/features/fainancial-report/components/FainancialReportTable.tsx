@@ -29,7 +29,7 @@ export default function FinancialReportTable({
   // دریافت داده‌ها از هوک‌ها
   const { locations } = UseGetLocations();
   const { sectionsList } = UseGetAllSection();
-  console.log(sectionsList);
+
   
 
   // تبدیل داده‌ها به آرایه برای ایمنی بیشتر

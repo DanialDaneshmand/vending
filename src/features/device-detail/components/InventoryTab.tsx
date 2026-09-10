@@ -52,7 +52,6 @@ const InventoryTab = () => {
   const { editDevice, isEditingDevice } = useEditDevice();
   const { device, isGettingDevice } = useGetDeviceDetail(deviceId as string);
   const { profile } = UseGetProfile();
-  console.log(device);
 
   useEffect(() => {
     if (!isGettingDevice) {
@@ -75,6 +74,11 @@ const InventoryTab = () => {
 const handleAddInventory = () => {
     const numericValue = +changeValue.count;
     const currentInventory = device?.inventory_level || 0;
+
+    if (device?.is_active===false) {
+      toast.error("این عملیات برای دستگاه  های غیر فعال امکان پذیر نیست");
+      return;
+    }
 
     if (numericValue === 0) {
       toast.error("لطفاً یک مقدار غیر از صفر را وارد کنید");
@@ -99,7 +103,7 @@ const handleAddInventory = () => {
         deviceId: deviceId as string,
         payload: {
           delta: finalDelta,
-          reason: changeValue.note || changeValue.operator,
+          reason: changeValue.note || changeValue.operator==="increase"?"افزودن":"کم کردن",
         },
       },
       {
@@ -116,6 +120,10 @@ const handleAddInventory = () => {
 };
 
   const handleSaveAlerts = async () => {
+    if (device?.is_active===false) {
+      toast.error("این عملیات برای دستگاه  های غیر فعال امکان پذیر نیست");
+      return;
+    }
     if (
       !alertValues.inventory_yellow_threshold ||
       !alertValues.inventory_red_threshold

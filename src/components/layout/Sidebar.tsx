@@ -33,7 +33,7 @@ export default function Sidebar() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const { alertList, isGettingAlertsList } = useGetAlertList();
-  const alertCount = alertList?.items?.length || 0;
+  const alertCount = alertList?.items?.filter((item:any)=>item.resolved===false).length || 0;
 
   // --- تابع پاکسازی کوکی ---
   const deleteCookie = (name: string) => {

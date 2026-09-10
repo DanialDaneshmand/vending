@@ -41,16 +41,16 @@ const StatsSkeleton = () => (
   </div>
 );
 
-export default function DashboardStats() {
+export default function DevicesCardsSection() {
   const { devicesList, isGettingDevicesList } = UseGetDevicesList();
 
   const stats = useMemo(() => {
     const items = devicesList?.items || [];
     const total = items.length;
-    const online = items.filter((d: any) => d.power_on === true).length;
-    const offline = items.filter((d: any) => d.power_on === false).length;
+    const online = items.filter((d: any) => d.status === "online").length;
+    const offline = items.filter((d: any) => d.status === "offline").length;
     const lowInventory = items.filter(
-      (d: any) => d.inventory_status === "critical",
+      (d: any) => d.inventory_level <d.inventory_red_threshold,
     ).length;
 
     return [

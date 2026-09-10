@@ -11,6 +11,31 @@ import Skeleton from "react-loading-skeleton";
 import { FaSlidersH } from "react-icons/fa";
 import UseGetProfile from "@/shared/hooks/useGetProfile";
 import { hasActionPermission } from "@/shared/permisseions/permissionUtils";
+import toast from "react-hot-toast"; // اضافه شد برای نمایش پیام موفقیت
+
+// ✅ تعریف استایل‌ها و نام‌های فارسی برای وضعیت‌ها
+const STATUS_MAP: Record<string, { name: string; style: string }> = {
+  pending: {
+    name: "در انتظار بررسی",
+    style: "bg-blue-50 text-blue-600",
+  },
+  online: {
+    name: "آنلاین",
+    style: "bg-green-50 text-green-600",
+  },
+  offline: {
+    name: "آفلاین",
+    style: "bg-gray-50 text-gray-500",
+  },
+  disabled: {
+    name: "غیر فعال",
+    style: "bg-red-50 text-red-600",
+  },
+  maintenance: {
+    name: "در حال تعمیر",
+    style: "bg-orange-50 text-orange-600",
+  },
+};
 
 const DeviceMiniIcon = () => (
   <svg
@@ -38,7 +63,6 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
   const [isShowConfirmModal, setIsShowConfirmModal] = useState(false);
   const [deviceId, setDeviceId] = useState<null | string>(null);
   const { deleteDevice } = useDeleteDevice();
-
   const { isgettingprofile, profile } = UseGetProfile();
 
   const handleDeleteBtnClick = (id: string) => {
@@ -49,9 +73,17 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
   const handleDeleleteDevice = async () => {
     if (deviceId) {
       if (hasActionPermission(profile?.role, "canDelete")) {
-        await deleteDevice(deviceId);
+        try {
+          await deleteDevice(deviceId);
+          toast.success("دستگاه با موفقیت حذف شد");
+        } catch (error) {
+          toast.error("خطا در حذف دستگاه");
+        } finally {
+          setIsShowConfirmModal(false);
+          setDeviceId(null);
+        }
       } else {
-        console.error("شما دسترسی حذف دستگاه را ندارید");
+        toast.error("شما دسترسی حذف دستگاه را ندارید");
       }
     }
   };
@@ -109,6 +141,13 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
       );
     });
   }, [devicesList, filters]);
+
+  const statusStyles: Record<string, string> = {
+    good: "bg-green-50 text-green-600", // سبز برای وضعیت خوب
+    yellow: "bg-yellow-50 text-yellow-600", // زرد برای هشدار
+    red: "bg-red-50 text-red-600", // قرمز برای وضعیت بحرانی
+    empty: "bg-gray-100 text-gray-500", // خاکستری برای خالی/ناموجود
+  };
 
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
@@ -172,76 +211,75 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((device: any) => (
-                <tr
-                  key={device.id}
-                  className="bg-white hover:bg-slate-50 transition-colors group"
-                >
-                  <td className="px-4 py-3 rounded-r-lg text-nowrap border-y border-r border-gray-100 text-slate-700 text-[14px] font-medium align-middle">
-                    <div className="flex items-center gap-2">
-                      <DeviceMiniIcon /> {device.name}
-                    </div>
-                  </td>
-                  <td className="px-4 w-16 py-3 text-center text-nowrap border-y border-gray-100 text-slate-500 text-[12px] align-middle">
-                    {device.device_code}
-                  </td>
-                  <td className="px-4 text-center py-3 border-y border-gray-100 text-slate-500 text-[13px] text-nowrap align-middle">
-                    {device.location_name}
-                  </td>
-                  <td className="px-4 py-3 border-y text-center border-gray-100 text-slate-500 text-[13px] text-nowrap align-middle">
-                    {device.section_name}
-                  </td>
-                  <td className="px-4 text-center py-3 border-y border-gray-100 align-middle">
-                    <span
-                      className={`px-3 py-1 rounded-md text-[11px] font-bold ${
-                        device.status === "online" || device.status === "فعال"
-                          ? "bg-green-50 text-green-600"
-                          : "bg-red-50 text-red-500"
-                      }`}
-                    >
-                      {device.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-center border-y border-gray-100 align-middle">
-                    <span
-                      className={`px-3 py-1 rounded-md text-[11px] font-bold ${
-                        device.inventory_status === "ok"
-                          ? "bg-green-50 text-green-600"
-                          : "bg-orange-50 text-orange-500"
-                      }`}
-                    >
-                      {device.inventory_level}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-center border-y border-gray-100 align-middle">
-                    <div className="flex justify-center gap-2">
-                      <Link
-                        href={`/devices/${device.id}`}
-                        className="p-2 text-gray-400 hover:text-blue-600 transition-all border border-gray-200 rounded-md"
-                      >
-                        <Eye size={16} />
-                      </Link>
+              {paginatedData.map((device: any) => {
+                // ✅ استخراج نام و استایل بر اساس وضعیت دستگاه
+                const statusInfo = STATUS_MAP[device.status] || {
+                  name: device.status, // اگر وضعیت در لیست نبود، همان مقدار دیتابیس را نشان بده
+                  style: "bg-gray-50 text-gray-400",
+                };
 
-                      {/* ✅ کنترل دسترسی: دکمه حذف فقط برای کسانی که canDelete دارند */}
-                      {hasActionPermission(profile?.role, "canDelete") && (
-                        <button
-                          onClick={() => handleDeleteBtnClick(device.id)}
-                          className="p-2 text-gray-400 hover:text-red-500 transition-all border border-gray-200 rounded-md"
+                return (
+                  <tr
+                    key={device.id}
+                    className="bg-white hover:bg-slate-50 transition-colors group"
+                  >
+                    <td className="px-4 py-3 rounded-r-lg text-nowrap border-y border-r border-gray-100 text-slate-700 text-[14px] font-medium align-middle">
+                      <div className="flex items-center gap-2">
+                        <DeviceMiniIcon /> {device.name}
+                      </div>
+                    </td>
+                    <td className="px-4 w-16 py-3 text-center text-nowrap border-y border-gray-100 text-slate-500 text-[12px] align-middle">
+                      {device.device_code}
+                    </td>
+                    <td className="px-4 text-center py-3 border-y border-gray-100 text-slate-500 text-[13px] text-nowrap align-middle">
+                      {device.location_name}
+                    </td>
+                    <td className="px-4 py-3 border-y text-center border-gray-100 text-slate-500 text-[13px] text-nowrap align-middle">
+                      {device.section_name}
+                    </td>
+                    <td className="px-4 text-center py-3 border-y border-gray-100 align-middle">
+                      <span
+                        className={`px-3 py-1 rounded-md text-[11px] font-bold ${statusInfo.style}`}
+                      >
+                        {statusInfo.name}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3 text-center border-y border-gray-100 align-middle">
+                      <span
+                        className={`px-3 py-1 rounded-md text-[11px] font-bold ${statusStyles[device.inventory_status] || "bg-slate-50 text-slate-400"}`}
+                      >
+                        {device.inventory_level}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center border-y border-gray-100 align-middle">
+                      <div className="flex justify-center gap-2">
+                        <Link
+                          href={`/devices/${device.id}`}
+                          className="p-2 text-gray-400 hover:text-blue-600 transition-all border border-gray-200 rounded-md"
                         >
-                          <LuTrash2 size={16} />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                          <Eye size={16} />
+                        </Link>
+                        {hasActionPermission(profile?.role, "canDelete") && (
+                          <button
+                            onClick={() => handleDeleteBtnClick(device.id)}
+                            className="p-2 text-gray-400 hover:text-red-500 transition-all border border-gray-200 rounded-md"
+                          >
+                            <LuTrash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
 
       {filteredData.length > pageSize && (
-        <div className="mt-4 flex justify-center">
+        <div className="mt-4 ">
           <StyledPagination
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}

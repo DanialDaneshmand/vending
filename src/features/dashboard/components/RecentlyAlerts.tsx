@@ -47,7 +47,10 @@ const getAlertStyle = (severity: string) => {
 export default function RecentAlerts() {
   const { dashboardInfo, isgettingDashboardInfo } = useGetDashboardInfo();
   const recentAlerts = dashboardInfo?.recent_alerts || [];
-  const totalAlerts = dashboardInfo?.kpis?.alerts?.total || 0;
+  const totalAlerts = dashboardInfo?.kpis?.alerts?.open || 0;
+
+  console.log(dashboardInfo);
+  
 
   // نمایش Skeleton در زمان لودینگ
   if (isgettingDashboardInfo) {

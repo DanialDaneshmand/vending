@@ -9,7 +9,8 @@ export function useDeleteRepair() {
     {
       mutationFn: deleteDeviceRepairApi,
       onSuccess: (data) => {
-        queryClient.invalidateQueries({queryKey:["repairs-list"]})
+        queryClient.invalidateQueries({queryKey:["repairs-list"]});
+        queryClient.invalidateQueries({queryKey:["all-repairs-list"]});
         toast.success("حذف تعمیر با موفقیت انجام شد");
       },
       onError: (err) => {

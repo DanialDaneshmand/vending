@@ -1,11 +1,7 @@
 "use client";
 import { toPersianNumbers } from "@/utils/toPersianNumber";
 import React, { Dispatch, SetStateAction } from "react";
-import {
-  IoIosArrowBack,
-  IoIosArrowForward,
- 
-} from "react-icons/io";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 interface StyledPaginationProps {
   currentPage: number;
@@ -112,7 +108,7 @@ const StyledPagination: React.FC<StyledPaginationProps> = ({
               setPageSize(Number(e.target.value));
               setCurrentPage(1);
             }}
-            className="border rounded-md px-1 text-sm outline-0"
+            className="border rounded-md px-1 text-smoutline-0"
           >
             <option value={5}>5</option>
             <option value={10}>10</option>

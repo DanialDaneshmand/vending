@@ -1,4 +1,3 @@
-
 "use client";
 
 import FilterContainer from "@/components/shared/FilterContainer";
@@ -18,51 +17,43 @@ interface ChangeHandlerEvent {
 
 // اصلاح مقادیر مطابق با دیتای سرور
 const optionsMap = {
-  places: { 
-    title: "مکان", 
-    options: [
-      { id: "all", name: "همه مکان ها" },
-      { id: "tehran", name: "تهران" },
-      { id: "mashhad", name: "مشهد" },
-    ] 
-  },
-  alertType: { 
-    title: "نوع هشدار", 
+  
+  alertType: {
+    title: "نوع هشدار",
     options: [
       { id: "all", name: "همه انواع" },
       { id: "hardware_error", name: "خطای سخت‌افزاری" },
       { id: "network_error", name: "خطای شبکه" },
-    ] 
+    ],
   },
-  status: { 
-    title: "وضعیت", 
+  status: {
+    title: "وضعیت",
     options: [
       { id: "all", name: "همه وضعیت ها" },
       { id: "resolved", name: "حل شده" },
       { id: "unresolved", name: "حل نشده" },
-    ] 
+    ],
   },
-  intensity: { 
-    title: "شدت", 
+  intensity: {
+    title: "شدت",
     options: [
       { id: "all", name: "همه شدت ها" },
       { id: "critical", name: "بحرانی" },
       { id: "warning", name: "بالا" },
       { id: "info", name: "متوسط" },
-    ] 
+    ],
   },
 };
 
 export default function Page() {
   const [filterValues, setFilterValues] = useState({
-  places: "all",
-  alertType: "all",
-  status: "all",
-  intensity: "all",
-});
+    places: "all",
+    alertType: "all",
+    status: "all",
+    intensity: "all",
+  });
 
   const { alertList, isGettingAlertsList } = useGetAlertList();
-
   
 
   const handleInputChange = (e: ChangeHandlerEvent) => {
@@ -73,39 +64,40 @@ export default function Page() {
   };
 
   const handleClearFilters = () => {
-  setFilterValues({
-  places: "all",
-  alertType: "all",
-  status: "all",
-  intensity: "all",
-});
-};
+    setFilterValues({
+      places: "all",
+      alertType: "all",
+      status: "all",
+      intensity: "all",
+    });
+  };
 
   const filteredAlerts = useMemo(() => {
-  const items = alertList?.items || [];
+    const items = alertList?.items || [];
 
-  return items.filter((alert: any) => {
-    const matchesIntensity = 
-      filterValues.intensity === "all" || 
-      alert.severity === filterValues.intensity;
+    return items.filter((alert: any) => {
+      const matchesIntensity =
+        filterValues.intensity === "all" ||
+        alert.severity === filterValues.intensity;
 
-    const matchesType = 
-      filterValues.alertType === "all" || 
-      alert.type === filterValues.alertType;
+      const matchesType =
+        filterValues.alertType === "all" ||
+        alert.type === filterValues.alertType;
 
-    let matchesStatus = true;
-    if (filterValues.status !== "all") {
-      if (filterValues.status === "resolved") matchesStatus = alert.resolved === true;
-      else if (filterValues.status === "unresolved") matchesStatus = alert.resolved === false;
-    }
+      let matchesStatus = true;
+      if (filterValues.status !== "all") {
+        if (filterValues.status === "resolved")
+          matchesStatus = alert.resolved === true;
+        else if (filterValues.status === "unresolved")
+          matchesStatus = alert.resolved === false;
+      }
 
-    const matchesPlace = 
-      filterValues.places === "all" || 
-      alert.location === filterValues.places;
+      const matchesPlace =
+        filterValues.places === "all" || alert.location_id === filterValues.places;
 
-    return matchesIntensity && matchesType && matchesStatus && matchesPlace;
-  });
-}, [alertList, filterValues]);
+      return matchesIntensity && matchesType && matchesStatus && matchesPlace;
+    });
+  }, [alertList, filterValues]);
 
   return (
     <section className="p-4">
@@ -126,15 +118,17 @@ export default function Page() {
       <AlertStats />
 
       {/* Main Content Area */}
-      <div className="grid grid-cols-12 pt-4 gap-x-4">
-        <div className="col-span-12 xl:col-span-3">
-          <RecentReports />
-        </div>
-        <div className="col-span-12 xl:col-span-9">
-          <AlertList 
-            data={filteredAlerts} 
-            isLoading={isGettingAlertsList} 
+      <div className="grid grid-cols-12 pt-4 gap-4">
+        
+        <div className="col-span-12 ">
+          <AlertList
+            filterValues={filterValues}
+            data={filteredAlerts}
+            isLoading={isGettingAlertsList}
           />
+        </div>
+        <div className="col-span-12 sm:col-span-4">
+          <RecentReports />
         </div>
       </div>
     </section>

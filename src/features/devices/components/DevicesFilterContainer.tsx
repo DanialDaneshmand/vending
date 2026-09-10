@@ -7,7 +7,7 @@ import { Download } from "lucide-react";
 import { FaSlidersH } from "react-icons/fa";
 import { LuFilter, LuSearch } from "react-icons/lu";
 import useGetTransactionsCSVReports from "@/features/fainancial-report/hooks/useGetTransactionsCSVReports";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 
 interface FilterContainerProps<T> {
   filterValues: T;
@@ -27,6 +27,7 @@ export default function DevicesFilterContainer<T>({
   const { sectionsList } = UseGetAllSection();
   const { executeGetCsv, isGettingtransactionsCsvReports } =
     useGetTransactionsCSVReports();
+  const pathname=usePathname();
 
   // تابع برای مدیریت خروجی CSV و تغییر نام فیلدها
   const handleExportCSV = async () => {
@@ -92,7 +93,7 @@ export default function DevicesFilterContainer<T>({
       >
         {/* Search Container */}
         <div
-          className={` col-span-12 lg:col-span-6 order-2 lg:order-1 flex items-center`}
+          className={` col-span-12 order-2 lg:order-1 flex items-center  ${pathname==="/devices/bulk-device-operations"?"lg:col-span-8":"lg:col-span-6"}`}
         >
           <div className="flex flex-col w-full ">
             <label htmlFor="" className="text-sm font-bold mb-2 mr-1">
@@ -118,11 +119,11 @@ export default function DevicesFilterContainer<T>({
           </div>
         </div>
         {/* CSV Btn */}
-        <div className="order-1 lg:order-2 flex flex-col items-end  sm:flex-row justify-between gap-4 sm:gap-4 col-span-12 lg:col-span-6">
+        <div className={`order-1 lg:order-2 flex flex-col items-end  sm:flex-row justify-between gap-4 sm:gap-4 col-span-12 ${pathname==="/devices/bulk-device-operations"?"lg:col-span-4":"lg:col-span-6"}`}>
           <button 
             onClick={handleExportCSV}
             disabled={isGettingtransactionsCsvReports}
-            className="flex justify-center w-full items-center h-[45] font-medium cursor-pointer gap-2 px-4 py-2 border border-gray-100 shadow-xs rounded-md text-sm text-gray-800 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`${pathname==="/devices/bulk-device-operations"?"hidden":"flex"}  justify-center w-full items-center h-[45] font-medium cursor-pointer gap-2 px-4 py-2 border border-gray-100 shadow-xs rounded-md text-sm text-gray-800 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             <Download className="w-4 h-4" />
             خروجی CSV
