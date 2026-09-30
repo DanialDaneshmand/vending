@@ -2,12 +2,11 @@
 import React, { useEffect, useState } from "react";
 import {
   Package,
-  Database,
   Plus,
   X,
-  AlignLeft,
   Bell,
   Save,
+  Layers, // اضافه شده برای آیکون ظرفیت
 } from "lucide-react";
 
 import InventoryTable from "./InventoryTable";
@@ -20,7 +19,6 @@ import InventoryTabChart from "./InventoryTabChart";
 import { hasActionPermission } from "@/shared/permisseions/permissionUtils";
 import UseGetProfile from "@/shared/hooks/useGetProfile";
 import { useEditDevice } from "../hooks/useEditDevice";
-import { string } from "yup";
 
 interface HandleChangeArg {
   target: {
@@ -30,10 +28,10 @@ interface HandleChangeArg {
 }
 
 const InventoryTab = () => {
-  // استفاده از یک استیت واحد برای مدیریت پنل‌های فعال
-  const [activePanel, setActivePanel] = useState<"none" | "edit" | "alert">(
-    "none",
-  );
+  // اضافه شدن حالت 'capacity' به پنل‌ها
+  const [activePanel, setActivePanel] = useState<
+    "none" | "edit" | "alert" | "capacity"
+  >("none");
 
   const [changeValue, setChangeValue] = useState({
     count: 0,
@@ -45,6 +43,8 @@ const InventoryTab = () => {
     inventory_yellow_threshold: "",
     inventory_red_threshold: "",
   });
+
+  const [capacityValue, setCapacityValue] = useState(""); // استیت برای مقدار ظرفیت
 
   const { deviceId } = useParams();
   const { addManualInventory, isAddingManualInventory } =
@@ -59,6 +59,7 @@ const InventoryTab = () => {
         inventory_yellow_threshold: device.inventory_yellow_threshold,
         inventory_red_threshold: device.inventory_red_threshold,
       });
+      setCapacityValue(device.inventory_capacity || ""); // مقدار اولیه ظرفیت
     }
   }, []);
 
@@ -70,12 +71,41 @@ const InventoryTab = () => {
     setAlertValues({ ...alertValues, [e.target.name]: e.target.value });
   };
 
-  
-const handleAddInventory = () => {
+  // تابع جدید برای ذخیره ظرفیت
+  const handleSaveCapacity = async () => {
+    if (device?.is_active === false) {
+      toast.error("این عملیات برای دستگاه های غیر فعال امکان پذیر نیست");
+      return;
+    }
+    if (!capacityValue) {
+      toast.error("لطفاً مقدار ظرفیت را وارد کنید");
+      return;
+    }
+    try {
+      editDevice(
+        {
+          deviceId: deviceId as string,
+          payload: {
+            inventory_capacity: +capacityValue,
+          },
+        },
+        {
+          onSuccess: () => {
+            setActivePanel("none");
+            toast.success("ظرفیت با موفقیت به‌روز شد");
+          },
+        },
+      );
+    } catch (error) {
+      toast.error("خطایی در ذخیره ظرفیت رخ داد");
+    }
+  };
+
+  const handleAddInventory = () => {
     const numericValue = +changeValue.count;
     const currentInventory = device?.inventory_level || 0;
 
-    if (device?.is_active===false) {
+    if (device?.is_active === false) {
       toast.error("این عملیات برای دستگاه  های غیر فعال امکان پذیر نیست");
       return;
     }
@@ -89,7 +119,9 @@ const handleAddInventory = () => {
       changeValue.operator === "decrease" &&
       numericValue > currentInventory
     ) {
-      toast.error(`مقدار وارد شده بیشتر از موجودی فعلی (${currentInventory}) است`);
+      toast.error(
+        `مقدار وارد شده بیشتر از موجودی فعلی (${currentInventory}) است`,
+      );
       return;
     }
 
@@ -103,12 +135,15 @@ const handleAddInventory = () => {
         deviceId: deviceId as string,
         payload: {
           delta: finalDelta,
-          reason: changeValue.note || changeValue.operator==="increase"?"افزودن":"کم کردن",
+          reason:
+            changeValue.note || changeValue.operator === "increase"
+              ? "افزودن"
+              : "کم کردن",
         },
       },
       {
         onSuccess: () => {
-          setActivePanel("none"); 
+          setActivePanel("none");
           setChangeValue({ count: 0, operator: "increase", note: "" });
           toast.success("موجودی با موفقیت به‌روز شد");
         },
@@ -117,10 +152,10 @@ const handleAddInventory = () => {
         },
       },
     );
-};
+  };
 
   const handleSaveAlerts = async () => {
-    if (device?.is_active===false) {
+    if (device?.is_active === false) {
       toast.error("این عملیات برای دستگاه  های غیر فعال امکان پذیر نیست");
       return;
     }
@@ -143,6 +178,7 @@ const handleAddInventory = () => {
         {
           onSuccess: () => {
             setActivePanel("none");
+            toast.success("هشدارها با موفقیت ذخیره شدند");
           },
         },
       );
@@ -154,9 +190,8 @@ const handleAddInventory = () => {
   return (
     <div className="pt-4 space-y-6" dir="rtl">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* کارت موجودی کل */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 h-full relative overflow-hidden group transition-all hover:shadow-md">
+          <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-6 h-full relative overflow-hidden group transition-all hover:shadow-md">
             <div className="absolute -top-10 -left-10 w-32 h-32 bg-emerald-50 rounded-full blur-3xl opacity-70 group-hover:bg-emerald-100 transition-colors" />
 
             <div className="relative z-10">
@@ -166,6 +201,21 @@ const handleAddInventory = () => {
                 </div>
 
                 <div className="flex gap-2">
+                  {/* دکمه جدید برای ظرفیت */}
+                  {hasActionPermission(profile?.role, "canEdit") && (
+                    <button
+                      onClick={() =>
+                        setActivePanel(
+                          activePanel === "capacity" ? "none" : "capacity",
+                        )
+                      }
+                      className={`p-2 rounded-lg transition-all ${activePanel === "capacity" ? "bg-blue-100 text-blue-600" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}
+                      title="تنظیم ظرفیت موجودی"
+                    >
+                      <Layers size={20} />
+                    </button>
+                  )}
+
                   {hasActionPermission(profile?.role, "canEdit") && (
                     <button
                       onClick={() =>
@@ -210,7 +260,7 @@ const handleAddInventory = () => {
                 </h2>
               </div>
 
-              {/* فرم ویرایش موجودی - فقط وقتی activePanel برابر edit باشد نمایش داده شود */}
+              {/* فرم ویرایش موجودی */}
               {activePanel === "edit" && (
                 <div className="mt-6 p-4 bg-slate-50 rounded-xl space-y-4 border border-slate-100 animate-in fade-in slide-in-from-top-2">
                   <div className=" gap-3">
@@ -234,95 +284,99 @@ const handleAddInventory = () => {
                         className={`p-2 h-11.5 w-full mt-1.5 text-sm border border-gray-100 shadow-xs bg-white rounded-lg outline-none focus:ring-2 ${changeValue.operator === "increase" ? "ring-emerald-500" : "ring-red-600"} `}
                       />
                     </div>
+                    <input
+                      type="text"
+                      name="note"
+                      value={changeValue.note}
+                      onChange={(e) => handleChange({ target: e.target })}
+                      placeholder="توضیحات"
+                      className="p-2 h-11.5 w-full text-sm border border-gray-100 shadow-xs bg-white rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={handleAddInventory}
+                      disabled={isAddingManualInventory}
+                      className="w-full h-11.5 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-all disabled:opacity-50"
+                    >
+                      ثبت تغییرات
+                    </button>
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-xs text-slate-500 mr-1 font-medium">
-                      توضیحات (اختیاری)
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        name="note"
-                        value={changeValue.note}
-                        onChange={(e) => handleChange({ target: e.target })}
-                        className="w-full p-2 pr-9 text-sm border h-11.5 border-gray-100 shadow-xs bg-white rounded-lg outline-none focus:ring-2 ring-emerald-500"
-                      />
-                      <AlignLeft
-                        size={14}
-                        className="absolute left-3 top-3 text-slate-400"
-                      />
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleAddInventory}
-                    disabled={isAddingManualInventory}
-                    className="w-full py-2 bg-emerald-600 text-white rounded-lg font-bold text-sm hover:bg-emerald-700 disabled:bg-gray-300 transition-colors"
-                  >
-                    {isAddingManualInventory
-                      ? "در حال ثبت..."
-                      : "تأیید و ثبت تغییرات"}
-                  </button>
                 </div>
               )}
 
-              {/* بخش تنظیمات هشدار - فقط وقتی activePanel برابر alert باشد نمایش داده شود */}
+              {/* فرم تنظیمات هشدار */}
               {activePanel === "alert" && (
                 <div className="mt-6 p-4 bg-amber-50 rounded-xl space-y-4 border border-amber-100 animate-in fade-in slide-in-from-top-2">
-                  <p className="text-xs font-bold text-amber-700 mb-2">
-                    تنظیم آستانه هشدارها
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-3">
                     <div className="flex flex-col gap-1">
-                      <label className="text-[10px] text-amber-600 font-medium">
-                        هشدار زرد (کم)
+                      <label className="text-xs text-amber-700 font-medium">
+                        حد هشدار زرد
                       </label>
                       <input
                         type="number"
                         name="inventory_yellow_threshold"
                         value={alertValues.inventory_yellow_threshold}
                         onChange={handleAlertChange}
-                        placeholder="عدد"
-                        className="p-2 text-sm border rounded-lg outline-none focus:ring-2 ring-amber-500"
+                        className="p-2 h-11.5 w-full text-sm border border-amber-200 bg-white rounded-lg outline-none focus:ring-2 focus:ring-amber-500"
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-[10px] text-amber-600 font-medium">
-                        هشدار قرمز (بسیار کم)
+                      <label className="text-xs text-red-700 font-medium">
+                        حد هشدار قرمز
                       </label>
                       <input
                         type="number"
                         name="inventory_red_threshold"
                         value={alertValues.inventory_red_threshold}
                         onChange={handleAlertChange}
-                        placeholder="عدد"
-                        className="p-2 text-sm border rounded-lg outline-none focus:ring-2 ring-amber-500"
+                        className="p-2 h-11.5 w-full text-sm border border-red-200 bg-white rounded-lg outline-none focus:ring-2 focus:ring-red-500"
                       />
                     </div>
+                    <button
+                      onClick={handleSaveAlerts}
+                      disabled={isEditingDevice}
+                      className="w-full h-11.5 bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-700 transition-all disabled:opacity-50"
+                    >
+                      ذخیره هشدارها
+                    </button>
                   </div>
-                  <button
-                    onClick={handleSaveAlerts}
-                    className="w-full py-2 bg-amber-500 text-white rounded-lg font-bold text-sm hover:bg-amber-600 transition-colors flex items-center justify-center gap-2"
-                  >
-                    {isEditingDevice ? (
-                      "  در حال ذخیره ..."
-                    ) : (
-                      <span>
-                        <Save size={16} /> ذخیره هشدارها
-                      </span>
-                    )}
-                  </button>
+                </div>
+              )}
+
+              {/* فرم تنظیم ظرفیت (بخش جدید) */}
+              {activePanel === "capacity" && (
+                <div className="mt-6 p-4 bg-blue-50 rounded-xl space-y-4 border border-blue-100 animate-in fade-in slide-in-from-top-2">
+                  <div className="space-y-3">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs text-blue-700 font-medium">
+                        ظرفیت موجودی
+                      </label>
+                      <input
+                        type="number"
+                        value={capacityValue}
+                        onChange={(e) => setCapacityValue(e.target.value)}
+                        placeholder="مقدار ظرفیت"
+                        className="p-2 h-11.5 w-full text-sm border border-blue-200 bg-white rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <button
+                      onClick={handleSaveCapacity}
+                      disabled={isEditingDevice}
+                      className="w-full h-11.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all disabled:opacity-50"
+                    >
+                      ذخیره ظرفیت
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </div>
-
-        {/* بخش نمودار */}
-        <InventoryTabChart />
-      </div>
-
-      <div className="col-span-1 lg:col-span-3">
-        <InventoryTable />
+        <div className="lg:col-span-2 h-full">
+          <InventoryTabChart />
+        </div>
+        <div className="lg:col-span-3 space-y-6">
+          <InventoryTable />
+        </div>
       </div>
     </div>
   );

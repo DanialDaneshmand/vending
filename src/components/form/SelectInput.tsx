@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -62,9 +61,7 @@ export default function SelectInput<T>({
   return (
     <div dir="rtl" className="relative w-full! flex flex-col" ref={ref}>
       {/* Label */}
-      <label className="text-sm mb-2 mr-1 text-gray-800">
-        {title}
-      </label>
+      <label className="text-sm mb-2 mr-1 text-gray-800">{title}</label>
 
       <button
         onClick={() => setOpen((prev) => !prev)}
@@ -94,9 +91,9 @@ export default function SelectInput<T>({
             rounded-xl shadow-sm overflow-hidden z-50
           "
         >
-          {options.map((item: OptionType) => (
+          {options.map((item: OptionType, index: number) => (
             <button
-              key={item.id}
+              key={`${item.id}-${index}`} // ✅ ترکیب ID و Index برای تضمین منحصر‌به‌فرد بودن
               onClick={() => {
                 handleChange({
                   target: {
@@ -107,11 +104,10 @@ export default function SelectInput<T>({
                 setOpen(false);
               }}
               className={`
-
-                w-full text-right px-4 py-2 text-sm
-                hover:bg-gray-100 transition
-                ${(filterValues as any)[name] === item.id ? "bg-gray-100 font-medium" : ""}
-              `}
+      w-full text-right px-4 py-2 text-sm
+      hover:bg-gray-100 transition
+      ${(filterValues as any)[name] === item.id ? "bg-gray-100 font-medium" : ""}
+    `}
             >
               {item.name}
             </button>

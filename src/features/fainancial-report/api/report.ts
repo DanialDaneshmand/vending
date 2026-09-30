@@ -1,23 +1,43 @@
 import clientApi from "@/shared/clientApi/clientApi";
 
-export async function getTransactionsCSVReportsApi(params: any) {
-  const queryParams: Record<string, string> = {};
+// تعریف دقیق پارامترها مطابق با Swagger
+export interface CSVReportParams {
+  device_id?: string | null;
+  location_id?: string | null;
+  section_id?: string | null;
+  city?: string | null;
+  device_status?: string | null;
+  inventory_status?: string | null;
+  date_from?: string | null;
+  date_to?: string | null;
+  search_query?: string | null;
+}
 
-  // 💡 اصلاح نام کلیدها برای هماهنگی با استیت (استفاده از underscore)
-  if (params.places) queryParams.location_id = params.places;
-  if (params.sections) queryParams.section_id = params.sections;
-  if (params.search_query) queryParams.search_query = params.search_query;
-  if (params.date_from) queryParams.date_from = params.date_from;
-  if (params.date_to) queryParams.date_to = params.date_to;
-  if (params.start_time) queryParams.start_time = params.start_time;
-  if (params.end_time) queryParams.end_time = params.end_time;
-  if (params.device_id) queryParams.end_time = params.device_id;
+export async function getTransactionsCSVReportsApi(params: CSVReportParams) {
+  // ۱. تعریف لیست مقادیر ممنوعه که نباید به API ارسال شوند
+  const forbiddenValues = ["همه مجموعه ها", "همه بخش ها", "all", "همه", ""];
 
+  // ۲. پاک‌سازی پیشرفته پارامترها
+  const cleanParams = Object.fromEntries(
+    Object.entries(params).filter(([_, value]) => {
+      // مقدار را به رشته تبدیل می‌کنیم تا بتوانیم با forbiddenValues مقایسه کنیم
+      const stringValue = String(value);
+      
+      // فقط مقادیری را نگه دار که:
+      // - null نباشند
+      // - undefined نباشند
+      // - در لیست forbiddenValues نباشند
+      return (
+        value !== null && 
+        value !== undefined && 
+        !forbiddenValues.includes(stringValue)
+      );
+    })
+  );
 
-  const queryString = new URLSearchParams(queryParams).toString();
-  const url = `/reports/transactions.csv${queryString ? `?${queryString}` : ""}`;
-  
-
-  // دریافت فایل به صورت blob
-  return await clientApi.get(url, { responseType: 'blob' }).then(({ data }) => data);
+  // استفاده از قابلیت params در axios برای ساخت استاندارد Query String
+  return await clientApi.get(`/reports/transactions.csv`, { 
+    params: cleanParams, 
+    responseType: 'blob' 
+  }).then(({ data }) => data);
 }

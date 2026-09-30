@@ -33,7 +33,6 @@ const RecentActivitiesTable = ({
   const { deviceTransactions, isGettingDeviceTransactions } =
     useGetDeviceTransactions(deviceId as string);
 
-    console.log(deviceTransactions);
     
 
   const items = deviceTransactions?.items || [];

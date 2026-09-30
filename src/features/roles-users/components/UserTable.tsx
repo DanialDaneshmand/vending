@@ -39,7 +39,6 @@ const UserTable = () => {
   const [statusFilter, setStatusFilter] = useState("active");
 
   const { userList, isgettigUserList } = UseGetUserList();
-  console.log(userList);
   
   const { deleteUser } = useDeleteUser();
 

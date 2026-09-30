@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Eye } from "lucide-react";
 import StyledPagination from "@/components/ui/Pagination";
 import Link from "next/link";
@@ -11,30 +11,24 @@ import Skeleton from "react-loading-skeleton";
 import { FaSlidersH } from "react-icons/fa";
 import UseGetProfile from "@/shared/hooks/useGetProfile";
 import { hasActionPermission } from "@/shared/permisseions/permissionUtils";
-import toast from "react-hot-toast"; // اضافه شد برای نمایش پیام موفقیت
+import toast from "react-hot-toast";
+import { FaBoxOpen, FaFileInvoiceDollar } from "react-icons/fa6";
+import { formatToPersianDate } from "@/utils/formatToPersianDate";
 
-// ✅ تعریف استایل‌ها و نام‌های فارسی برای وضعیت‌ها
 const STATUS_MAP: Record<string, { name: string; style: string }> = {
-  pending: {
-    name: "در انتظار بررسی",
-    style: "bg-blue-50 text-blue-600",
-  },
-  online: {
-    name: "آنلاین",
-    style: "bg-green-50 text-green-600",
-  },
-  offline: {
-    name: "آفلاین",
-    style: "bg-gray-50 text-gray-500",
-  },
-  disabled: {
-    name: "غیر فعال",
-    style: "bg-red-50 text-red-600",
-  },
-  maintenance: {
-    name: "در حال تعمیر",
-    style: "bg-orange-50 text-orange-600",
-  },
+  pending: { name: "در انتظار بررسی", style: "bg-blue-50 text-blue-600" },
+  online: { name: "آنلاین", style: "bg-green-50 text-green-600" },
+  offline: { name: "آفلاین", style: "bg-gray-50 text-gray-500" },
+  disabled: { name: "غیر فعال", style: "bg-red-50 text-red-600" },
+
+  maintenance: { name: "در حال تعمیر", style: "bg-orange-50 text-orange-600" },
+};
+
+const statusStyles: Record<string, string> = {
+  good: "bg-green-50 text-green-600",
+  yellow: "bg-yellow-50 text-yellow-600",
+  red: "bg-red-50 text-red-600",
+  empty: "bg-gray-100 text-gray-500",
 };
 
 const DeviceMiniIcon = () => (
@@ -57,9 +51,41 @@ const DeviceMiniIcon = () => (
 );
 
 export default function DeviceManagementTable({ filters }: { filters: any }) {
+  // ✅ مقادیر پیش‌فرض طبق درخواست تو
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
-  const { devicesList, isGettingDevicesList } = UseGetDevicesList();
+
+  // ✅ آماده‌سازی پارامترها برای ارسال به سرور (مطابق با Swagger)
+  const queryParams = {
+    page: currentPage,
+    size: pageSize,
+    q: filters.search || "",
+    location_id:
+      filters.places === "all" || filters.places === "all_places"
+        ? null
+        : filters.places,
+    section_id:
+      filters.sections === "all" || filters.sections === "all_sections"
+        ? null
+        : filters.sections,
+    status:
+      filters.status === "all" || filters.status === "all_status"
+        ? null
+        : filters.status,
+    connection: filters.alertType === "all_power" ? null : filters.alertType,
+    inventory:
+      filters.inventory === "all" || filters.inventory === "all_inventory"
+        ? null
+        : filters.inventory,
+    // اگر فیلتر deviceId هم داری می‌توانی اینجا اضافه کنی
+  };
+
+  // ✅ پاس دادن پارامترها به هوک
+  const { devicesList, isGettingDevicesList } = UseGetDevicesList(queryParams);
+
+  
+  
+
   const [isShowConfirmModal, setIsShowConfirmModal] = useState(false);
   const [deviceId, setDeviceId] = useState<null | string>(null);
   const { deleteDevice } = useDeleteDevice();
@@ -88,73 +114,9 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
     }
   };
 
-  const filteredData = useMemo(() => {
-    if (!devicesList?.items) return [];
-    return devicesList.items.filter((device: any) => {
-      const searchMatch =
-        !filters.search ||
-        filters.search === "" ||
-        device.name?.toLowerCase().includes(filters.search.toLowerCase()) ||
-        device.device_code
-          ?.toLowerCase()
-          .includes(filters.search.toLowerCase());
-
-      const locationMatch =
-        filters.places === "all" ||
-        filters.places === "all_places" ||
-        filters.places === "همه مجموعه ها" ||
-        device.location_id === filters.places;
-
-      const sectionMatch =
-        filters.sections === "all" ||
-        filters.sections === "all_sections" ||
-        filters.sections === "همه بخش ها" ||
-        device.section_id === filters.sections;
-
-      const statusMatch =
-        !filters.status ||
-        filters.status === "all" ||
-        filters.status === "all_status" ||
-        filters.status === "همه وضعیت ها" ||
-        device.status === filters.status;
-
-      const connectionMatch =
-        !filters.alertType ||
-        filters.alertType === "all_power" ||
-        filters.alertType === "وضعیت اتصال " ||
-        String(device.power_on) === filters.alertType;
-
-      const inventoryMatch =
-        !filters.inventory ||
-        filters.inventory === "all" ||
-        filters.inventory === "all_inventory" ||
-        filters.inventory === "وضعیت موجودی" ||
-        device.inventory_status === filters.inventory;
-
-      return (
-        searchMatch &&
-        locationMatch &&
-        sectionMatch &&
-        statusMatch &&
-        connectionMatch &&
-        inventoryMatch
-      );
-    });
-  }, [devicesList, filters]);
-
-  const statusStyles: Record<string, string> = {
-    good: "bg-green-50 text-green-600", // سبز برای وضعیت خوب
-    yellow: "bg-yellow-50 text-yellow-600", // زرد برای هشدار
-    red: "bg-red-50 text-red-600", // قرمز برای وضعیت بحرانی
-    empty: "bg-gray-100 text-gray-500", // خاکستری برای خالی/ناموجود
-  };
-
-  const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredData.slice(startIndex, startIndex + pageSize);
-  }, [currentPage, pageSize, filteredData]);
-
-  const totalPages = Math.ceil((filteredData.length || 0) / pageSize);
+  // ✅ دیتای نهایی مستقیماً از سرور می‌آید و نیازی به slice یا filter کلاینتی نیست
+  const dataToRender = devicesList?.items || [];
+  const totalPages = Math.ceil((devicesList?.total || 0) / pageSize);
 
   if (isGettingDevicesList || isgettingprofile) {
     return (
@@ -169,20 +131,40 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
       className="w-full p-4 bg-white border border-gray-100 shadow-sm rounded-lg mt-4"
       dir="rtl"
     >
-      <div className="flex items-center justify-between w-full mb-4">
-        <h2 className="text-lg font-bold text-gray-800">لیست دستگاه‌ها</h2>
-        {hasActionPermission(profile?.role, "canCreate") && (
+      <div className="flex items-center justify-between mb-4">
+        <div className="w-3/4">
+          <h2 className="text-lg font-bold text-gray-800">لیست دستگاه‌ها</h2>
+        </div>
+
+        <div className="flex flex-col lg:flex-row items-center gap-2 w-full">
           <Link
-            href="/devices/bulk-device-operations"
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm"
+            href="/devices/devices-fainancial-report"
+            className="flex-1 flex items-center w-full justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm"
           >
-            <FaSlidersH className="w-4 h-4" />
-            <span>زمان بندی دستگاه‌ها</span>
+            <FaFileInvoiceDollar className="w-4 h-4" />
+            <span>گزارش مالی</span>
           </Link>
-        )}
+
+          <Link
+            href="/devices/devices-inventory-reports"
+            className="flex-1 flex items-center w-full justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm"
+          >
+            <FaBoxOpen className="w-4 h-4" />
+            <span>گزارش موجودی</span>
+          </Link>
+          {hasActionPermission(profile?.role, "canCreate") && (
+            <Link
+              href="/devices/bulk-device-operations"
+              className="flex-1 flex items-center w-full justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm"
+            >
+              <FaSlidersH className="w-4 h-4" />
+              <span>زمان بندی</span>
+            </Link>
+          )}
+        </div>
       </div>
 
-      {paginatedData.length === 0 ? (
+      {dataToRender.length === 0 ? (
         <div className="flex justify-center py-6">
           <div className="border border-gray-200 border-dashed rounded-lg w-full h-32 flex items-center justify-center">
             <p>هیچ دستگاهی با این مشخصات یافت نشد</p>
@@ -197,7 +179,7 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
                 <th className="px-4 py-2 font-normal text-nowrap">
                   شناسه دستگاه
                 </th>
-                <th className="px-4 py-2 font-normal text-center">مکان</th>
+                <th className="px-4 py-2 font-normal text-center">مجموعه</th>
                 <th className="px-4 py-2 font-normal text-center">بخش</th>
                 <th className="px-4 py-2 font-normal text-nowrap text-center">
                   وضعیت دستگاه
@@ -205,18 +187,23 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
                 <th className="px-4 py-2 font-normal text-nowrap text-center">
                   موجودی
                 </th>
+                <th className="px-4 py-2 font-normal text-nowrap text-center">
+                  آخرین اتصال
+                </th>
                 <th className="px-4 py-2 font-normal w-40 text-center">
                   عملیات
                 </th>
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((device: any) => {
-                // ✅ استخراج نام و استایل بر اساس وضعیت دستگاه
+              {dataToRender.map((device: any) => {
                 const statusInfo = STATUS_MAP[device.status] || {
-                  name: device.status, // اگر وضعیت در لیست نبود، همان مقدار دیتابیس را نشان بده
+                  name: device.status,
                   style: "bg-gray-50 text-gray-400",
                 };
+                const inventoryDisplay = device.inventory_capacity
+                  ? `${Math.round((device.inventory_level / device.inventory_capacity) * 100)}%`
+                  : device.inventory_level;
 
                 return (
                   <tr
@@ -244,13 +231,16 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
                         {statusInfo.name}
                       </span>
                     </td>
-
                     <td className="px-4 py-3 text-center border-y border-gray-100 align-middle">
                       <span
                         className={`px-3 py-1 rounded-md text-[11px] font-bold ${statusStyles[device.inventory_status] || "bg-slate-50 text-slate-400"}`}
                       >
-                        {device.inventory_level}
+                        {inventoryDisplay}
                       </span>
+                    </td>
+
+                    <td className="px-4 py-3 text-center border-y border-gray-100 align-middle text-slate-500 text-[13px] text-nowrap">
+                      {formatToPersianDate(device.last_seen_at)}
                     </td>
                     <td className="px-4 py-3 text-center border-y border-gray-100 align-middle">
                       <div className="flex justify-center gap-2">
@@ -278,8 +268,7 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
         </div>
       )}
 
-      {filteredData.length > pageSize && (
-        <div className="mt-4 ">
+        <div className="mt-4">
           <StyledPagination
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
@@ -288,7 +277,6 @@ export default function DeviceManagementTable({ filters }: { filters: any }) {
             setPageSize={setPageSize}
           />
         </div>
-      )}
 
       <ConfirmModal
         handleConfirm={handleDeleleteDevice}

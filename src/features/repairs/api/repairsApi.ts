@@ -36,7 +36,7 @@ export async function getAllRepairsApi(){
     return await clientApi.get(`/maintenance-tasks`).then(({data})=>data)
 }
 
-export async function resolveRepairApi(repairId:string){
-    return await clientApi.post(`/maintenance-tasks/${repairId}/resolve`).then(({data})=>data)
+export async function resolveRepairApi({ repairId, payload }: { repairId: string, payload: { note: string } }) {
+    // ارسال payload (که شامل description است) به عنوان بدنه درخواست POST
+    return await clientApi.post(`/maintenance-tasks/${repairId}/resolve`, payload).then(({ data }) => data);
 }
-

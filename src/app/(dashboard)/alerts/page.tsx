@@ -53,8 +53,7 @@ export default function Page() {
     intensity: "all",
   });
 
-  const { alertList, isGettingAlertsList } = useGetAlertList();
-  
+  const { alertList, isGettingAlertsList } = useGetAlertList();  
 
   const handleInputChange = (e: ChangeHandlerEvent) => {
     setFilterValues((prev) => ({
@@ -127,9 +126,9 @@ export default function Page() {
             isLoading={isGettingAlertsList}
           />
         </div>
-        <div className="col-span-12 sm:col-span-4">
+        {/* <div className="col-span-12 sm:col-span-4">
           <RecentReports />
-        </div>
+        </div> */}
       </div>
     </section>
   );

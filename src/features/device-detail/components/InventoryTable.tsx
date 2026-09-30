@@ -1,52 +1,91 @@
 
 "use client";
 import React, { useMemo, useState } from "react";
-import { Trash2, Database, User, ArrowLeftRight } from "lucide-react";
+import { Database, User } from "lucide-react";
 import StyledPagination from "@/components/ui/Pagination";
+import SelectInput from "@/components/form/SelectInput"; // فرض بر اینکه این کامپوننت را دارید
 import useGetDeviceInventoryTransactions from "../hooks/useGetDeviceInventoryTransActions";
 import { useParams } from "next/navigation";
-import UseGetProfile from "@/shared/hooks/useGetProfile"; // اضافه شد
-import { hasActionPermission } from "@/shared/permisseions/permissionUtils"; // اضافه شد
+import UseGetProfile from "@/shared/hooks/useGetProfile";
 import { formatToPersianDate } from "@/utils/formatToPersianDate";
+import UseGetUserList from "@/features/roles-users/hooks/useGetUserList";
 
 const InventoryTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
+  const [selectedUser, setSelectedUser] = useState("all"); // استیت برای فیلتر کاربر
   const { deviceId } = useParams();
 
   const { deviceInventoryTransactions, isGettingDeviceInventoryTransactions } =
     useGetDeviceInventoryTransactions(deviceId as string);
 
-  // --- Auth & Profile ---
-  const { isgettingprofile, profile } = UseGetProfile(); // اضافه شد
+    
 
-  const transactionsArray = useMemo(() => {
-    return deviceInventoryTransactions?.items || [];
-  }, [deviceInventoryTransactions]);
+  const { userList, isgettigUserList } = UseGetUserList();
+  const { isgettingprofile } = UseGetProfile();
 
+  // ۱. آماده‌سازی لیست کاربران برای SelectInput
+  const userOptions = useMemo(() => {
+    return [
+      { id: "all", name: "همه کاربران" },
+      ...(userList?.items?.map((user: any) => ({ 
+        id: user.username, // استفاده از username چون در تراکنش‌ها username داریم
+        name: user.full_name || user.username 
+      })) || []),
+    ];
+  }, [userList]);
+
+  // ۲. فیلتر کردن تراکنش‌ها بر اساس کاربر انتخاب شده
+  const filteredTransactions = useMemo(() => {
+    const allItems = deviceInventoryTransactions?.items || [];
+    if (selectedUser === "all") return allItems;
+
+    return allItems.filter((item: any) => item.username === selectedUser);
+  }, [deviceInventoryTransactions, selectedUser]);
+
+  // ۳. صفحه‌بندی روی داده‌های فیلتر شده
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
-    return transactionsArray.slice(startIndex, startIndex + pageSize);
-  }, [currentPage, pageSize, transactionsArray]);
+    return filteredTransactions.slice(startIndex, startIndex + pageSize);
+  }, [currentPage, pageSize, filteredTransactions]);
 
-  const totalPages = Math.ceil(transactionsArray.length / pageSize);
+  const totalPages = Math.ceil(filteredTransactions.length / pageSize);
+
+  // هندلر تغییر کاربر
+  const handleUserChange = (e: any) => {
+    setSelectedUser(e.target.value);
+    setCurrentPage(1); // بازگشت به صفحه اول هنگام تغییر فیلتر
+  };
 
   return (
     <div className="w-full bg-white p-4 rounded-lg border border-gray-100 shadow-sm overflow-hidden">
-      <div className="flex justify-between items-center p-4 border-b border-gray-50">
+      {/* هدر و بخش فیلتر کاربر */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border-b border-gray-50 gap-4">
         <h3 className="text-[#1e293b] font-bold text-base flex items-center gap-2">
           <Database size={18} className="text-slate-400" />
           تاریخچه تغییرات موجودی
         </h3>
+
+        {/* سلکتور فیلتر کاربر */}
+        <div className="w-full sm:w-64">
+          <SelectInput
+            name="userFilter"
+            title="فیلتر کاربر"
+            options={userOptions}
+            filterValues={{ userFilter: selectedUser }}
+            handleChange={handleUserChange}
+          />
+        </div>
       </div>
 
+
       <div className="overflow-x-auto">
-        {isGettingDeviceInventoryTransactions || isgettingprofile ? ( // لودینگ پروفایل اضافه شد
+        {isGettingDeviceInventoryTransactions || isgettingprofile || isgettigUserList ? (
           <table className="w-full text-right min-w-xl border-collapse">
             <tbody className="divide-y divide-gray-50">
               {[...Array(5)].map((_, i) => (
                 <tr key={`skeleton-${i}`} className="animate-pulse">
-                  {[...Array(7)].map((_, j) => (
+                  {[...Array(6)].map((_, j) => (
                     <td key={j} className="px-6 py-4">
                       <div className="h-4 w-20 bg-gray-100 rounded mx-auto" />
                     </td>
@@ -55,7 +94,7 @@ const InventoryTable = () => {
               ))}
             </tbody>
           </table>
-        ) : transactionsArray.length > 0 ? (
+        ) : filteredTransactions.length > 0 ? (
           <>
             <table className="w-full text-right min-w-max border-collapse">
               <thead className="bg-[#F9FAFC]">
@@ -66,13 +105,11 @@ const InventoryTable = () => {
                   <th className="px-6 py-4 font-medium text-center">موجودی قبل</th>
                   <th className="px-6 py-4 font-medium text-center">تغییرات</th>
                   <th className="px-6 py-4 font-medium text-center">موجودی فعلی</th>
-                  {/* <th className="px-6 py-4 font-medium text-center">عملیات</th> */}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {paginatedData.map((item: any, index: number) => {
                   const isPositive = item.delta >= 0;
-
                   const datePart = item.created_at?.split("T")[0]?.replace(/-/g, "/");
                   const timePart = item.created_at?.split("T")[1]?.substring(0, 5);
 
@@ -106,16 +143,6 @@ const InventoryTable = () => {
                       <td className="px-6 py-4 text-center text-sm font-bold text-slate-800">
                         {item.after_level}
                       </td>
-                      {/* <td className="px-6 py-4 text-center">
-                        {hasActionPermission(profile?.role, 'canDelete') && (
-                          <button
-                            className="p-2 hover:bg-red-50 rounded-full transition-colors text-red-500"
-                            onClick={() => console.log("Deleting item ID:", item.id)}
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        )}
-                      </td> */}
                     </tr>
                   );
                 })}
@@ -128,6 +155,7 @@ const InventoryTable = () => {
                 setCurrentPage={setCurrentPage}
                 totalPages={totalPages}
                 pageSize={pageSize}
+
                 setPageSize={setPageSize}
               />
             </div>
@@ -137,7 +165,7 @@ const InventoryTable = () => {
             <div className="bg-gray-50 p-4 rounded-full mb-3">
               <Database size={40} className="text-gray-300" />
             </div>
-            <span className="text-sm font-medium">تراکنش موجودی برای این دستگاه وجود ندارد.</span>
+            <span className="text-sm font-medium">تراکنشی برای کاربر یا دستگاه انتخاب شده یافت نشد.</span>
           </div>
         )}
       </div>

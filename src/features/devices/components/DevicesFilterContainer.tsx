@@ -1,5 +1,6 @@
-
-import React, { useState } from "react";
+"use client";
+import React, { useState, useEffect } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import SelectInput from "@/components/form/SelectInput";
 import UseGetAllSection from "@/shared/hooks/useGetAllSections";
 import UseGetLocations from "@/shared/hooks/useGetLocations";
@@ -7,7 +8,17 @@ import { Download } from "lucide-react";
 import { FaSlidersH } from "react-icons/fa";
 import { LuFilter, LuSearch } from "react-icons/lu";
 import useGetTransactionsCSVReports from "@/features/fainancial-report/hooks/useGetTransactionsCSVReports";
-import { useParams, usePathname } from "next/navigation";
+
+// تغییر ساختار به id و name برای هماهنگی کامل با SelectInput
+const CITIES_LIST = [
+  { id: "all", name: "همه شهرها" },
+  { id: "Tehran", name: "تهران" },
+  { id: "Mashhad", name: "مشهد" },
+  { id: "Isfahan", name: "اصفهان" },
+  { id: "Tabriz", name: "تبریز" },
+  { id: "Shiraz", name: "شیراز" },
+  { id: "Karaj", name: "کرج" },
+];
 
 interface FilterContainerProps<T> {
   filterValues: T;
@@ -22,218 +33,212 @@ export default function DevicesFilterContainer<T>({
   handleInputChange,
   onReset,
 }: FilterContainerProps<T>) {
-  const [isFilter, setIsFilter] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const { locations } = UseGetLocations();
   const { sectionsList } = UseGetAllSection();
   const { executeGetCsv, isGettingtransactionsCsvReports } =
     useGetTransactionsCSVReports();
-  const pathname=usePathname();
 
-  // تابع برای مدیریت خروجی CSV و تغییر نام فیلدها
+  const filters = filterValues as any;
+  const [searchTerm, setSearchTerm] = useState(filters.search || "");
+
+  const updateUrl = (name: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value && value !== "all" && value !== "all") {
+      params.set(name, value);
+    } else {
+      params.delete(name);
+    }
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const handleInputChangeWithUrl = (e: any) => {
+    const { name, value } = e.target;
+    handleInputChange(e);
+    updateUrl(name, value);
+  };
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      handleInputChange({ target: { name: "search", value: searchTerm } });
+      updateUrl("q", searchTerm);
+    }, 500);
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  const mapFiltersToCsvParams = () => {
+    return {
+      q: filters.search || "",
+      location_id: filters.places === "all" ? "" : filters.places,
+      section_id: filters.sections === "all" ? "" : filters.sections,
+      city: filters.city || "",
+      status: filters.status || "",
+      connection: filters.connection || "",
+      inventory: filters.inventory || "",
+      date_from: filters.date_from || null,
+      date_to: filters.date_to || null,
+    };
+  };
+
   const handleExportCSV = async () => {
-    const filters=filterValues as any
     try {
-      // ۱. آماده‌سازی پارامترها (هماهنگ با نام‌های API)
-      const params = {
-        
-        places: filters.places === "همه مجموعه ها" ? undefined : filters.places,
-        sections: filters.sections === "همه بخش ها" ? undefined : filters.sections,
-      };
-
-
-      // ۲. اجرای هوک و دریافت دیتای خام (Blob)
+      const params = mapFiltersToCsvParams();
       const blob = await executeGetCsv(params);
-      
-      if (!blob) {
-        console.error("No data received from server");
-        return;
-      }
-
-      // ۳. تبدیل Blob به فایل قابل دانلود در مرورگر
+      if (!blob) return;
       const url = window.URL.createObjectURL(new Blob([blob]));
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      
-      // نام فایل را به همراه تاریخ جاری می‌سازیم
-      const fileName = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
-      link.setAttribute('download', fileName);
-      
+      link.setAttribute("download", `report_${new Date().getTime()}.csv`);
+
       document.body.appendChild(link);
       link.click();
-      
-      // ۴. پاک‌سازی برای جلوگیری از نشت حافظه
       link.remove();
-      window.URL.revokeObjectURL(url);
-      
     } catch (error) {
       console.error("Export Error:", error);
-      // می‌توانید اینجا یک Toast یا Alert برای کاربر نمایش دهید
     }
   };
 
+  const handleResetAndClearUrl = () => {
+    onReset();
+    router.push(pathname);
+  };
+
   return (
-    <div className="w-full">
-      {/* Mobile Filter Container*/}
-      <div className="mt-4 block sm:hidden">
+    <div
+      className={`flex flex-wrap items-center pt-4 justify-between gap-4 ${className}`}
+    >
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="relative w-full md:w-72">
+          <LuSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <input
+            type="text"
+            placeholder="جستجوی دستگاه..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          />
+        </div>
+
         <button
-          onClick={() => setIsFilter((prev) => !prev)}
-          className="flex bg-white justify-center w-full items-center h-[45px] font-medium cursor-pointer gap-2 px-4 py-2 border border-gray-100 shadow-xs rounded-md text-sm text-gray-800 hover:bg-gray-50 transition-all"
+          onClick={() => setIsFilterOpen(!isFilterOpen)}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all ${
+            isFilterOpen
+              ? "bg-blue-600 text-white"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
         >
-          <FaSlidersH className="w-4 h-4" />
-          <span>فیلتر کردن دستگاه ها</span>
+          <LuFilter className="w-4 h-4" />
+          <span className="hidden sm:inline">فیلترها</span>
+          <FaSlidersH className="w-3 h-3" />
         </button>
-      </div>
 
-      <div
-        className={`${className} ${
-          isFilter
-            ? "transition-all duration-100 h-auto border border-gray-100 shadow-sm p-4 rounded-lg"
-            : "h-0 sm:h-auto transition-all duration-100"
-        } overflow-hidden sm:overflow-visible`}
-      >
-        {/* Search Container */}
-        <div
-          className={` col-span-12 order-2 lg:order-1 flex items-center  ${pathname==="/devices/bulk-device-operations"?"lg:col-span-8":"lg:col-span-6"}`}
-        >
-          <div className="flex flex-col w-full ">
-            <label htmlFor="" className="text-sm font-bold mb-2 mr-1">
-              جستجو
-            </label>
-            <div className=" flex  items-center  sm:mb-0 w-full">
-              <input
-                onChange={(e) =>
-                  handleInputChange({
-                    target: { name: e.target.name, value: e.target.value },
-                  })
-                }
-                name="search"
-                type="text"
-                placeholder="جستجو بر اساس کد دستگاه ..."
-                className="w-full outline-0 border border-gray-100 shadow-xs h-[45] rounded-lg p-3 placeholder:text-sm"
-              />
-              <span className="-mr-8">
-                <LuSearch />
-
-              </span>
-            </div>
-          </div>
-        </div>
-        {/* CSV Btn */}
-        <div className={`order-1 lg:order-2 flex flex-col items-end  sm:flex-row justify-between gap-4 sm:gap-4 col-span-12 ${pathname==="/devices/bulk-device-operations"?"lg:col-span-4":"lg:col-span-6"}`}>
-          <button 
-            onClick={handleExportCSV}
-            disabled={isGettingtransactionsCsvReports}
-            className={`${pathname==="/devices/bulk-device-operations"?"hidden":"flex"}  justify-center w-full items-center h-[45] font-medium cursor-pointer gap-2 px-4 py-2 border border-gray-100 shadow-xs rounded-md text-sm text-gray-800 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
-          >
-            <Download className="w-4 h-4" />
-            خروجی CSV
-          </button>
-          <button 
-            onClick={onReset}
-            className=" flex shadow-xs h-[45] items-center justify-center gap-x-3 border border-gray-100 rounded-lg px-3 w-full py-3  cursor-pointer text-sm"
-          >
-            <span>
-              <LuFilter size={18} />
-            </span>
-            <span>پاکسازی فیلتر ها</span>
-          </button>
-        </div>
-
-        <div className="order-3 col-span-12 grid grid-cols-10 gap-4 mt-4">
-          {/* مجموعه ها */}
-          <div className="col-span-12 sm:col-span-5 lg:col-span-2 flex items-center">
-            <div className="w-full">
+        {isFilterOpen && (
+          <div className="flex flex-col gap-3 p-4 bg-gray-50 border w-full rounded-xl animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
               <SelectInput
+                title="شهر"
+                filterValues={filters}
+                handleChange={handleInputChangeWithUrl}
+                name="city"
+                options={CITIES_LIST} // ✅ حالا مستقیماً {id, name} است
+              />
+
+              <SelectInput
+                title="مجموعه"
+                filterValues={filters}
+                handleChange={handleInputChangeWithUrl}
                 name="places"
-                title="مجموعه ها"
                 options={[
-                  { id: "all", title: "همه مجموعه ها" },
-                  ...(locations?.items?.map((item: any) => ({
-                    id: item.id,
-                    name: item.name,
+                  { id: "all", name: "همه مجموعه ها" },
+                  ...(locations?.items?.map((loc: any) => ({
+                    id: loc.id,
+                    name: loc.name,
                   })) || []),
                 ]}
-                filterValues={filterValues as any}
-                handleChange={handleInputChange}
               />
-            </div>
-          </div>
 
-          {/* بخش ها */}
-          <div className="col-span-12 sm:col-span-5 lg:col-span-2 flex items-center">
-            <div className="w-full">
               <SelectInput
+                title="بخش"
+                filterValues={filters}
+                handleChange={handleInputChangeWithUrl}
                 name="sections"
-                title="بخش ها"
                 options={[
-                  { id: "all", title: "همه بخش ها" },
-                  ...(sectionsList?.items?.map((item: any) => ({
-                    id: item.id,
-                    name: item.name,
+                  { id: "all", name: "همه بخش ها" },
+                  ...(sectionsList?.items?.map((sec: any) => ({
+                    id: sec.id,
+                    name: sec.name,
                   })) || []),
                 ]}
-                filterValues={filterValues as any}
-                handleChange={handleInputChange}
               />
-            </div>
-          </div>
 
-          {/* وضعیت دستگاه */}
-          <div className="col-span-12 sm:col-span-5 lg:col-span-2 flex items-center">
-            <div className="w-full">
               <SelectInput
+                title="وضعیت"
+                filterValues={filters}
+                handleChange={handleInputChangeWithUrl}
                 name="status"
-                title="وضعیت دستگاه"
                 options={[
-                  { id: "all_status", name: "همه وضعیت ها" },
-                  { id: "pending", name: "در انتظار بررسی" },
+                  { id: "all", name: "همه وضعیت ها" },
                   { id: "online", name: "آنلاین" },
                   { id: "offline", name: "آفلاین" },
-                  { id: "disabled", name: "مسدود شده" },
-                  { id: "maintenance", name: "در حال تعمیر" },
+                  { id: "pending", name: "در انتظار" },
+                  { id: "disabled", name: "غیرفعال" },
+                  { id: "maintenance", name: "تعمیرات" },
                 ]}
-                filterValues={filterValues as any}
-                handleChange={handleInputChange}
               />
-            </div>
-          </div>
 
-          {/* وضعیت اتصال */}
-          <div className="col-span-12 sm:col-span-5 lg:col-span-2 flex items-center">
-            <div className="w-full">
               <SelectInput
-                name="alertType"
-                title="وضعیت اتصال"
+                title="اتصال"
+                filterValues={filters}
+                handleChange={handleInputChangeWithUrl}
+                name="connection"
                 options={[
-                  { id: "all_power", name: "همه وضعیت ها" },
-                  { id: "true", name: "روشن" },
-                  { id: "false", name: "خاموش" },
+                  { id: "all", name: "همه" },
+                  { id: "online", name: "متصل" },
+                  { id: "offline", name: "قطع شده" },
                 ]}
-                filterValues={filterValues as any}
-                handleChange={handleInputChange}
               />
-            </div>
-          </div>
 
-
-          {/* وضعیت موجودی */}
-          <div className="col-span-12 sm:col-span-5 lg:col-span-2 flex items-center">
-            <div className="w-full">
               <SelectInput
+                title="موجودی"
+                filterValues={filters}
+                handleChange={handleInputChangeWithUrl}
                 name="inventory"
-                title="وضعیت موجودی"
                 options={[
-                  { id: "all_inventory", name: "همه وضعیت ها" },
-                  { id: "ok", name: "مناسب" },
-                  { id: "critical", name: "کم" },
+                  { id: "all", name:"همه" },
+                  { id: "ok", name: "به اندازه" },
+                  { id: "low", name: "کم" },
                 ]}
-                filterValues={filterValues as any}
-                handleChange={handleInputChange}
               />
             </div>
+
+            <div className="flex justify-end">
+              <button
+                onClick={handleResetAndClearUrl}
+                className="px-3 py-2 text-xs text-red-500 hover:bg-red-50 rounded-md transition-colors"
+              >
+                حذف تمام فیلترها
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
+
+      <button
+        onClick={handleExportCSV}
+        disabled={isGettingtransactionsCsvReports}
+        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isGettingtransactionsCsvReports ? (
+          <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4" />
+        ) : (
+          <Download className="w-4 h-4" />
+        )}
+        <span>خروجی CSV</span>
+      </button>
     </div>
   );
 }

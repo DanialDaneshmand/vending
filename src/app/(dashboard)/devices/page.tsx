@@ -2,22 +2,45 @@
 "use client";
 
 import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import PageTitle from "@/components/shared/PageTitle";
 import DevicesCardsSection from "@/features/devices/components/DevicesCardsSection";
 import DevicesFilterContainer from "@/features/devices/components/DevicesFilterContainer";
+import UseGetLocations from "@/shared/hooks/useGetLocations";
 import DeviceManagementTable from "@/features/devices/components/DevicesManagementTable";
 
 export default function DevicesPage() {
+  const searchParams = useSearchParams();
+
   const initialFilters = {
     places: "همه مجموعه ها",
     sections: "همه بخش ها",
-    alertType: "وضعیت اتصال ", 
-    status: "همه وضعیت ها",
-    inventory: "وضعیت موجودی",
+    status: "all",
+    inventory: "all",
+    connection: "all",
+    deviceId: "all",
+    city:"all",
     search: "",
   };
 
-  const [filterAndSearchValues, setFilterAndSearchValues] = useState(initialFilters);
+  // ✅ فقط یکبار در لحظه مقداردهی اولیه استیت، URL را چک می‌کنیم
+  const [filterAndSearchValues, setFilterAndSearchValues] = useState(() => {
+    if (searchParams.toString()) {
+      return {
+        places: searchParams.get("location_id") || "همه مجموعه ها",
+        sections: searchParams.get("section_id") || "همه بخش ها",
+        status: searchParams.get("status") || "",
+        inventory: searchParams.get("inventory") || "",
+        connection: searchParams.get("connection") || "",
+        deviceId: searchParams.get("device_id") || "all",
+        search: searchParams.get("q") || "",
+      };
+    }
+    return initialFilters;
+  });
+
+  const { locations } = UseGetLocations();
+
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
@@ -31,17 +54,15 @@ export default function DevicesPage() {
     setFilterAndSearchValues(initialFilters);
   };
 
-  
-
   return (
     <section className="p-4">
       <PageTitle title="دستگاه ها " description="داشبورد / دستگاه ها" />
 
       <DevicesFilterContainer
-        className="grid grid-cols-12 bg-white gap-6 sm:gap-4 mt-4 p-0 sm:p-4"
+        className=""
         filterValues={filterAndSearchValues}
         handleInputChange={handleInputChange}
-        onReset={resetFilters} // ارسال تابع پاکسازی
+        onReset={resetFilters}
       />
 
       <DevicesCardsSection />
